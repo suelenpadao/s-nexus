@@ -521,7 +521,7 @@ td:last-child{padding-right:0}
         💾 Salvar Alterações
       </button>
       <div class="pill pill-green">🔥 Streak: <span id="streak-val">3</span>d</div>
-      <div class="pill pill-indigo">⚡ Score: <span id="score-val">72</span></div>
+      <div class="pill pill-indigo">⚡ Score: <span id="score-val">0</span></div>
     </div>
   </div>
 
@@ -597,7 +597,7 @@ td:last-child{padding-right:0}
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
         <div style="font-size:13px;font-weight:700">Performance Diária — Hoje</div>
-        <span class="tag" style="background:rgba(16,185,129,0.12);color:var(--green);border:1px solid rgba(16,185,129,0.25)">Score: 72 pts</span>
+        <span class="tag" style="background:rgba(16,185,129,0.12);color:var(--green);border:1px solid rgba(16,185,129,0.25)">Score: <span id="perf-score-tag">0</span> pts</span>
       </div>
       <div id="daily-goals" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px"></div>
     </div>
@@ -745,7 +745,7 @@ td:last-child{padding-right:0}
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
         <div style="font-size:13px;font-weight:700">Metas Diárias — Hoje</div>
         <div style="display:flex;gap:8px;align-items:center">
-          <span class="tag" style="background:rgba(16,185,129,0.1);color:var(--green);border:1px solid rgba(16,185,129,0.2)">Score: 72/100</span>
+          <span class="tag" style="background:rgba(16,185,129,0.1);color:var(--green);border:1px solid rgba(16,185,129,0.2)">Score: <span id="perf-score-tag2">0</span>/100</span>
           <button onclick="resetDay()" class="btn-ghost" style="font-size:10px;padding:5px 11px">Novo Dia</button>
         </div>
       </div>
@@ -1282,7 +1282,9 @@ async function onAuthSuccess(user, username) {
 }
 
 async function resetAccountData() {
-  if (!confirm('Isso vai apagar TODOS os dados da sua conta e começar do zero. Continuar?')) return;
+  if (!confirm('Isso vai apagar TODOS os seus dados (leads, vendas, financeiro, jornadas, hábitos, score) e começar do zero. Tem certeza?')) return;
+
+  // Zerar tudo
   state.sales = [];
   state.leads = [];
   state.commission = 0;
@@ -1292,10 +1294,22 @@ async function resetAccountData() {
   state.chatHistory = [];
   state.streak = 0;
   state.weekScores = [0,0,0,0,0,0,0];
-  state.habits.forEach(h => h.done = 0);
+  state.pomCount = 0;
+  state.pomTime = 25*60;
+  state.pomTotal = 25*60;
+  state.pomActive = false;
+  state.goal = 1000000;
+  state.habits = state.habits.map(h => ({...h, done: 0}));
+  state.selectedLead = null;
+
+  // Salvar na nuvem
   await saveState(true);
+
+  // Atualizar UI imediatamente sem recarregar
   renderDashboard();
-  showAuthInfoToast('✓ Conta resetada com sucesso.');
+  renderHabits();
+  showAuthInfoToast('✓ Conta resetada com sucesso — tudo zerado!');
+  closeMobile();
 }
 
 async function logout() {
@@ -2031,8 +2045,8 @@ const STAGES = [
 // Sequência fixa de toques nos primeiros ~2 meses após o cadastro do lead/cliente.
 // Depois do dia 60, a jornada entra em modo de "acompanhamento mensal" recorrente.
 const JOURNEY_TEMPLATE = [
-  { day: 0,  type: "email",     icon: "✉️", label: "E-mail de boas-vindas" },
-  { day: 0,  type: "whatsapp",  icon: "📱", label: "Mensagem de WhatsApp" },
+  { day: 0,  type: "whatsapp",  icon: "📱", label: "1ª Mensagem de WhatsApp" },
+  { day: 0,  type: "whatsapp",  icon: "📱", label: "2ª Mensagem de WhatsApp" },
   { day: 1,  type: "ligacao",   icon: "📞", label: "Ligação" },
   { day: 4,  type: "video",     icon: "🎥", label: "Vídeo personalizado" },
   { day: 11, type: "contato",   icon: "🔔", label: "Novo contato" },
@@ -2484,10 +2498,28 @@ function renderLeadDetail(l) {
         </div>
         <div>
           <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Observações</div>
-          <textarea rows="4" style="resize:none" placeholder="Adicionar observação...">${l.notes||''}</textarea>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <button onclick="addFollowup(${l.id})" class="btn-primary" style="font-size:11px;padding:8px 14px">+1 Follow-up</button>
-            <span style="font-size:11px;color:var(--text3);align-self:center">Total: ${l.followups}x</span>
+
+          <!-- Histórico de observações -->
+          <div id="notes-history-${l.id}" style="max-height:180px;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:6px">
+            ${(l.noteHistory && l.noteHistory.length > 0)
+              ? l.noteHistory.slice().reverse().map(n => `
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;padding:10px 12px;position:relative">
+                  <div style="font-size:11px;color:var(--text);line-height:1.5;white-space:pre-wrap">${n.text}</div>
+                  <div style="font-size:9px;color:var(--text3);margin-top:5px">${new Date(n.date).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+                </div>`).join('')
+              : (l.notes ? `<div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;padding:10px 12px">
+                  <div style="font-size:11px;color:var(--text);line-height:1.5;white-space:pre-wrap">${l.notes}</div>
+                  <div style="font-size:9px;color:var(--text3);margin-top:5px">Observação anterior</div>
+                </div>` : `<div style="font-size:11px;color:var(--text3);text-align:center;padding:12px">Nenhuma observação ainda</div>`)
+            }
+          </div>
+
+          <!-- Campo para nova observação -->
+          <textarea id="new-note-${l.id}" rows="2" style="resize:none;font-size:12px" placeholder="Nova observação..."></textarea>
+          <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+            <button onclick="addNote(${l.id})" style="padding:8px 14px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border-radius:8px;font-size:11px;font-weight:700;border:none">+ Adicionar</button>
+            <button onclick="addFollowup(${l.id})" class="btn-primary" style="font-size:11px;padding:8px 14px;background:rgba(99,102,241,0.12);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25)">+1 Follow-up</button>
+            <span style="font-size:11px;color:var(--text3)">Total: ${l.followups}x</span>
           </div>
         </div>
       </div>
@@ -2561,6 +2593,32 @@ function saveLead() {
   ensureJourneyForLead(newId, name, startDate);
   toggleAddLead();
   renderCRM();
+}
+
+function addNote(id) {
+  const input = document.getElementById(`new-note-${id}`);
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) { input.focus(); return; }
+
+  const l = state.leads.find(l => l.id === id);
+  if (!l) return;
+
+  // Inicializa histórico se não existir
+  if (!Array.isArray(l.noteHistory)) {
+    l.noteHistory = [];
+    // Migra nota antiga para o histórico
+    if (l.notes) {
+      l.noteHistory.push({ text: l.notes, date: new Date().toISOString() });
+    }
+  }
+
+  l.noteHistory.push({ text, date: new Date().toISOString() });
+  l.notes = text; // mantém compatibilidade com código existente
+  input.value = '';
+  markDirty();
+  renderLeadDetail(l);
+  showAuthInfoToast('✓ Observação adicionada!');
 }
 
 function addFollowup(id) {
@@ -2862,7 +2920,12 @@ function renderPerformance() {
 
 function renderHabits() {
   const score=Math.round(state.habits.reduce((a,h)=>a+Math.min(100,(h.done/h.goal)*100),0)/state.habits.length);
-  document.getElementById('score-val').textContent=score;
+  // Atualiza todos os lugares que mostram o score
+  ['score-val','perf-score-tag','perf-score-tag2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = score;
+  });
+  document.getElementById('streak-val').textContent = state.streak;
   document.getElementById('habit-list').innerHTML=state.habits.map(h=>`
     <div style="display:flex;align-items:center;gap:14px">
       <div style="width:38px;height:38px;border-radius:10px;background:${h.color}14;border:1px solid ${h.color}2a;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${h.icon}</div>
@@ -3381,6 +3444,7 @@ function init() {
     applyAvatar();
     renderGreeting();
     renderDashboard();
+    renderHabits();
     calcSim();
     renderJourneyWidgets();
     initGoogleCalendar();
