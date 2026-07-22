@@ -53,6 +53,46 @@ if (typeof supabase === 'undefined') {
   --pink: #ec4899;
   --red: #ef4444;
 }
+
+/* ─── TEMA CLARO ─── */
+body.light-mode {
+  --bg: #f4f5f9;
+  --bg2: #ffffff;
+  --bg3: #eef0f6;
+  --border: rgba(0,0,0,0.07);
+  --border2: rgba(0,0,0,0.13);
+  --text: #111827;
+  --text2: rgba(17,24,39,0.6);
+  --text3: rgba(17,24,39,0.35);
+}
+body.light-mode input,
+body.light-mode textarea,
+body.light-mode select {
+  background: rgba(0,0,0,0.04);
+  color: #111827;
+}
+body.light-mode select option { background: #fff; color: #111827; }
+body.light-mode ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); }
+body.light-mode .sidebar { box-shadow: 2px 0 20px rgba(0,0,0,0.08); }
+body.light-mode #boot-loading,
+body.light-mode #auth-screen { background: #f4f5f9; }
+body.light-mode #auth-card-login,
+body.light-mode #auth-card-forgot {
+  background: #fff;
+  border-color: rgba(0,0,0,0.1);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.12);
+}
+body.light-mode .card {
+  background: #fff;
+  border-color: rgba(0,0,0,0.07);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+body.light-mode .nav-item { color: rgba(17,24,39,0.5); }
+body.light-mode .nav-item.active { background: rgba(99,102,241,0.1); color: #6366f1; }
+body.light-mode .main { background: #f4f5f9; }
+body.light-mode #billing-wall { background: #f4f5f9; }
+body.light-mode #change-password-modal > div { background: #fff; }
+
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
@@ -457,6 +497,9 @@ td:last-child{padding-right:0}
   </div>
   <div style="padding:8px 20px 0">
     <button onclick="openChangePassword()" style="width:100%;padding:8px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:8px;color:#a5b4fc;font-size:11px;font-weight:600">🔐 Trocar Senha</button>
+  </div>
+  <div style="padding:8px 20px 0">
+    <button id="theme-toggle-btn" onclick="toggleTheme()" style="width:100%;padding:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text2);font-size:11px;font-weight:600">🌙 Tema Escuro</button>
   </div>
   <div style="padding:8px 20px 0">
     <button onclick="logout()" style="width:100%;padding:8px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;color:#ef4444;font-size:11px;font-weight:600">⎋ Sair da conta</button>
@@ -1123,6 +1166,31 @@ async function submitForgotPassword() {
 function sendPasswordReset() { showForgotPassword(); }
 
 // ── Trocar senha (dentro do app) ───────────────────────────────
+// ─── TEMA CLARO / ESCURO ───────────────────────────────────────
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light-mode');
+  try { localStorage.setItem('snexus_theme', isLight ? 'light' : 'dark'); } catch(e) {}
+  updateThemeButton(isLight);
+}
+
+function updateThemeButton(isLight) {
+  const btn = document.getElementById('theme-toggle-btn');
+  if (!btn) return;
+  btn.textContent = isLight ? '🌙 Tema Escuro' : '☀️ Tema Claro';
+}
+
+function applyStoredTheme() {
+  try {
+    const stored = localStorage.getItem('snexus_theme');
+    const isLight = stored === 'light';
+    if (isLight) document.body.classList.add('light-mode');
+    updateThemeButton(isLight);
+  } catch(e) {}
+}
+
+// Aplicar tema salvo assim que possível
+applyStoredTheme();
+
 function openChangePassword() {
   const modal = document.getElementById('change-password-modal');
   if (modal) {
@@ -1250,14 +1318,37 @@ async function loadState() {
   try {
     const { data, error } = await sb
       .from('snexus_data')
-      .select('data')
+      .select('data, user_id')
       .eq('user_id', currentUser.id)
       .maybeSingle();
+
     if (error) throw error;
-    if (data && data.data) {
-      Object.assign(state, data.data);
+
+    // Segurança extra: só carrega se o user_id bater exatamente
+    if (data && data.data && data.user_id === currentUser.id) {
+      // Merge seguro: preserva estrutura do state padrão, só sobrescreve com dados do usuário
+      const loaded = data.data;
+      // Campos de array e objetos só sobrescrevem se existirem no banco
+      if (Array.isArray(loaded.sales)) state.sales = loaded.sales;
+      if (Array.isArray(loaded.leads)) state.leads = loaded.leads;
+      if (Array.isArray(loaded.postsale)) state.postsale = loaded.postsale;
+      if (Array.isArray(loaded.contracts)) state.contracts = loaded.contracts;
+      if (Array.isArray(loaded.journeys)) state.journeys = loaded.journeys;
+      if (Array.isArray(loaded.chatHistory)) state.chatHistory = loaded.chatHistory;
+      if (Array.isArray(loaded.weekScores)) state.weekScores = loaded.weekScores;
+      if (loaded.habits && Array.isArray(loaded.habits)) state.habits = loaded.habits;
+      if (typeof loaded.commission === 'number') state.commission = loaded.commission;
+      if (typeof loaded.streak === 'number') state.streak = loaded.streak;
+      if (typeof loaded.goal === 'number') state.goal = loaded.goal;
+      if (typeof loaded.userName === 'string') state.userName = loaded.userName;
+      if (typeof loaded.crmView === 'string') state.crmView = loaded.crmView;
+      if (loaded.userPhoto) state.userPhoto = loaded.userPhoto;
+      if (typeof loaded.pomCount === 'number') state.pomCount = loaded.pomCount;
+      if (Array.isArray(loaded.pomTime)) state.pomTime = loaded.pomTime;
       return true;
     }
+
+    // Usuário novo — começa zerado (não carrega nada)
     return false;
   } catch (e) {
     return false;
@@ -2071,8 +2162,8 @@ function renderJourneyWidgets() {
 
 // Cache do formatador de moeda (criar 1x é muito mais rápido que criar a cada chamada)
 const _currencyFormatter = new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
-const fmt = v => _currencyFormatter.format(v);
-const pct = (v,t) => Math.min(100,(v/t)*100);
+const fmt = v => _currencyFormatter.format(v || 0);
+const pct = (v,t) => (!t || !v) ? 0 : Math.min(100, Math.max(0, (v/t)*100));
 const today = new Date();
 
 // monthsLeft e neededPerMonth são funções para sempre refletir GOAL e commission atuais
