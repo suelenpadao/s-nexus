@@ -56,42 +56,113 @@ if (typeof supabase === 'undefined') {
 
 /* ─── TEMA CLARO ─── */
 body.light-mode {
-  --bg: #f4f5f9;
+  --bg: #f0f2f8;
   --bg2: #ffffff;
-  --bg3: #eef0f6;
-  --border: rgba(0,0,0,0.07);
-  --border2: rgba(0,0,0,0.13);
+  --bg3: #e8ebf4;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.14);
   --text: #111827;
-  --text2: rgba(17,24,39,0.6);
-  --text3: rgba(17,24,39,0.35);
+  --text2: rgba(17,24,39,0.65);
+  --text3: rgba(17,24,39,0.4);
 }
+/* Inputs e selects */
 body.light-mode input,
 body.light-mode textarea,
 body.light-mode select {
   background: rgba(0,0,0,0.04);
   color: #111827;
+  border-color: rgba(0,0,0,0.14);
 }
+body.light-mode input::placeholder,
+body.light-mode textarea::placeholder { color: rgba(17,24,39,0.35); }
 body.light-mode select option { background: #fff; color: #111827; }
-body.light-mode ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); }
-body.light-mode .sidebar { box-shadow: 2px 0 20px rgba(0,0,0,0.08); }
-body.light-mode #boot-loading,
-body.light-mode #auth-screen { background: #f4f5f9; }
+/* Scrollbar */
+body.light-mode ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.25); }
+/* Sidebar */
+body.light-mode .sidebar {
+  background: #ffffff;
+  border-right-color: rgba(0,0,0,0.08);
+  box-shadow: 2px 0 16px rgba(0,0,0,0.06);
+}
+body.light-mode .sidebar-user { border-top-color: rgba(0,0,0,0.07); }
+body.light-mode .logo-text { color: #111827; }
+body.light-mode .logo-sub { color: rgba(17,24,39,0.45); }
+body.light-mode .nav-item { color: rgba(17,24,39,0.5); }
+body.light-mode .nav-item:hover { background: rgba(99,102,241,0.07); color: #6366f1; }
+body.light-mode .nav-item.active { background: rgba(99,102,241,0.1); color: #6366f1; }
+body.light-mode .nav-badge { background: rgba(99,102,241,0.15); color: #4f46e5; }
+body.light-mode .nav-badge.ai { background: rgba(99,102,241,0.15); color: #4f46e5; }
+body.light-mode #sidebar-user-name { color: #111827; }
+body.light-mode #sidebar-user-email { color: rgba(17,24,39,0.45); }
+/* Main */
+body.light-mode .main { background: #f0f2f8; }
+body.light-mode #page-title { color: #111827; }
+body.light-mode #page-date { color: rgba(17,24,39,0.45); }
+body.light-mode #save-status { color: rgba(17,24,39,0.4); }
+/* Cards */
+body.light-mode .card {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.07);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+/* Textos gerais */
+body.light-mode .metric-label { color: rgba(17,24,39,0.5); }
+body.light-mode .metric-sub { color: rgba(17,24,39,0.4); }
+body.light-mode .tag { background: rgba(0,0,0,0.05); color: rgba(17,24,39,0.6); }
+/* Botões */
+body.light-mode button[style*="rgba(255,255,255,0.0"] { background: rgba(0,0,0,0.05) !important; color: #374151 !important; }
+body.light-mode .btn-primary { background: linear-gradient(135deg,#6366f1,#4f46e5) !important; color: #fff !important; }
+/* Telas de auth */
+body.light-mode #boot-loading { background: #f0f2f8; }
+body.light-mode #auth-screen { background: #f0f2f8; }
+body.light-mode #auth-screen > div > div:first-child { background: transparent; }
 body.light-mode #auth-card-login,
 body.light-mode #auth-card-forgot {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.1);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+}
+body.light-mode #auth-card-login label,
+body.light-mode #auth-card-forgot label { color: rgba(17,24,39,0.5); }
+/* Pills do topo */
+body.light-mode .pill { color: #374151 !important; }
+body.light-mode .pill-indigo { background: rgba(99,102,241,0.1) !important; color: #4f46e5 !important; border-color: rgba(99,102,241,0.2) !important; }
+/* Hero do dashboard */
+body.light-mode #hero-pct-txt { color: #111827; }
+/* Kanban */
+body.light-mode .kanban-col { background: #f0f2f8; border-color: rgba(0,0,0,0.07); }
+body.light-mode .kanban-col-title { color: rgba(17,24,39,0.5); }
+body.light-mode .lead-card { background: #ffffff; border-color: rgba(0,0,0,0.07); box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+body.light-mode .lead-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+/* Modais */
+body.light-mode #change-password-modal > div {
   background: #fff;
   border-color: rgba(0,0,0,0.1);
-  box-shadow: 0 24px 64px rgba(0,0,0,0.12);
 }
-body.light-mode .card {
+body.light-mode #plans-modal > div {
   background: #fff;
-  border-color: rgba(0,0,0,0.07);
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  border-color: rgba(0,0,0,0.1);
 }
-body.light-mode .nav-item { color: rgba(17,24,39,0.5); }
-body.light-mode .nav-item.active { background: rgba(99,102,241,0.1); color: #6366f1; }
-body.light-mode .main { background: #f4f5f9; }
-body.light-mode #billing-wall { background: #f4f5f9; }
-body.light-mode #change-password-modal > div { background: #fff; }
+body.light-mode #billing-wall { background: #f0f2f8; }
+/* Barras de progresso */
+body.light-mode .bar-track { background: rgba(0,0,0,0.08); }
+/* Formulários de cadastro */
+body.light-mode .form-group label { color: rgba(17,24,39,0.6); }
+/* Mobile tabbar */
+body.light-mode .mobile-tabbar {
+  background: rgba(255,255,255,0.97);
+  border-top-color: rgba(0,0,0,0.08);
+}
+body.light-mode .mobile-tabbar button { color: rgba(17,24,39,0.4); }
+body.light-mode .mobile-tabbar button.active { color: #6366f1; background: rgba(99,102,241,0.08); }
+/* Overlay */
+body.light-mode .overlay.open { background: rgba(0,0,0,0.4); }
+/* Toasts e badges */
+body.light-mode .nav-badge { color: #4f46e5; }
+/* Sidebar mini-goal */
+body.light-mode #sidebar-pct { color: #111827; }
+body.light-mode #sidebar-remain { color: rgba(17,24,39,0.45); }
+
 
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -1284,31 +1355,58 @@ async function onAuthSuccess(user, username) {
 async function resetAccountData() {
   if (!confirm('Isso vai apagar TODOS os seus dados (leads, vendas, financeiro, jornadas, hábitos, score) e começar do zero. Tem certeza?')) return;
 
-  // Zerar tudo
-  state.sales = [];
-  state.leads = [];
-  state.commission = 0;
-  state.journeys = [];
-  state.postsale = [];
-  state.contracts = [];
-  state.chatHistory = [];
-  state.streak = 0;
-  state.weekScores = [0,0,0,0,0,0,0];
-  state.pomCount = 0;
-  state.pomTime = 25*60;
-  state.pomTotal = 25*60;
-  state.pomActive = false;
-  state.goal = 1000000;
-  state.habits = state.habits.map(h => ({...h, done: 0}));
-  state.selectedLead = null;
+  // Estado zerado padrão
+  const emptyState = {
+    commission: 0,
+    sales: [],
+    leads: [],
+    habits: [
+      {id:"contacts",label:"Contatos novos",done:0,goal:30,icon:"👥",color:"#6366f1"},
+      {id:"followups",label:"Follow-ups",done:0,goal:15,icon:"🔄",color:"#06b6d4"},
+      {id:"calls",label:"Ligações fortes",done:0,goal:5,icon:"📞",color:"#10b981"},
+      {id:"meetings",label:"Reuniões online",done:0,goal:2,icon:"💻",color:"#f59e0b"},
+      {id:"visits",label:"Visitas",done:0,goal:1,icon:"🏠",color:"#ec4899"},
+      {id:"proposals",label:"Propostas enviadas",done:0,goal:2,icon:"📄",color:"#f97316"}
+    ],
+    streak: 0,
+    pomActive: false,
+    pomTime: 25*60,
+    pomTotal: 25*60,
+    pomType: "foco",
+    pomCount: 0,
+    crmView: "kanban",
+    editingSaleId: null,
+    userName: state.userName || "Corretor",
+    userPhoto: state.userPhoto || null,
+    selectedLead: null,
+    chatHistory: [],
+    weekScores: [0,0,0,0,0,0,0],
+    postsale: [],
+    contracts: [],
+    journeys: [],
+    googleCalendarConnected: false,
+    goal: 1000000
+  };
 
-  // Salvar na nuvem
-  await saveState(true);
+  // Aplicar no state atual
+  Object.assign(state, emptyState);
+  GOAL = 1000000;
 
-  // Atualizar UI imediatamente sem recarregar
+  try {
+    // Apagar registro antigo do Supabase e recriar zerado
+    await sb.from('snexus_data').delete().eq('user_id', currentUser.id);
+    await sb.from('snexus_data').insert({ user_id: currentUser.id, data: emptyState });
+    hasUnsavedChanges = false;
+    updateSaveStatus('saved-manual');
+  } catch(e) {
+    // Se falhar, tenta upsert normal
+    await saveState(true);
+  }
+
+  // Atualizar toda a UI
   renderDashboard();
   renderHabits();
-  showAuthInfoToast('✓ Conta resetada com sucesso — tudo zerado!');
+  showAuthInfoToast('✓ Conta zerada com sucesso!');
   closeMobile();
 }
 
