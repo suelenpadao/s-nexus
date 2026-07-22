@@ -194,8 +194,7 @@ td:last-child{padding-right:0}
 <!-- ═══════════════════ TELA DE CARREGAMENTO INICIAL ═══════════════════ -->
 <div id="boot-loading" style="position:fixed;inset:0;background:#07090f;display:flex;align-items:center;justify-content:center;z-index:1000">
   <div style="text-align:center">
-    <img src="https://suelenpadao.github.io/s-nexus/logo.png" style="width:80px;height:80px;border-radius:18px;object-fit:contain;margin:0 auto 16px;display:block;animation:pulse 1.6s infinite" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
-    <div style="display:none;width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#6366f1,#4f46e5);align-items:center;justify-content:center;font-weight:800;font-size:22px;margin:0 auto 16px">S</div>
+    <img src="https://raw.githubusercontent.com/suelenpadao/s-nexus/main/ChatGPT%20Image%2011%20de%20jul.%20de%202026%2C%2011_03_45.png" style="width:80px;height:80px;object-fit:contain;margin:0 auto 16px;display:block;animation:pulse 1.6s infinite" onerror="this.style.display='none'">
     <div style="color:rgba(240,242,255,0.4);font-size:13px">Carregando S Nexus...</div>
   </div>
 </div>
@@ -204,7 +203,7 @@ td:last-child{padding-right:0}
 <div id="auth-screen" style="display:none;position:fixed;inset:0;background:#07090f;z-index:900;align-items:center;justify-content:center;padding:20px">
   <div style="width:100%;max-width:400px">
     <div style="text-align:center;margin-bottom:28px">
-      <img src="https://suelenpadao.github.io/s-nexus/logo.png" style="width:80px;height:80px;border-radius:18px;object-fit:contain;margin:0 auto 14px;display:block" onerror="this.outerHTML='<div style=\'width:52px;height:52px;border-radius:15px;background:linear-gradient(135deg,#6366f1,#4f46e5);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:24px;margin:0 auto 14px\'>S</div>'"/>
+      <img src="https://raw.githubusercontent.com/suelenpadao/s-nexus/main/ChatGPT%20Image%2011%20de%20jul.%20de%202026%2C%2011_03_45.png" style="width:110px;height:110px;object-fit:contain;margin:0 auto 14px;display:block" onerror="this.style.display='none'">
       <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:22px;color:#fff">S Nexus</div>
       <div style="font-size:11px;color:rgba(240,242,255,0.35);text-transform:uppercase;letter-spacing:.12em;margin-top:2px">CRM Premium</div>
     </div>
@@ -257,7 +256,7 @@ td:last-child{padding-right:0}
 <!-- ───────────────── SIDEBAR ───────────────── -->
 <aside class="sidebar" id="sidebar">
   <div class="logo">
-    <img src="https://suelenpadao.github.io/s-nexus/logo.png" class="logo-icon" style="width:40px;height:40px;border-radius:12px;object-fit:contain;background:#0d1020" onerror="this.outerHTML='<div class=\"logo-icon\">S</div>'"/>
+    <img src="https://raw.githubusercontent.com/suelenpadao/s-nexus/main/ChatGPT%20Image%2011%20de%20jul.%20de%202026%2C%2011_03_45.png" style="width:40px;height:40px;border-radius:10px;object-fit:contain" onerror="this.outerHTML='<div class=logo-icon>S</div>'">
     <div>
       <div class="logo-text">S Nexus</div>
       <div class="logo-sub">CRM Premium</div>
@@ -674,54 +673,8 @@ td:last-child{padding-right:0}
 let GOAL = 1000000;
 
 let state = {
-  commission: 43750.00,
-  sales: [
-    {
-      id:1, buyer:"Dr. João Petri", seller:"Versato Empreendimentos",
-      value:885000, commission:22125, commissionPct:2.5,
-      date:"2025-03-15", status:"fechamento", notes:"",
-      installments:[
-        {id:1,date:"2026-05-15",value:62.50,status:"pendente"},
-        {id:2,date:"2026-05-30",value:1093.75,status:"pendente"},
-        {id:3,date:"2026-06-30",value:1093.75,status:"pendente"},
-        {id:4,date:"2026-07-30",value:1093.75,status:"pendente"},
-        {id:5,date:"2026-08-30",value:1093.75,status:"pendente"},
-        {id:6,date:"2026-09-30",value:1093.75,status:"pendente"},
-        {id:7,date:"2026-10-30",value:1093.75,status:"pendente"},
-        {id:8,date:"2026-11-30",value:1093.75,status:"pendente"},
-        {id:9,date:"2026-12-30",value:1093.75,status:"pendente"},
-        {id:10,date:"2027-01-30",value:2125.00,status:"pendente"},
-        {id:11,date:"2027-02-28",value:2125.00,status:"pendente"},
-        {id:12,date:"2027-03-30",value:2125.00,status:"pendente"},
-        {id:13,date:"2027-04-30",value:2125.00,status:"pendente"},
-        {id:14,date:"2027-05-30",value:2125.00,status:"pendente"},
-        {id:15,date:"2027-06-30",value:2125.00,status:"pendente"},
-        {id:16,date:"2027-07-30",value:562.50,status:"pendente"}
-      ]
-    },
-    {
-      id:2, buyer:"Liege da Silva Acunha", seller:"",
-      value:865000, commission:21625.00, commissionPct:2.5, notes:"Comissão líquida = 50% do valor de cada parcela (planilha original tem o valor integral; aqui consta apenas a parte da Suelen)",
-      date:"2026-06-11", status:"fechamento",
-      installments:[
-        {id:1,date:"2026-06-11",value:62.50,status:"pago"},
-        {id:2,date:"2026-07-15",value:1093.75,status:"pendente"},
-        {id:3,date:"2026-08-15",value:1093.75,status:"pendente"},
-        {id:4,date:"2026-09-15",value:1093.75,status:"pendente"},
-        {id:5,date:"2026-10-15",value:1093.75,status:"pendente"},
-        {id:6,date:"2026-11-15",value:1093.75,status:"pendente"},
-        {id:7,date:"2026-12-15",value:1093.75,status:"pendente"},
-        {id:8,date:"2026-12-15",value:5312.50,status:"pendente"},
-        {id:9,date:"2027-01-15",value:1093.75,status:"pendente"},
-        {id:10,date:"2027-02-15",value:1093.75,status:"pendente"},
-        {id:11,date:"2027-03-15",value:1093.75,status:"pendente"},
-        {id:12,date:"2027-04-15",value:1093.75,status:"pendente"},
-        {id:13,date:"2027-05-15",value:1093.75,status:"pendente"},
-        {id:14,date:"2027-06-15",value:1093.75,status:"pendente"},
-        {id:15,date:"2027-06-15",value:3125.00,status:"pendente"}
-      ]
-    }
-  ],
+  commission: 0,
+  sales: [],
   leads: [],
   habits: [
     {id:"contacts",label:"Contatos novos",done:0,goal:30,icon:"👥",color:"#6366f1"},
@@ -744,13 +697,8 @@ let state = {
   selectedLead: null,
   chatHistory: [],
   weekScores: [0,0,0,0,0,0,0],
-  postsale: [
-    {id:1,client:"Dr. João Petri",sale:"Versato Empreendimentos",date:"2025-03-15",reinforcementDate:"2026-03-15",reinforcementType:"anual",status:"ativo",notes:"Reforço anual em março"},
-    {id:2,client:"Liege da Silva Acunha",sale:"",date:"2026-06-11",reinforcementDate:"2027-06-11",reinforcementType:"anual",status:"ativo",notes:"Venda com 15 parcelas até jun/2027"},
-  ],
-  contracts: [
-    {id:1,name:"Contrato Dr. João Petri",client:"Dr. João Petri",date:"2025-03-15",status:"assinado",type:"compra",dataUrl:null,fileType:null}
-  ],
+  postsale: [],
+  contracts: [],
   journeys: [],
   googleCalendarConnected: false,
   goal: 1000000
@@ -899,74 +847,20 @@ async function onAuthSuccess(user, username) {
 }
 
 async function resetAccountData() {
-  if (!confirm('Isso vai APAGAR todos os dados salvos na nuvem e recarregar os dados corretos (vendas João Petri e Liege com valores certos, sem leads de exemplo). Continuar?')) return;
-
-  // Dados corretos a serem aplicados
-  const correctSales = [
-    {
-      id:1, buyer:"Dr. João Petri", seller:"Versato Empreendimentos",
-      value:885000, commission:22125, commissionPct:2.5,
-      date:"2025-03-15", status:"fechamento", notes:"",
-      installments:[
-        {id:1,date:"2026-05-15",value:62.50,status:"pendente"},
-        {id:2,date:"2026-05-30",value:1093.75,status:"pendente"},
-        {id:3,date:"2026-06-30",value:1093.75,status:"pendente"},
-        {id:4,date:"2026-07-30",value:1093.75,status:"pendente"},
-        {id:5,date:"2026-08-30",value:1093.75,status:"pendente"},
-        {id:6,date:"2026-09-30",value:1093.75,status:"pendente"},
-        {id:7,date:"2026-10-30",value:1093.75,status:"pendente"},
-        {id:8,date:"2026-11-30",value:1093.75,status:"pendente"},
-        {id:9,date:"2026-12-30",value:1093.75,status:"pendente"},
-        {id:10,date:"2027-01-30",value:2125.00,status:"pendente"},
-        {id:11,date:"2027-02-28",value:2125.00,status:"pendente"},
-        {id:12,date:"2027-03-30",value:2125.00,status:"pendente"},
-        {id:13,date:"2027-04-30",value:2125.00,status:"pendente"},
-        {id:14,date:"2027-05-30",value:2125.00,status:"pendente"},
-        {id:15,date:"2027-06-30",value:2125.00,status:"pendente"},
-        {id:16,date:"2027-07-30",value:562.50,status:"pendente"}
-      ]
-    },
-    {
-      id:2, buyer:"Liege da Silva Acunha", seller:"",
-      value:865000, commission:21625.00, commissionPct:2.5,
-      date:"2026-06-11", status:"fechamento",
-      notes:"Comissão líquida = 50% do valor de cada parcela",
-      installments:[
-        {id:1,date:"2026-06-11",value:62.50,status:"pago"},
-        {id:2,date:"2026-07-15",value:1093.75,status:"pendente"},
-        {id:3,date:"2026-08-15",value:1093.75,status:"pendente"},
-        {id:4,date:"2026-09-15",value:1093.75,status:"pendente"},
-        {id:5,date:"2026-10-15",value:1093.75,status:"pendente"},
-        {id:6,date:"2026-11-15",value:1093.75,status:"pendente"},
-        {id:7,date:"2026-12-15",value:1093.75,status:"pendente"},
-        {id:8,date:"2026-12-15",value:5312.50,status:"pendente"},
-        {id:9,date:"2027-01-15",value:1093.75,status:"pendente"},
-        {id:10,date:"2027-02-15",value:1093.75,status:"pendente"},
-        {id:11,date:"2027-03-15",value:1093.75,status:"pendente"},
-        {id:12,date:"2027-04-15",value:1093.75,status:"pendente"},
-        {id:13,date:"2027-05-15",value:1093.75,status:"pendente"},
-        {id:14,date:"2027-06-15",value:1093.75,status:"pendente"},
-        {id:15,date:"2027-06-15",value:3125.00,status:"pendente"}
-      ]
-    }
-  ];
-
-  state.sales = correctSales;
+  if (!confirm('Isso vai apagar TODOS os dados da sua conta e começar do zero. Continuar?')) return;
+  state.sales = [];
   state.leads = [];
+  state.commission = 0;
   state.journeys = [];
-  state.commission = correctSales.reduce((a,s)=>a+s.commission,0);
+  state.postsale = [];
+  state.contracts = [];
+  state.chatHistory = [];
   state.streak = 0;
   state.weekScores = [0,0,0,0,0,0,0];
-  state.habits.forEach(h=>h.done=0);
-  state.postsale = [
-    {id:1,client:"Dr. João Petri",sale:"Versato Empreendimentos",date:"2025-03-15",reinforcementDate:"2026-03-15",reinforcementType:"anual",status:"ativo",notes:"Reforço anual em março"},
-    {id:2,client:"Liege da Silva Acunha",sale:"",date:"2026-06-11",reinforcementDate:"2027-06-11",reinforcementType:"anual",status:"ativo",notes:"Venda com 15 parcelas até jun/2027"}
-  ];
-
-  ensureJourneysForExistingData();
+  state.habits.forEach(h => h.done = 0);
   await saveState(true);
   renderDashboard();
-  showAuthInfoToast('✓ Dados resetados com sucesso! VGV e comissões corrigidos.');
+  showAuthInfoToast('✓ Conta resetada com sucesso.');
 }
 
 async function logout() {
@@ -980,73 +874,7 @@ async function logout() {
 // ─── CORREÇÃO PONTUAL DE DADOS (mantém o restante intocado) ───────────────────
 // Corrige apenas as vendas de exemplo (João Petri id=1 e Liege id=2) com os valores
 // e parcelas corretos, sem apagar nenhum outro dado que você já tenha cadastrado.
-async function fixSeedSalesData() {
-  if (!confirm('Isso vai corrigir os valores e parcelas das vendas "Dr. João Petri" e "Liege da Silva Acunha" para os valores certos (mantendo todo o resto intocado). Continuar?')) return;
 
-  const joaoPetri = state.sales.find(s => s.id === 1);
-  if (joaoPetri) {
-    joaoPetri.buyer = "Dr. João Petri";
-    joaoPetri.seller = "Versato Empreendimentos";
-    joaoPetri.value = 885000;
-    joaoPetri.commission = 22125;
-    joaoPetri.commissionPct = 2.5;
-    joaoPetri.date = "2025-03-15";
-    joaoPetri.installments = [
-      {id:1,date:"2026-05-15",value:62.50,status:"pendente"},
-      {id:2,date:"2026-05-30",value:1093.75,status:"pendente"},
-      {id:3,date:"2026-06-30",value:1093.75,status:"pendente"},
-      {id:4,date:"2026-07-30",value:1093.75,status:"pendente"},
-      {id:5,date:"2026-08-30",value:1093.75,status:"pendente"},
-      {id:6,date:"2026-09-30",value:1093.75,status:"pendente"},
-      {id:7,date:"2026-10-30",value:1093.75,status:"pendente"},
-      {id:8,date:"2026-11-30",value:1093.75,status:"pendente"},
-      {id:9,date:"2026-12-30",value:1093.75,status:"pendente"},
-      {id:10,date:"2027-01-30",value:2125.00,status:"pendente"},
-      {id:11,date:"2027-02-28",value:2125.00,status:"pendente"},
-      {id:12,date:"2027-03-30",value:2125.00,status:"pendente"},
-      {id:13,date:"2027-04-30",value:2125.00,status:"pendente"},
-      {id:14,date:"2027-05-30",value:2125.00,status:"pendente"},
-      {id:15,date:"2027-06-30",value:2125.00,status:"pendente"},
-      {id:16,date:"2027-07-30",value:562.50,status:"pendente"}
-    ];
-  }
-
-  const liege = state.sales.find(s => s.id === 2);
-  if (liege) {
-    liege.buyer = "Liege da Silva Acunha";
-    liege.seller = "";
-    liege.value = 1730000;
-    liege.commission = 21625.00;
-    liege.commissionPct = 1.25;
-    liege.notes = "Comissão líquida = 50% do valor de cada parcela (planilha original tem o valor integral; aqui consta apenas a parte da Suelen)";
-    liege.date = "2026-06-11";
-    liege.installments = [
-      {id:1,date:"2026-06-11",value:62.50,status:"pago"},
-      {id:2,date:"2026-07-15",value:1093.75,status:"pendente"},
-      {id:3,date:"2026-08-15",value:1093.75,status:"pendente"},
-      {id:4,date:"2026-09-15",value:1093.75,status:"pendente"},
-      {id:5,date:"2026-10-15",value:1093.75,status:"pendente"},
-      {id:6,date:"2026-11-15",value:1093.75,status:"pendente"},
-      {id:7,date:"2026-12-15",value:1093.75,status:"pendente"},
-      {id:8,date:"2026-12-15",value:5312.50,status:"pendente"},
-      {id:9,date:"2027-01-15",value:1093.75,status:"pendente"},
-      {id:10,date:"2027-02-15",value:1093.75,status:"pendente"},
-      {id:11,date:"2027-03-15",value:1093.75,status:"pendente"},
-      {id:12,date:"2027-04-15",value:1093.75,status:"pendente"},
-      {id:13,date:"2027-05-15",value:1093.75,status:"pendente"},
-      {id:14,date:"2027-06-15",value:1093.75,status:"pendente"},
-      {id:15,date:"2027-06-15",value:3125.00,status:"pendente"}
-    ];
-  }
-
-  // Recalcula a comissão acumulada total com base em TODAS as vendas atuais (preserva outras vendas que você tenha criado)
-  state.commission = state.sales.reduce((a,s) => a + s.commission, 0);
-
-  await saveState(true);
-  renderFinancial();
-  renderDashboard();
-  alert('Dados corrigidos e salvos com sucesso! Comissão acumulada atualizada para ' + fmt(state.commission) + '.');
-}
 
 // ─── PERSISTÊNCIA DE DADOS (tabela snexus_data) ───────────────────
 
@@ -2584,8 +2412,8 @@ function markReinforcementDone(clientId) {
 
 function renderAlerts() {
   const alerts=[
-    {type:'reforco',lead:'Dr. João Petri',msg:'Reforço anual vence em 23 dias',date:'12 Jun 2025',priority:'alta',color:'#ef4444',icon:'⚡'},
-    {type:'parcela',lead:'Dr. João Petri',msg:'Parcela 2/3 prevista para 10 Jul 2025',date:'10 Jul 2025',priority:'media',color:'#f59e0b',icon:'💰'},
+    
+    
     {type:'followup',lead:'Ana Lima',msg:'Sem contato há 2 dias — lead quente!',date:'Urgente',priority:'alta',color:'#ef4444',icon:'🔥'},
     {type:'followup',lead:'Carlos Mendes',msg:'Reunião online amanhã às 15h',date:'Amanhã',priority:'alta',color:'#6366f1',icon:'💻'},
     {type:'contrato',lead:'Patricia Souza',msg:'Proposta aberta há 3 dias sem resposta',date:'3 dias',priority:'media',color:'#f97316',icon:'📄'}
@@ -2648,7 +2476,7 @@ function renderAlerts() {
 const QUICK_ACTIONS=[
   "Gere follow-up para Ana Lima (lead quente, 2 dias sem contato)",
   "Qual minha estratégia de vendas para essa semana?",
-  "Crie mensagem de reforço anual para Dr. João Petri",
+  "Crie mensagem de follow-up para um lead quente",
   "Analise meu pipeline e diga o que priorizar agora"
 ];
 
@@ -2708,7 +2536,7 @@ async function sendAI() {
 O usuário é um corretor com meta de R$1.000.000 em comissão líquida em 2025.
 Situação atual:
 - Comissão acumulada: R$22.125 (2.2% da meta)
-- 1 venda realizada: Dr. João Petri, R$885.000, comissão R$22.125
+- Vendas realizadas: ${state.sales.length}
 - 5 leads ativos: Ana Lima (quente/WhatsApp), Carlos Mendes (quente/reunião), Patricia Souza (morno/proposta), Roberto Alves (frio/novo), Fernanda Costa (quente/negociação)
 - Meta mensal necessária: ${fmt(neededPerMonth)}
 - ${monthsLeft} meses restantes no ano
