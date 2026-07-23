@@ -2899,8 +2899,13 @@ function renderLeadDetail(l) {
           <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px">${l.name}</div>
           <div style="font-size:12px;color:var(--text3);margin-top:2px">${l.phone} · ${l.origin}</div>
         </div>
-        <div style="display:flex;gap:8px;align-items:center">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           ${tagHTML(tColors[l.temp],l.temp)}
+          <div style="display:flex;gap:4px">
+            <button onclick="changeTempManual(${l.id},'quente')" title="Quente" style="padding:4px 10px;border-radius:7px;font-size:11px;font-weight:700;background:${l.temp==='quente'?'rgba(239,68,68,0.2)':'rgba(255,255,255,0.05)'};border:1px solid ${l.temp==='quente'?'rgba(239,68,68,0.5)':'rgba(255,255,255,0.08)'};color:${l.temp==='quente'?'#ef4444':'var(--text3)'};cursor:pointer">🔴</button>
+            <button onclick="changeTempManual(${l.id},'morno')" title="Morno" style="padding:4px 10px;border-radius:7px;font-size:11px;font-weight:700;background:${l.temp==='morno'?'rgba(245,158,11,0.2)':'rgba(255,255,255,0.05)'};border:1px solid ${l.temp==='morno'?'rgba(245,158,11,0.5)':'rgba(255,255,255,0.08)'};color:${l.temp==='morno'?'#f59e0b':'var(--text3)'};cursor:pointer">🟡</button>
+            <button onclick="changeTempManual(${l.id},'frio')" title="Frio" style="padding:4px 10px;border-radius:7px;font-size:11px;font-weight:700;background:${l.temp==='frio'?'rgba(99,102,241,0.2)':'rgba(255,255,255,0.05)'};border:1px solid ${l.temp==='frio'?'rgba(99,102,241,0.5)':'rgba(255,255,255,0.08)'};color:${l.temp==='frio'?'#6366f1':'var(--text3)'};cursor:pointer">🔵</button>
+          </div>
           <button onclick="selectLead(${l.id})" style="padding:5px 12px;background:rgba(255,255,255,0.06);color:var(--text3);border-radius:7px;font-size:11px">✕ Fechar</button>
         </div>
       </div>
@@ -3057,12 +3062,51 @@ function addFollowup(id) {
   if(state.selectedLead===id) renderLeadDetail(l);
 }
 
+function changeTempManual(id, temp) {
+  const l = state.leads.find(l => l.id === id);
+  if (!l) return;
+  l.temp = temp;
+  markDirty();
+  renderCRM();
+  renderLeadDetail(l);
+}
+
+// Temperatura automática por etapa do pipeline
+const STAGE_TEMP = {
+  lead_novo:              'frio',
+  atendimento_whatsapp:   'frio',
+  contato_iniciado:       'morno',
+  whatsapp:               'morno',
+  ligacao:                'morno',
+  reuniao_online:         'quente',
+  visita:                 'quente',
+  proposta:               'quente',
+  negociacao:             'quente',
+  fechamento:             'quente',
+  postsale:               'quente',
+};
+
 function moveStage(id, status) {
   markDirty();
-  const l=state.leads.find(l=>l.id===id);
-  if(l) l.status=status;
+  const l = state.leads.find(l => l.id === id);
+  if (!l) return;
+
+  l.status = status;
+
+  // Temperatura automática baseada na etapa
+  const autoTemp = STAGE_TEMP[status];
+  if (autoTemp) l.temp = autoTemp;
+
+  // Ao chegar em Fechamento ou Pós-venda, marca TODA a jornada como concluída
+  if (status === 'fechamento' || status === 'postsale') {
+    const journey = state.journeys.find(j => j.leadId === id);
+    if (journey && journey.steps) {
+      journey.steps.forEach(s => s.status = 'feito');
+    }
+  }
+
   renderCRM();
-  renderLeadDetail(state.leads.find(l=>l.id===id));
+  renderLeadDetail(state.leads.find(l => l.id === id));
 }
 
 function openWhatsApp(phone, name) {
@@ -3711,14 +3755,107 @@ function markReinforcementDone(clientId) {
 }
 
 function renderAlerts() {
-  const alerts=[
-    
-    
-    {type:'followup',lead:'Ana Lima',msg:'Sem contato há 2 dias — lead quente!',date:'Urgente',priority:'alta',color:'#ef4444',icon:'🔥'},
-    {type:'followup',lead:'Carlos Mendes',msg:'Reunião online amanhã às 15h',date:'Amanhã',priority:'alta',color:'#6366f1',icon:'💻'},
-    {type:'contrato',lead:'Patricia Souza',msg:'Proposta aberta há 3 dias sem resposta',date:'3 dias',priority:'media',color:'#f97316',icon:'📄'}
-  ];
+  // ── Alertas reais baseados nos dados do usuário ──
+  const now = new Date();
+  const today = now.toISOString().split('T')[0];
+  const realAlerts = [];
 
+  // Leads quentes sem contato há mais de 2 dias
+  state.leads.filter(l => l.temp === 'quente').forEach(l => {
+    const last = l.lastContact ? new Date(l.lastContact) : null;
+    const daysSince = last ? Math.floor((now - last) / (1000*60*60*24)) : 99;
+    if (daysSince >= 2) {
+      realAlerts.push({
+        lead: l.name, icon: '🔥', color: '#ef4444',
+        msg: `Sem contato há ${daysSince} dia${daysSince!==1?'s':''} — lead quente!`,
+        date: daysSince >= 5 ? 'Urgente' : `${daysSince}d`, priority: 'alta'
+      });
+    }
+  });
+
+  // Leads com proposta enviada há mais de 3 dias sem resposta
+  state.leads.filter(l => l.status === 'proposta_enviada').forEach(l => {
+    const last = l.lastContact ? new Date(l.lastContact) : null;
+    const daysSince = last ? Math.floor((now - last) / (1000*60*60*24)) : 0;
+    if (daysSince >= 3) {
+      realAlerts.push({
+        lead: l.name, icon: '📄', color: '#f97316',
+        msg: `Proposta aberta há ${daysSince} dias sem resposta`,
+        date: `${daysSince} dias`, priority: 'media'
+      });
+    }
+  });
+
+  // Parcelas vencendo nos próximos 7 dias
+  state.sales.forEach(s => {
+    (s.installments||[]).filter(i => i.status === 'pendente').forEach(i => {
+      const diff = Math.floor((new Date(i.date) - now) / (1000*60*60*24));
+      if (diff >= 0 && diff <= 7) {
+        realAlerts.push({
+          lead: s.buyer, icon: '💰', color: '#10b981',
+          msg: `Parcela de ${fmt(i.value)} vence em ${diff === 0 ? 'hoje' : diff+' dias'}`,
+          date: diff === 0 ? 'Hoje' : `${diff}d`, priority: diff <= 1 ? 'alta' : 'media'
+        });
+      }
+    });
+  });
+
+  // Reforços de pós-venda próximos (30 dias)
+  state.postsale.forEach(c => {
+    if (!c.reinforcementDate) return;
+    const diff = Math.floor((new Date(c.reinforcementDate) - now) / (1000*60*60*24));
+    if (diff >= 0 && diff <= 30) {
+      realAlerts.push({
+        lead: c.client, icon: '🔔', color: '#f59e0b',
+        msg: `Reforço ${c.reinforcementType} em ${diff === 0 ? 'hoje' : diff+' dias'}`,
+        date: diff === 0 ? 'Hoje' : `${diff}d`, priority: diff <= 3 ? 'alta' : 'media'
+      });
+    }
+  });
+
+  // Métricas reais
+  const criticos = realAlerts.filter(a => a.priority === 'alta').length;
+  const reforcos = state.postsale.filter(c => {
+    if (!c.reinforcementDate) return false;
+    const diff = Math.floor((new Date(c.reinforcementDate) - now) / (1000*60*60*24));
+    return diff >= 0 && diff <= 30;
+  }).length;
+  const followupsHoje = state.leads.filter(l => l.lastContact === today).length;
+  const parcelasHoje = state.sales.flatMap(s => (s.installments||[]))
+    .filter(i => i.status === 'pendente' && i.date === today).length;
+
+  document.getElementById('alert-summary').innerHTML = [
+    {l:'Alertas críticos',   v: criticos,     c:'#ef4444', i:'🚨'},
+    {l:'Reforços próximos',  v: reforcos,     c:'#f59e0b', i:'⚡'},
+    {l:'Follow-ups hoje',    v: followupsHoje, c:'#6366f1', i:'🔔'},
+    {l:'Parcelas hoje',      v: parcelasHoje,  c:'#10b981', i:'💰'},
+  ].map(m => `
+    <div class="card" style="text-align:center;box-shadow:0 0 16px ${m.c}11">
+      <div style="font-size:26px;margin-bottom:4px">${m.i}</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;font-weight:800;color:${m.c}">${m.v}</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:2px">${m.l}</div>
+    </div>`).join('');
+
+  // Lista de alertas reais
+  const alertsContainer = document.getElementById('central-alerts-list');
+  if (alertsContainer) {
+    alertsContainer.innerHTML = realAlerts.length > 0
+      ? realAlerts.sort((a,b) => a.priority === 'alta' ? -1 : 1).map(a => `
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">
+          <div style="width:38px;height:38px;border-radius:10px;background:${a.color}18;border:1px solid ${a.color}33;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${a.icon}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:700;font-size:13px;color:var(--text)">${a.lead}</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">${a.msg}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:4px">${a.date}</div>
+            <span style="background:${a.color}22;color:${a.color};border:1px solid ${a.color}44;border-radius:6px;font-size:9px;font-weight:800;padding:2px 8px;text-transform:uppercase">${a.priority}</span>
+          </div>
+        </div>`).join('')
+      : '<div style="color:var(--text3);text-align:center;padding:24px;font-size:12px">🎉 Nenhum alerta no momento — tudo em dia!</div>';
+  }
+
+  // Jornada pendente
   const journeySteps = getUpcomingJourneySteps(14);
   document.getElementById('journey-pending-list').innerHTML = journeySteps.length ? journeySteps.map(s=>{
     const d = new Date(s.date);
@@ -3742,32 +3879,9 @@ function renderAlerts() {
 
   renderJourneyWidgets();
 
-  document.getElementById('alert-summary').innerHTML=[
-    {l:'Alertas críticos',v:2,c:'#ef4444',i:'🚨'},
-    {l:'Reforços próximos',v:1,c:'#f59e0b',i:'⚡'},
-    {l:'Follow-ups hoje',v:3,c:'#6366f1',i:'🔔'},
-    {l:'Parcelas julho',v:1,c:'#10b981',i:'💰'}
-  ].map(m=>`
-    <div class="card" style="text-align:center;box-shadow:0 0 16px ${m.c}11">
-      <div style="font-size:26px;margin-bottom:4px">${m.i}</div>
-      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;font-weight:800;color:${m.c}">${m.v}</div>
-      <div style="font-size:10px;color:var(--text3);margin-top:2px">${m.l}</div>
-    </div>`).join('');
-
-  document.getElementById('alerts-list').innerHTML=`
+  document.getElementById('alerts-list').innerHTML = `
     <div style="font-size:13px;font-weight:700;margin-bottom:16px">Central de Alertas</div>
-    ${alerts.map((a,i)=>`
-      <div class="alert-item">
-        <div class="alert-icon" style="background:${a.color}14;border:1px solid ${a.color}2a">${a.icon}</div>
-        <div style="flex:1">
-          <div style="font-weight:600;font-size:13px">${a.lead}</div>
-          <div style="font-size:12px;color:var(--text2);margin-top:2px">${a.msg}</div>
-        </div>
-        <div style="text-align:right;flex-shrink:0">
-          <div style="font-size:11px;color:var(--text3);margin-bottom:4px">${a.date}</div>
-          ${tagHTML(a.color,a.priority)}
-        </div>
-      </div>`).join('')}`;
+    <div id="central-alerts-list"></div>`;
 }
 
 const QUICK_ACTIONS=[
