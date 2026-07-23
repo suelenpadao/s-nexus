@@ -964,21 +964,88 @@ td:last-child{padding-right:0}
   </div>
 
   <div id="sec-admin" class="section">
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px" id="admin-metrics"></div>
 
-    <div class="grid-2" style="gap:14px">
+    <!-- Abas do Admin -->
+    <div style="display:flex;gap:6px;margin-bottom:20px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:4px;flex-wrap:wrap">
+      <button onclick="switchAdminTab('overview')" id="admin-tab-overview" class="admin-tab active" style="flex:1;min-width:100px;padding:8px 14px;border-radius:9px;font-size:11px;font-weight:700;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;cursor:pointer">📊 Visão Geral</button>
+      <button onclick="switchAdminTab('subscriptions')" id="admin-tab-subscriptions" class="admin-tab" style="flex:1;min-width:100px;padding:8px 14px;border-radius:9px;font-size:11px;font-weight:700;background:transparent;color:var(--text3);border:none;cursor:pointer">💳 Assinaturas</button>
+      <button onclick="switchAdminTab('demo')" id="admin-tab-demo" class="admin-tab" style="flex:1;min-width:100px;padding:8px 14px;border-radius:9px;font-size:11px;font-weight:700;background:transparent;color:var(--text3);border:none;cursor:pointer">🎭 Demonstração</button>
+      <button onclick="switchAdminTab('logs')" id="admin-tab-logs" class="admin-tab" style="flex:1;min-width:100px;padding:8px 14px;border-radius:9px;font-size:11px;font-weight:700;background:transparent;color:var(--text3);border:none;cursor:pointer">📋 Logs</button>
+    </div>
+
+    <!-- ABA: VISÃO GERAL -->
+    <div id="admin-panel-overview">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:16px" id="admin-metrics"></div>
       <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
           <div style="font-size:13px;font-weight:700">👥 Usuários</div>
-          <button onclick="loadAdminData()" style="padding:5px 11px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);border-radius:7px;color:#a5b4fc;font-size:10px">↻ Atualizar</button>
+          <div style="display:flex;gap:8px">
+            <input id="admin-search" type="text" placeholder="🔍 Buscar..." oninput="filterAdminUsers()" style="font-size:11px;height:32px;width:160px">
+            <select id="admin-filter-plan" onchange="filterAdminUsers()" style="font-size:11px;height:32px;padding:0 8px">
+              <option value="">Todos os planos</option>
+              <option value="trial">Trial</option>
+              <option value="starter">Starter</option>
+              <option value="pro">Pro</option>
+              <option value="premium">Premium</option>
+              <option value="blocked">Bloqueados</option>
+            </select>
+            <button onclick="loadAdminData()" style="padding:5px 11px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);border-radius:7px;color:#a5b4fc;font-size:10px">↻</button>
+          </div>
         </div>
         <div id="admin-users-list"><div style="color:var(--text3);font-size:12px;text-align:center;padding:20px">Carregando...</div></div>
       </div>
+    </div>
+
+    <!-- ABA: ASSINATURAS -->
+    <div id="admin-panel-subscriptions" style="display:none">
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <button onclick="filterSubs('all')" class="sub-filter-btn active" style="padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;background:rgba(99,102,241,0.15);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3);cursor:pointer">Todos</button>
+        <button onclick="filterSubs('trial')" class="sub-filter-btn" style="padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border);cursor:pointer">🎁 Trial ativo</button>
+        <button onclick="filterSubs('trial_warning')" class="sub-filter-btn" style="padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border);cursor:pointer">⚠️ Vencendo em 3d</button>
+        <button onclick="filterSubs('trial_expired')" class="sub-filter-btn" style="padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border);cursor:pointer">⏰ Trial expirado</button>
+        <button onclick="filterSubs('active')" class="sub-filter-btn" style="padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border);cursor:pointer">✅ Pagantes</button>
+        <button onclick="filterSubs('blocked')" class="sub-filter-btn" style="padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border);cursor:pointer">🔒 Bloqueados</button>
+      </div>
       <div class="card">
-        <div style="font-size:13px;font-weight:700;margin-bottom:14px">📋 Logs Recentes</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:14px">💳 Assinaturas e Trials</div>
+        <div id="admin-subs-list"><div style="color:var(--text3);font-size:12px;text-align:center;padding:20px">Carregando...</div></div>
+      </div>
+    </div>
+
+    <!-- ABA: DEMONSTRAÇÃO -->
+    <div id="admin-panel-demo" style="display:none">
+      <div class="card" style="margin-bottom:16px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px">🎭 Modo Demonstração</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Visualize o sistema como cada plano de cliente. Seus dados reais ficam preservados.</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+          ${['starter','pro','premium'].map(p => {
+            const plan = {starter:{name:'Starter',color:'#06b6d4',emoji:'🚀',price:'R$59,90/mês'},pro:{name:'Pro',color:'#6366f1',emoji:'⚡',price:'R$99,90/mês'},premium:{name:'Premium',color:'#f59e0b',emoji:'👑',price:'R$149,90/mês'}}[p];
+            return `<div style="background:${plan.color}11;border:1px solid ${plan.color}33;border-radius:12px;padding:16px;text-align:center">
+              <div style="font-size:28px;margin-bottom:8px">${plan.emoji}</div>
+              <div style="font-weight:700;color:var(--text);margin-bottom:2px">${plan.name}</div>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:12px">${plan.price}</div>
+              <button onclick="activateDemoMode('${p}')" style="width:100%;padding:8px;background:${plan.color}22;color:${plan.color};border:1px solid ${plan.color}44;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">🎭 Simular ${plan.name}</button>
+            </div>`;
+          }).join('')}
+        </div>
+        ${`<div style="margin-top:16px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;font-size:11px;color:var(--text3)">
+          ℹ️ O modo demonstração mostra exatamente o que cada cliente vê — incluindo paywalls e recursos bloqueados. Nenhum dado real de clientes é exposto.
+        </div>`}
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:700;margin-bottom:14px">📋 Histórico de demonstrações</div>
+        <div id="demo-history-list"><div style="color:var(--text3);font-size:12px;text-align:center;padding:16px">Carregando...</div></div>
+      </div>
+    </div>
+
+    <!-- ABA: LOGS -->
+    <div id="admin-panel-logs" style="display:none">
+      <div class="card">
+        <div style="font-size:13px;font-weight:700;margin-bottom:14px">📋 Logs da Plataforma</div>
         <div id="admin-logs-list"><div style="color:var(--text3);font-size:12px;text-align:center;padding:20px">Carregando...</div></div>
       </div>
     </div>
+
   </div>
 
 </main>
@@ -1651,39 +1718,62 @@ window.addEventListener('beforeunload', (e) => {
 //  SISTEMA DE PERMISSÕES — Permission Guards por Plano
 // ═══════════════════════════════════════════════════════════════
 
+// PLATFORM ADMIN — nunca expira, acesso total
+const PLATFORM_ADMIN_EMAIL = 'suelenpadao@snexus.local';
+
 const PERMISSIONS = {
-  trial:   ['crm.leads.view','crm.leads.create','crm.pipeline','dashboard.basic','dashboard.premium',
-             'financial.basic','financial.full','performance.pomodoro','performance.score',
-             'ai.nexus','journey.automatic','alerts.smart','calendar.google','calendar.bulk_sync',
-             'documents.upload','backup.manual','backup.automatic','postsale.basic'],
-  starter: ['crm.leads.view','crm.leads.create','crm.pipeline','dashboard.basic',
-             'financial.basic','backup.manual'],
-  pro:     ['crm.leads.view','crm.leads.create','crm.pipeline','dashboard.basic','dashboard.premium',
-             'financial.basic','financial.full','performance.pomodoro','performance.score',
-             'ai.nexus','journey.automatic','alerts.smart','calendar.google','calendar.bulk_sync',
-             'documents.upload','backup.manual','backup.automatic','postsale.basic'],
-  premium: ['crm.leads.view','crm.leads.create','crm.pipeline','dashboard.basic','dashboard.premium',
-             'financial.basic','financial.full','performance.pomodoro','performance.score',
-             'ai.nexus','journey.automatic','alerts.smart','calendar.google','calendar.bulk_sync',
-             'documents.upload','backup.manual','backup.automatic','postsale.basic',
-             'team.manage','team.permissions'],
+  // Trial agora = apenas Starter (não libera Pro/Premium)
+  trial:          ['crm.leads.view','crm.leads.create','crm.pipeline',
+                   'dashboard.basic','financial.basic','backup.manual'],
+  trial_expired:  [], // nada liberado — só Minha Assinatura
+  starter:        ['crm.leads.view','crm.leads.create','crm.pipeline',
+                   'dashboard.basic','financial.basic','backup.manual'],
+  pro:            ['crm.leads.view','crm.leads.create','crm.pipeline',
+                   'dashboard.basic','dashboard.premium','financial.basic',
+                   'financial.full','performance.pomodoro','performance.score',
+                   'ai.nexus','journey.automatic','alerts.smart','calendar.google',
+                   'calendar.bulk_sync','documents.upload','backup.manual',
+                   'backup.automatic','postsale.basic'],
+  premium:        ['crm.leads.view','crm.leads.create','crm.pipeline',
+                   'dashboard.basic','dashboard.premium','financial.basic',
+                   'financial.full','performance.pomodoro','performance.score',
+                   'ai.nexus','journey.automatic','alerts.smart','calendar.google',
+                   'calendar.bulk_sync','documents.upload','backup.manual',
+                   'backup.automatic','postsale.basic','team.manage','team.permissions'],
+  internal_admin: ['crm.leads.view','crm.leads.create','crm.pipeline',
+                   'dashboard.basic','dashboard.premium','financial.basic',
+                   'financial.full','performance.pomodoro','performance.score',
+                   'ai.nexus','journey.automatic','alerts.smart','calendar.google',
+                   'calendar.bulk_sync','documents.upload','backup.manual',
+                   'backup.automatic','postsale.basic','team.manage','team.permissions'],
+  demo:           [], // definido dinamicamente pelo demoMode
 };
+
+// Modo demonstração — só platform_admin pode ativar
+let demoMode = null; // null | 'starter' | 'pro' | 'premium'
 
 function can(feature) {
   if (!currentBilling) return false;
-  const plan = currentBilling.blocked ? 'blocked' : (currentBilling.plan || 'trial');
-  if (plan === 'blocked' || plan === 'expired') return false;
-  const allowed = PERMISSIONS[plan] || PERMISSIONS['trial'];
+  // Demo mode sobrepõe tudo
+  if (demoMode && isPlatformAdmin()) {
+    const demoPerms = PERMISSIONS[demoMode] || [];
+    return demoPerms.includes(feature);
+  }
+  const plan = currentBilling.status === 'internal_admin' ? 'internal_admin'
+             : currentBilling.blocked ? 'trial_expired'
+             : (currentBilling.plan || 'trial');
+  const allowed = PERMISSIONS[plan] || [];
   return allowed.includes(feature);
 }
 
-function requirePlan(feature, minPlan) {
-  if (can(feature)) return true;
-  openPlansModal();
-  return false;
+function isPlatformAdmin() {
+  return currentUser && (
+    currentUser.email === PLATFORM_ADMIN_EMAIL ||
+    currentBilling?.status === 'internal_admin' ||
+    currentBilling?.isPlatformAdmin === true
+  );
 }
 
-// Mostra paywall inline em vez do conteúdo bloqueado
 function paywallHTML(featureName, minPlan) {
   const plan = PLANS_CONFIG.find(p => p.id === minPlan) || PLANS_CONFIG[1];
   return `<div style="text-align:center;padding:40px 20px;background:rgba(99,102,241,0.04);border:1px dashed rgba(99,102,241,0.25);border-radius:16px;margin:8px 0">
@@ -1694,6 +1784,42 @@ function paywallHTML(featureName, minPlan) {
       💎 Ver Planos
     </button>
   </div>`;
+}
+
+// Ativar/desativar modo demonstração
+function activateDemoMode(plan) {
+  if (!isPlatformAdmin()) { showAuthInfoToast('❌ Acesso negado'); return; }
+  demoMode = plan;
+  writeLog('demo_mode_enter', `Admin entrou em modo demo: ${plan}`, {plan});
+  showAuthInfoToast(`🎭 Modo demonstração ${plan.toUpperCase()} ativado`);
+  renderDashboard();
+  updateDemoModeBanner();
+}
+
+function deactivateDemoMode() {
+  if (!demoMode) return;
+  writeLog('demo_mode_exit', `Admin saiu do modo demo: ${demoMode}`, {plan: demoMode});
+  demoMode = null;
+  showAuthInfoToast('✅ Modo demonstração desativado — voltando ao Admin');
+  updateDemoModeBanner();
+  renderDashboard();
+}
+
+function updateDemoModeBanner() {
+  let banner = document.getElementById('demo-mode-banner');
+  if (demoMode) {
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.id = 'demo-mode-banner';
+      banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9998;background:linear-gradient(90deg,#f59e0b,#f97316);color:#fff;text-align:center;padding:8px 16px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:12px';
+      document.body.appendChild(banner);
+    }
+    const planName = PLANS_CONFIG.find(p => p.id === demoMode)?.name || demoMode;
+    banner.innerHTML = `🎭 MODO DEMONSTRAÇÃO — ${planName.toUpperCase()} &nbsp;|&nbsp; Você está vendo como um cliente ${planName} vê o sistema <button onclick="deactivateDemoMode()" style="background:rgba(0,0,0,0.2);border:none;color:#fff;padding:3px 10px;border-radius:6px;font-size:11px;cursor:pointer;margin-left:8px">✕ Sair</button>`;
+    document.body.style.paddingTop = '36px';
+  } else {
+    if (banner) { banner.remove(); document.body.style.paddingTop = ''; }
+  }
 }
 
 const LOG_EVENTS = {
@@ -1765,20 +1891,28 @@ let currentBilling = null;
 // Verifica plano/trial do usuário no Supabase
 async function checkUserBilling(userId) {
   try {
-    // Tenta buscar da tabela subscriptions primeiro (nova)
     const { data: sub } = await sb.from('subscriptions').select('*').eq('user_id', userId).maybeSingle();
 
     if (sub) {
+      // Platform admin — acesso permanente
+      if (sub.status === 'internal_admin' || sub.is_platform_admin) {
+        currentBilling = {
+          plan: 'premium', status: 'internal_admin',
+          isPlatformAdmin: true, daysLeft: 99999, blocked: false
+        };
+        return currentBilling;
+      }
+
       const now = new Date();
       const expires = sub.expires_at ? new Date(sub.expires_at) : null;
       const daysLeft = expires ? Math.ceil((expires - now) / (1000*60*60*24)) : 999;
 
-      if (sub.status === 'blocked' || sub.status === 'refunded' || sub.status === 'chargeback') {
+      if (['blocked','refunded','chargeback'].includes(sub.status)) {
         currentBilling = { plan: sub.plan_id, blocked: true, reason: sub.status, daysLeft: 0 };
         return currentBilling;
       }
-      if ((sub.status === 'trial' || sub.status === 'expired') && expires && expires < now) {
-        currentBilling = { plan: 'trial', blocked: true, reason: 'trial_expired', daysLeft: 0 };
+      if (sub.status === 'trial_expired' || (sub.status === 'trial' && expires && expires < now)) {
+        currentBilling = { plan: 'trial', blocked: true, reason: 'trial_expired', daysLeft: 0, status: 'trial_expired' };
         return currentBilling;
       }
       if (sub.status === 'active' && expires && expires < now) {
@@ -1786,43 +1920,60 @@ async function checkUserBilling(userId) {
         return currentBilling;
       }
 
-      currentBilling = { plan: sub.plan_id || 'trial', status: sub.status, daysLeft, blocked: false };
+      currentBilling = {
+        plan: sub.plan_id || 'trial',
+        status: sub.status,
+        daysLeft,
+        blocked: false,
+        aiCallsUsed: sub.ai_calls_used || 0,
+        aiCallsLimit: sub.ai_calls_limit || 100,
+        isPlatformAdmin: sub.is_platform_admin || false
+      };
       return currentBilling;
     }
 
-    // Fallback: tabela snexus_profiles (legado)
-    const { data, error } = await sb.from('snexus_profiles').select('plan, trial_ends_at, plan_expires_at, is_blocked').eq('user_id', userId).maybeSingle();
+    // Fallback: snexus_profiles (legado)
+    const { data, error } = await sb.from('snexus_profiles')
+      .select('plan, trial_ends_at, plan_expires_at, is_blocked, is_platform_admin')
+      .eq('user_id', userId).maybeSingle();
 
     if (!data && !error) {
-      // Novo usuário — cria subscription + profile
       const trialEnd = new Date(Date.now() + 7*24*60*60*1000);
       await sb.from('snexus_profiles').upsert({ user_id: userId, plan: 'trial', trial_ends_at: trialEnd.toISOString() }, { onConflict: 'user_id' });
       await sb.from('subscriptions').upsert({ user_id: userId, plan_id: 'trial', status: 'trial', expires_at: trialEnd.toISOString() }, { onConflict: 'user_id' });
-      currentBilling = { plan: 'trial', daysLeft: 7, blocked: false };
+      currentBilling = { plan: 'trial', status: 'trial', daysLeft: 7, blocked: false };
       return currentBilling;
     }
 
     if (error || !data) {
-      currentBilling = { plan: 'trial', daysLeft: 99, blocked: false };
+      currentBilling = { plan: 'trial', status: 'trial', daysLeft: 99, blocked: false };
+      return currentBilling;
+    }
+
+    if (data.is_platform_admin) {
+      currentBilling = { plan: 'premium', status: 'internal_admin', isPlatformAdmin: true, daysLeft: 99999, blocked: false };
       return currentBilling;
     }
 
     const now = new Date();
-    if (data.is_blocked) { currentBilling = { plan: data.plan, blocked: true, reason: 'blocked' }; return currentBilling; }
+    if (data.is_blocked) { currentBilling = { plan: data.plan, blocked: true, reason: 'blocked', status: 'blocked' }; return currentBilling; }
 
     if (data.plan === 'trial' && data.trial_ends_at) {
       const trialEnd = new Date(data.trial_ends_at);
       const daysLeft = Math.ceil((trialEnd - now)/(1000*60*60*24));
-      if (daysLeft <= 0) { currentBilling = { plan:'trial', blocked:true, reason:'trial_expired', daysLeft:0 }; return currentBilling; }
-      currentBilling = { plan:'trial', daysLeft, blocked:false };
+      if (daysLeft <= 0) {
+        currentBilling = { plan:'trial', blocked:true, reason:'trial_expired', status:'trial_expired', daysLeft:0 };
+        return currentBilling;
+      }
+      currentBilling = { plan:'trial', status:'trial', daysLeft, blocked:false };
       return currentBilling;
     }
 
-    currentBilling = { plan: data.plan || 'trial', daysLeft: 999, blocked: false };
+    currentBilling = { plan: data.plan || 'trial', status: data.plan || 'trial', daysLeft: 999, blocked: false };
     return currentBilling;
 
   } catch (e) {
-    currentBilling = { plan: 'trial', daysLeft: 99, blocked: false };
+    currentBilling = { plan: 'trial', status: 'trial', daysLeft: 99, blocked: false };
     return currentBilling;
   }
 }
@@ -1933,7 +2084,121 @@ function closePlansModal() {
 const ADMIN_EMAIL = 'suelenpadao@snexus.local'; // usuário: suelenpadao
 
 function isAdmin() {
-  return currentUser && currentUser.email === ADMIN_EMAIL;
+  return isPlatformAdmin();
+}
+
+function switchAdminTab(tab) {
+  ['overview','subscriptions','demo','logs'].forEach(t => {
+    const panel = document.getElementById(`admin-panel-${t}`);
+    const btn = document.getElementById(`admin-tab-${t}`);
+    if (panel) panel.style.display = t === tab ? '' : 'none';
+    if (btn) {
+      btn.style.background = t === tab ? 'linear-gradient(135deg,#6366f1,#4f46e5)' : 'transparent';
+      btn.style.color = t === tab ? '#fff' : 'var(--text3)';
+    }
+  });
+  if (tab === 'logs') loadAdminLogs();
+  if (tab === 'subscriptions') loadAdminSubscriptions();
+  if (tab === 'demo') loadDemoHistory();
+}
+
+let _allSubsData = [];
+
+async function loadAdminSubscriptions() {
+  const el = document.getElementById('admin-subs-list');
+  if (!el) return;
+  try {
+    const { data: subs } = await sb.from('subscriptions').select('*').order('created_at', {ascending:false});
+    _allSubsData = subs || [];
+    renderSubsTable(_allSubsData);
+  } catch(e) {
+    if (el) el.innerHTML = '<div style="color:#ef4444;font-size:12px;padding:12px">Erro ao carregar assinaturas</div>';
+  }
+}
+
+function filterSubs(filter) {
+  document.querySelectorAll('.sub-filter-btn').forEach(b => {
+    b.style.background = 'rgba(255,255,255,0.05)';
+    b.style.color = 'var(--text3)';
+    b.style.borderColor = 'var(--border)';
+  });
+  const activeBtn = event?.target;
+  if (activeBtn) {
+    activeBtn.style.background = 'rgba(99,102,241,0.15)';
+    activeBtn.style.color = '#a5b4fc';
+    activeBtn.style.borderColor = 'rgba(99,102,241,0.3)';
+  }
+  const now = new Date();
+  let filtered = _allSubsData;
+  if (filter === 'trial') filtered = filtered.filter(s => s.status === 'trial' && new Date(s.expires_at) > now);
+  else if (filter === 'trial_warning') filtered = filtered.filter(s => {
+    if (s.status !== 'trial') return false;
+    const days = Math.ceil((new Date(s.expires_at) - now)/(1000*60*60*24));
+    return days > 0 && days <= 3;
+  });
+  else if (filter === 'trial_expired') filtered = filtered.filter(s => s.status === 'trial_expired' || (s.status === 'trial' && new Date(s.expires_at) <= now));
+  else if (filter === 'active') filtered = filtered.filter(s => s.status === 'active');
+  else if (filter === 'blocked') filtered = filtered.filter(s => s.status === 'blocked');
+  renderSubsTable(filtered);
+}
+
+function renderSubsTable(subs) {
+  const el = document.getElementById('admin-subs-list');
+  if (!el) return;
+  const now = new Date();
+  el.innerHTML = subs.length ? subs.map(s => {
+    const expires = s.expires_at ? new Date(s.expires_at) : null;
+    const daysLeft = expires ? Math.ceil((expires - now)/(1000*60*60*24)) : null;
+    const planColors = {trial:'#f59e0b',starter:'#06b6d4',pro:'#6366f1',premium:'#f59e0b',internal_admin:'#10b981'};
+    const color = s.status === 'blocked' ? '#ef4444' : (planColors[s.plan_id || s.status] || '#666');
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);flex-wrap:wrap">
+      <div style="flex:1;min-width:120px">
+        <div style="font-size:11px;font-weight:600;color:var(--text)">${s.kiwify_customer_id || s.user_id?.slice(0,12)+'...'}</div>
+        <div style="font-size:10px;color:var(--text3)">${expires ? new Date(s.created_at).toLocaleDateString('pt-BR') : '—'}</div>
+      </div>
+      <span style="background:${color}22;color:${color};border:1px solid ${color}44;border-radius:6px;font-size:9px;font-weight:700;padding:2px 8px;white-space:nowrap">${s.plan_id || '—'}</span>
+      <span style="font-size:10px;color:${daysLeft !== null && daysLeft <= 3 ? '#ef4444' : 'var(--text3)'};white-space:nowrap">${daysLeft !== null ? (daysLeft <= 0 ? 'Expirado' : `${daysLeft}d restantes`) : '—'}</span>
+      <div style="display:flex;gap:4px;flex-shrink:0">
+        <button onclick="adminChangePlan('${s.user_id}')" style="padding:3px 7px;background:rgba(99,102,241,0.1);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25);border-radius:5px;font-size:9px;cursor:pointer">✏️</button>
+        <button onclick="adminGrantDays('${s.user_id}')" style="padding:3px 7px;background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.25);border-radius:5px;font-size:9px;cursor:pointer">🎁</button>
+      </div>
+    </div>`;
+  }).join('') : '<div style="color:var(--text3);text-align:center;padding:20px;font-size:12px">Nenhum resultado</div>';
+}
+
+async function loadDemoHistory() {
+  const el = document.getElementById('demo-history-list');
+  if (!el) return;
+  try {
+    const { data } = await sb.from('snexus_logs')
+      .select('*')
+      .in('event', ['demo_mode_enter','demo_mode_exit'])
+      .order('created_at', {ascending:false})
+      .limit(20);
+    el.innerHTML = (data||[]).length > 0
+      ? (data||[]).map(l => `<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:11px">
+          <span style="font-weight:600">🎭 ${l.description}</span>
+          <span style="color:var(--text3);margin-left:8px">${new Date(l.created_at).toLocaleString('pt-BR')}</span>
+        </div>`).join('')
+      : '<div style="color:var(--text3);text-align:center;padding:16px;font-size:12px">Nenhuma demonstração realizada ainda</div>';
+  } catch(e) { el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:12px">Carregue após ativar o modo demo</div>'; }
+}
+
+async function loadAdminLogs() {
+  const el = document.getElementById('admin-logs-list');
+  if (!el) return;
+  try {
+    const { data: logs } = await sb.from('snexus_logs').select('*').order('created_at',{ascending:false}).limit(100);
+    const eventIcons = {login:'🔑',logout:'🚪',signup:'🎉',password_change:'🔐',plan_change:'💳',block:'🔒',unblock:'🔓',data_save:'💾',trial_start:'🎁',trial_expired:'⏰',backup_export:'📦',backup_import:'📥',demo_mode_enter:'🎭',demo_mode_exit:'🎭',manual_grant:'🎁'};
+    el.innerHTML = (logs||[]).map(l => `
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+        <div style="font-size:14px;flex-shrink:0">${eventIcons[l.event]||'📋'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;font-weight:600;color:var(--text)">${l.description||l.event}</div>
+          <div style="font-size:9px;color:var(--text3);margin-top:2px">${l.user_id?.slice(0,8)||'—'} · ${new Date(l.created_at).toLocaleString('pt-BR')}</div>
+        </div>
+      </div>`).join('') || '<div style="color:var(--text3);text-align:center;padding:20px;font-size:12px">Nenhum log</div>';
+  } catch(e) { el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:12px">Erro ao carregar logs</div>'; }
 }
 
 function checkAdminNav() {
