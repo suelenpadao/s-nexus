@@ -529,6 +529,12 @@ td:last-child{padding-right:0}
       <span class="nav-icon">✦</span> IA Nexus
       <span class="nav-badge ai">AI</span>
     </button>
+    <button class="nav-item" onclick="goTo('studio',this)">
+      <span class="nav-icon">🎨</span> Presentation Studio
+    </button>
+    <button class="nav-item" onclick="goTo('investment',this)">
+      <span class="nav-icon">📈</span> Análise de Investimento
+    </button>
     <button class="nav-item" onclick="goTo('subscription',this)">
       <span class="nav-icon">💳</span> Minha Assinatura
     </button>
@@ -1036,6 +1042,181 @@ td:last-child{padding-right:0}
       </div>
     </div>
 
+  </div>
+
+  <!-- ══ PRESENTATION STUDIO ══ -->
+  <div id="sec-studio" class="section">
+    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+      <button onclick="switchStudioTab('presentation')" id="studio-tab-presentation" style="padding:9px 18px;border-radius:10px;font-size:12px;font-weight:700;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;cursor:pointer">📋 Apresentação</button>
+      <button onclick="switchStudioTab('comparator')" id="studio-tab-comparator" style="padding:9px 18px;border-radius:10px;font-size:12px;font-weight:700;background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border);cursor:pointer">⚖️ Comparador</button>
+      <button onclick="switchStudioTab('dossier')" id="studio-tab-dossier" style="padding:9px 18px;border-radius:10px;font-size:12px;font-weight:700;background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border);cursor:pointer">📁 Dossiê</button>
+      <button onclick="switchStudioTab('catalog')" id="studio-tab-catalog" style="padding:9px 18px;border-radius:10px;font-size:12px;font-weight:700;background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border);cursor:pointer">📚 Catálogo</button>
+      <button onclick="switchStudioTab('templates')" id="studio-tab-templates" style="padding:9px 18px;border-radius:10px;font-size:12px;font-weight:700;background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border);cursor:pointer">🎭 Modelos</button>
+    </div>
+
+    <!-- Apresentação -->
+    <div id="studio-panel-presentation">
+      <div class="grid-2" style="gap:16px">
+        <div class="card">
+          <div style="font-size:13px;font-weight:700;margin-bottom:16px">📋 Gerar Apresentação de Imóvel</div>
+          <div class="form-group" style="margin-bottom:12px">
+            <label>Cliente</label>
+            <select id="studio-client">
+              <option value="">Selecionar cliente...</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:12px">
+            <label>Empreendimento</label>
+            <input id="studio-empreendimento" type="text" placeholder="Nome do empreendimento">
+          </div>
+          <div class="form-group" style="margin-bottom:12px">
+            <label>Descrição do Imóvel</label>
+            <textarea id="studio-desc" rows="3" placeholder="Área, dormitórios, suítes, vagas, diferenciais..."></textarea>
+          </div>
+          <div class="form-group" style="margin-bottom:12px">
+            <label>Valor (R$)</label>
+            <input id="studio-value" type="text" placeholder="ex: 850.000">
+          </div>
+          <div class="form-group" style="margin-bottom:12px">
+            <label>Localização</label>
+            <input id="studio-location" type="text" placeholder="Bairro, cidade">
+          </div>
+          <div class="form-group" style="margin-bottom:16px">
+            <label>Modelo</label>
+            <select id="studio-template">
+              <option value="standard">Padrão Premium</option>
+              <option value="investor">Investidor</option>
+              <option value="first_home">Primeiro Imóvel</option>
+              <option value="luxury">Alto Padrão</option>
+              <option value="beach">Frente Mar</option>
+              <option value="launch">Lançamento</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button onclick="generatePresentation()" style="flex:1;padding:12px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer">✨ Gerar Apresentação</button>
+            <button onclick="generatePresentationPDF()" style="padding:12px 16px;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.25);border-radius:10px;font-weight:700;font-size:13px;cursor:pointer">📄 PDF</button>
+          </div>
+        </div>
+        <div class="card" id="studio-preview">
+          <div style="text-align:center;padding:40px 20px;color:var(--text3)">
+            <div style="font-size:48px;margin-bottom:16px">🎨</div>
+            <div style="font-size:14px;font-weight:600;margin-bottom:8px">Preview da Apresentação</div>
+            <div style="font-size:12px">Preencha os dados ao lado e clique em "Gerar Apresentação"</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparador -->
+    <div id="studio-panel-comparator" style="display:none">
+      <div class="card">
+        <div style="font-size:13px;font-weight:700;margin-bottom:16px">⚖️ Comparador de Imóveis</div>
+        <div class="grid-2" style="gap:16px;margin-bottom:16px">
+          <div id="comp-imovel-1">
+            <div style="font-size:11px;font-weight:700;color:var(--indigo);margin-bottom:8px;text-transform:uppercase">IMÓVEL 1</div>
+            <div class="form-group" style="margin-bottom:8px"><label>Nome</label><input type="text" id="comp1-name" placeholder="Nome do imóvel"></div>
+            <div class="form-group" style="margin-bottom:8px"><label>Valor (R$)</label><input type="text" id="comp1-value" placeholder="850.000"></div>
+            <div class="form-group" style="margin-bottom:8px"><label>Área (m²)</label><input type="text" id="comp1-area" placeholder="85"></div>
+            <div class="form-group" style="margin-bottom:8px"><label>Dormitórios</label><input type="text" id="comp1-dorms" placeholder="3"></div>
+            <div class="form-group" style="margin-bottom:8px"><label>Suítes</label><input type="text" id="comp1-suites" placeholder="1"></div>
+            <div class="form-group" style="margin-bottom:8px"><label>Vagas</label><input type="text" id="comp1-vagas" placeholder="2"></div>
+            <div class="form-group" style="margin-bottom:8px"><label>Localização</label><input type="text" id="comp1-loc" placeholder="Bairro, Cidade"></div>
+            <div class="form-group"><label>Diferenciais</label><textarea id="comp1-diff" rows="2" placeholder="Varanda, área gourmet..."></textarea></div>
+          </div>
+          <div id="comp-imovel-2">
+            <div style="font-size:11px;font-weight:700;color:#06b6d4;margin-bottom:8px;text-transform:uppercase">IMÓVEL 2</div>
+            <div class="form-group" style="margin-bottom:8px"><label>Nome</label><input type="text" id="comp2-name" placeholder="Nome do imóvel"></div>
+            <div class="form-group" style="margin-bottom:8px"><label>Valor (R$)</label><input type="text" id="comp2-value" placeholder="920.000"></div>
+            <div class="form-group" style="margin-bottom:8px"><label>Área (m²)</label><input type="text" id="comp2-area" placeholder="95"></div>
+            <div class="form-group" style="margin-bottom:8px"><label>Dormitórios</label><input type="text" id="comp2-dorms" placeholder="3"></div>
+            <div class="form-group" style="margin-bottom:8px"><label>Suítes</label><input type="text" id="comp2-suites" placeholder="2"></div>
+            <div class="form-group" style="margin-bottom:8px"><label>Vagas</label><input type="text" id="comp2-vagas" placeholder="2"></div>
+            <div class="form-group" style="margin-bottom:8px"><label>Localização</label><input type="text" id="comp2-loc" placeholder="Bairro, Cidade"></div>
+            <div class="form-group"><label>Diferenciais</label><textarea id="comp2-diff" rows="2" placeholder="Piscina, academia..."></textarea></div>
+          </div>
+        </div>
+        <button onclick="generateComparison()" style="width:100%;padding:12px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer">⚖️ Gerar Comparativo</button>
+        <div id="comp-result" style="margin-top:16px"></div>
+      </div>
+    </div>
+
+    <!-- Dossiê -->
+    <div id="studio-panel-dossier" style="display:none">
+      <div class="card">
+        <div style="font-size:13px;font-weight:700;margin-bottom:16px">📁 Dossiê do Empreendimento</div>
+        <div class="grid-2" style="gap:12px">
+          <div class="form-group"><label>Nome do Empreendimento</label><input id="doss-name" type="text" placeholder="Nome do empreendimento"></div>
+          <div class="form-group"><label>Construtora</label><input id="doss-builder" type="text" placeholder="Nome da construtora"></div>
+          <div class="form-group"><label>Localização</label><input id="doss-loc" type="text" placeholder="Endereço completo"></div>
+          <div class="form-group"><label>Previsão de Entrega</label><input id="doss-delivery" type="text" placeholder="Ex: Dezembro 2026"></div>
+          <div class="form-group" style="grid-column:1/-1"><label>Características</label><textarea id="doss-features" rows="3" placeholder="Torres, unidades, área de lazer, diferenciais..."></textarea></div>
+          <div class="form-group" style="grid-column:1/-1"><label>Plantas disponíveis</label><textarea id="doss-plants" rows="2" placeholder="Ex: 2 dorms 60m², 3 dorms 85m², Cobertura 150m²"></textarea></div>
+        </div>
+        <button onclick="generateDossier()" style="margin-top:16px;width:100%;padding:12px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer">📁 Gerar Dossiê</button>
+        <div id="doss-result" style="margin-top:16px"></div>
+      </div>
+    </div>
+
+    <!-- Catálogo -->
+    <div id="studio-panel-catalog" style="display:none">
+      <div class="card">
+        <div style="font-size:13px;font-weight:700;margin-bottom:16px">📚 Catálogo Digital</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Gere um catálogo com todos os imóveis cadastrados no CRM</div>
+        <div class="form-group" style="margin-bottom:12px"><label>Título do Catálogo</label><input id="cat-title" type="text" placeholder="Portfólio de Imóveis Premium"></div>
+        <div class="form-group" style="margin-bottom:12px"><label>Introdução</label><textarea id="cat-intro" rows="2" placeholder="Mensagem personalizada para o cliente..."></textarea></div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label>Filtrar por etapa</label>
+          <select id="cat-filter">
+            <option value="all">Todos os leads</option>
+            <option value="proposta_enviada">Proposta enviada</option>
+            <option value="negociacao">Em negociação</option>
+          </select>
+        </div>
+        <button onclick="generateCatalog()" style="width:100%;padding:12px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer">📚 Gerar Catálogo</button>
+        <div id="cat-result" style="margin-top:16px"></div>
+      </div>
+    </div>
+
+    <!-- Modelos -->
+    <div id="studio-panel-templates" style="display:none">
+      <div style="font-size:13px;font-weight:700;margin-bottom:16px">🎭 Biblioteca de Modelos</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px" id="templates-grid"></div>
+    </div>
+  </div>
+
+  <!-- ══ ANÁLISE DE INVESTIMENTO ══ -->
+  <div id="sec-investment" class="section">
+    <div class="grid-2" style="gap:16px">
+      <div class="card">
+        <div style="font-size:13px;font-weight:700;margin-bottom:16px">📈 Análise de Investimento</div>
+        <div class="form-group" style="margin-bottom:10px"><label>Cliente</label><select id="inv-client"><option value="">Selecionar...</option></select></div>
+        <div class="form-group" style="margin-bottom:10px"><label>Empreendimento</label><input id="inv-emp" type="text" placeholder="Nome do empreendimento"></div>
+        <div class="form-group" style="margin-bottom:10px"><label>Unidade</label><input id="inv-unit" type="text" placeholder="Apto 201, Torre A"></div>
+        <div class="form-group" style="margin-bottom:10px"><label>Valor Total (R$)</label><input id="inv-value" type="number" placeholder="850000"></div>
+        <div class="form-group" style="margin-bottom:10px"><label>Entrada (R$)</label><input id="inv-entrada" type="number" placeholder="170000"></div>
+        <div class="form-group" style="margin-bottom:10px"><label>Parcelas mensais</label><input id="inv-parcelas" type="number" placeholder="36"></div>
+        <div class="form-group" style="margin-bottom:10px"><label>Valor da parcela (R$)</label><input id="inv-pmt" type="number" placeholder="5000"></div>
+        <div class="form-group" style="margin-bottom:10px"><label>Prazo total (meses)</label><input id="inv-prazo" type="number" placeholder="48"></div>
+        <div class="form-group" style="margin-bottom:10px"><label>Valorização anual estimada (%)</label><input id="inv-valorizacao" type="number" placeholder="8" step="0.1"></div>
+        <div class="form-group" style="margin-bottom:10px"><label>Aluguel estimado/mês (R$)</label><input id="inv-aluguel" type="number" placeholder="3500"></div>
+        <div class="form-group" style="margin-bottom:16px"><label>Índice de correção</label>
+          <select id="inv-indice">
+            <option value="INCC">INCC</option>
+            <option value="IPCA">IPCA</option>
+            <option value="IGP-M">IGP-M</option>
+            <option value="Fixo">Taxa Fixa</option>
+          </select>
+        </div>
+        <button onclick="generateInvestmentAnalysis()" style="width:100%;padding:12px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer">📊 Gerar Análise</button>
+      </div>
+      <div class="card" id="inv-result">
+        <div style="text-align:center;padding:40px 20px;color:var(--text3)">
+          <div style="font-size:48px;margin-bottom:16px">📈</div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:8px">Análise de Investimento</div>
+          <div style="font-size:12px">Preencha os dados e clique em "Gerar Análise"</div>
+        </div>
+      </div>
+    </div>
   </div>
 
 </main>
@@ -2222,6 +2403,545 @@ async function loadAdminLogs() {
   } catch(e) { el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:12px">Erro ao carregar logs</div>'; }
 }
 
+// ═══════════════════════════════════════════════════════════════
+//  MÓDULO 10 — EXPERIÊNCIA PREMIUM (skeleton loading + animações)
+// ═══════════════════════════════════════════════════════════════
+
+function skeletonHTML(lines = 3) {
+  return Array(lines).fill(0).map((_, i) => `
+    <div style="height:14px;background:linear-gradient(90deg,rgba(255,255,255,0.05) 25%,rgba(255,255,255,0.1) 50%,rgba(255,255,255,0.05) 75%);border-radius:7px;margin-bottom:10px;width:${[100,75,90][i%3]}%;animation:shimmer 1.5s infinite"></div>
+  `).join('');
+}
+
+// Adicionar CSS de shimmer dinamicamente
+(function addShimmerCSS() {
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+    @keyframes fadeInUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes scaleIn { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
+    .fade-in-up { animation: fadeInUp .3s ease forwards; }
+    .scale-in { animation: scaleIn .2s ease forwards; }
+    .hover-lift { transition: transform .2s ease, box-shadow .2s ease; }
+    .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(99,102,241,0.2); }
+  `;
+  document.head.appendChild(style);
+})();
+
+// ═══════════════════════════════════════════════════════════════
+//  MÓDULO 4 — REFORÇOS AUTOMÁTICOS
+// ═══════════════════════════════════════════════════════════════
+
+function getAutoReinforcements() {
+  const now = new Date();
+  const reminders = [];
+
+  // Reforços de pós-venda
+  state.postsale.forEach(c => {
+    if (!c.reinforcementDate) return;
+    const date = new Date(c.reinforcementDate);
+    const diff = Math.floor((date - now) / (1000*60*60*24));
+    if (diff >= 0 && diff <= 30) {
+      reminders.push({
+        id: `postsale-${c.id}`,
+        type: 'reforco',
+        client: c.client,
+        description: `Reforço ${c.reinforcementType} — ${c.client}`,
+        date: c.reinforcementDate,
+        daysLeft: diff,
+        icon: '🔔',
+        color: diff <= 7 ? '#ef4444' : diff <= 15 ? '#f59e0b' : '#6366f1',
+        urgency: diff === 0 ? 'hoje' : diff <= 7 ? 'urgente' : diff <= 15 ? 'próximo' : 'programado',
+        actions: ['whatsapp', 'ligar', 'agendar', 'concluir']
+      });
+    }
+  });
+
+  // Parcelas vencendo
+  state.sales.forEach(s => {
+    (s.installments || []).filter(i => i.status === 'pendente').forEach(i => {
+      const date = new Date(i.date);
+      const diff = Math.floor((date - now) / (1000*60*60*24));
+      if (diff >= 0 && diff <= 30) {
+        reminders.push({
+          id: `parcela-${s.id}-${i.id}`,
+          type: 'parcela',
+          client: s.buyer,
+          description: `Parcela ${fmt(i.value)} — ${s.buyer}`,
+          date: i.date,
+          daysLeft: diff,
+          icon: '💰',
+          color: diff <= 3 ? '#ef4444' : diff <= 7 ? '#f59e0b' : '#10b981',
+          urgency: diff === 0 ? 'hoje' : diff <= 3 ? 'urgente' : diff <= 7 ? 'próximo' : 'programado',
+          actions: ['whatsapp', 'concluir'],
+          saleId: s.id,
+          instId: i.id
+        });
+      }
+    });
+  });
+
+  return reminders.sort((a, b) => a.daysLeft - b.daysLeft);
+}
+
+function reinforcementReminderHTML(r) {
+  const urgencyColors = { hoje: '#ef4444', urgente: '#ef4444', próximo: '#f59e0b', programado: '#6366f1' };
+  const color = urgencyColors[r.urgency] || r.color;
+  return `
+    <div class="hover-lift" style="background:${color}0a;border:1px solid ${color}25;border-radius:12px;padding:14px 16px;margin-bottom:10px">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <div style="font-size:22px;flex-shrink:0">${r.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:13px;color:var(--text)">${r.description}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">
+            ${r.daysLeft === 0 ? '⚡ Hoje!' : `📅 Em ${r.daysLeft} dia${r.daysLeft !== 1 ? 's' : ''}`}
+            <span style="margin-left:8px;background:${color}22;color:${color};border-radius:5px;padding:1px 7px;font-size:9px;font-weight:800;text-transform:uppercase">${r.urgency}</span>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+            ${r.actions.includes('whatsapp') ? `<button onclick="openWhatsApp('',\'${r.client}\')" style="padding:5px 10px;background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.25);border-radius:7px;font-size:10px;font-weight:700;cursor:pointer">📱 WhatsApp</button>` : ''}
+            ${r.actions.includes('ligar') ? `<button style="padding:5px 10px;background:rgba(99,102,241,0.1);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25);border-radius:7px;font-size:10px;font-weight:700;cursor:pointer">📞 Ligar</button>` : ''}
+            ${r.actions.includes('agendar') ? `<button onclick="syncReinforcementToGoogle(${r.id?.split('-')[1]})" style="padding:5px 10px;background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.25);border-radius:7px;font-size:10px;font-weight:700;cursor:pointer">📅 Agendar</button>` : ''}
+            ${r.actions.includes('concluir') ? `<button onclick="markReinforcement('${r.id}')" style="padding:5px 10px;background:rgba(255,255,255,0.06);color:var(--text3);border:1px solid var(--border2);border-radius:7px;font-size:10px;cursor:pointer">✓ Concluído</button>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function markReinforcement(id) {
+  showAuthInfoToast('✓ Marcado como concluído!');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MÓDULO 1 — PRESENTATION STUDIO
+// ═══════════════════════════════════════════════════════════════
+
+function initStudio() {
+  // Popular selects com clientes reais
+  const clients = state.leads.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+  const clientOptions = `<option value="">Selecionar cliente...</option>${clients}`;
+  ['studio-client', 'inv-client'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = clientOptions;
+  });
+
+  // Renderizar biblioteca de modelos
+  renderTemplatesLibrary();
+  switchStudioTab('presentation');
+}
+
+function switchStudioTab(tab) {
+  ['presentation','comparator','dossier','catalog','templates'].forEach(t => {
+    const panel = document.getElementById(`studio-panel-${t}`);
+    const btn = document.getElementById(`studio-tab-${t}`);
+    if (panel) panel.style.display = t === tab ? '' : 'none';
+    if (btn) {
+      btn.style.background = t === tab ? 'linear-gradient(135deg,#6366f1,#4f46e5)' : 'rgba(255,255,255,0.05)';
+      btn.style.color = t === tab ? '#fff' : 'var(--text3)';
+      btn.style.border = t === tab ? 'none' : '1px solid var(--border)';
+    }
+  });
+}
+
+function renderTemplatesLibrary() {
+  const templates = [
+    { id:'investor', name:'Investidor', emoji:'💰', desc:'Foco em rentabilidade e valorização', color:'#10b981' },
+    { id:'first_home', name:'Primeiro Imóvel', emoji:'🏠', desc:'Sonho da casa própria, financiamento', color:'#6366f1' },
+    { id:'luxury', name:'Alto Padrão', emoji:'👑', desc:'Imóveis premium e exclusivos', color:'#f59e0b' },
+    { id:'beach', name:'Frente Mar', emoji:'🌊', desc:'Imóveis litorâneos e de veraneio', color:'#06b6d4' },
+    { id:'launch', name:'Lançamento', emoji:'🚀', desc:'Novos empreendimentos em pré-venda', color:'#8b5cf6' },
+    { id:'rental', name:'Locação', emoji:'🔑', desc:'Imóveis para renda passiva', color:'#f97316' },
+    { id:'commercial', name:'Comercial', emoji:'🏢', desc:'Salas, lojas e galpões', color:'#ec4899' },
+    { id:'standard', name:'Padrão Premium', emoji:'⭐', desc:'Modelo completo e versátil', color:'#6366f1' },
+  ];
+  const grid = document.getElementById('templates-grid');
+  if (!grid) return;
+  grid.innerHTML = templates.map(t => `
+    <div class="card hover-lift" style="cursor:pointer;border:1px solid ${t.color}25;background:${t.color}08" onclick="useTemplate('${t.id}')">
+      <div style="font-size:32px;margin-bottom:10px">${t.emoji}</div>
+      <div style="font-weight:700;font-size:13px;color:var(--text);margin-bottom:4px">${t.name}</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:12px">${t.desc}</div>
+      <button style="width:100%;padding:7px;background:${t.color}18;color:${t.color};border:1px solid ${t.color}35;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">
+        Usar Modelo
+      </button>
+    </div>`).join('');
+}
+
+function useTemplate(templateId) {
+  document.getElementById('studio-template').value = templateId;
+  switchStudioTab('presentation');
+  showAuthInfoToast(`✓ Modelo "${templateId}" selecionado!`);
+}
+
+async function generatePresentation() {
+  const client = document.getElementById('studio-client').value;
+  const clientName = client
+    ? state.leads.find(l => l.id == client)?.name || 'Cliente'
+    : 'Cliente';
+  const emp = document.getElementById('studio-empreendimento').value || 'Empreendimento';
+  const desc = document.getElementById('studio-desc').value || '';
+  const value = document.getElementById('studio-value').value || '';
+  const location = document.getElementById('studio-location').value || '';
+  const template = document.getElementById('studio-template').value || 'standard';
+
+  const preview = document.getElementById('studio-preview');
+  preview.innerHTML = skeletonHTML(4);
+
+  // Usar IA para gerar texto da apresentação
+  const prompt = `Gere uma apresentação comercial PREMIUM e PERSUASIVA de imóvel para o cliente ${clientName}.
+Empreendimento: ${emp}
+Descrição: ${desc}
+Valor: R$ ${value}
+Localização: ${location}
+Modelo: ${template}
+
+Crie:
+1. Título impactante
+2. Frase de abertura personalizada para ${clientName}
+3. 3 diferenciais principais em bullet points
+4. Call to action final
+
+Seja objetivo, profissional e persuasivo. Máximo 200 palavras.`;
+
+  let content = '';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 500,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    content = data.content?.[0]?.text || 'Erro ao gerar conteúdo.';
+  } catch(e) {
+    content = `Apresentação para ${clientName} — ${emp}\n\n${desc}\n\nValor: R$ ${value}\nLocalização: ${location}`;
+  }
+
+  const templateColors = {
+    standard: '#6366f1', investor: '#10b981', first_home: '#06b6d4',
+    luxury: '#f59e0b', beach: '#06b6d4', launch: '#8b5cf6',
+    rental: '#f97316', commercial: '#ec4899'
+  };
+  const color = templateColors[template] || '#6366f1';
+  const brokerName = state.userName || 'Corretor';
+
+  preview.innerHTML = `
+    <div class="scale-in" style="background:linear-gradient(135deg,${color}22,${color}08);border:1px solid ${color}35;border-radius:16px;padding:24px">
+      <!-- Capa -->
+      <div style="text-align:center;margin-bottom:20px;padding:20px;background:linear-gradient(135deg,${color},${color}cc);border-radius:12px;color:#fff">
+        <div style="font-size:32px;margin-bottom:8px">🏠</div>
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:18px;margin-bottom:4px">${emp}</div>
+        <div style="font-size:12px;opacity:0.85">Apresentação exclusiva para ${clientName}</div>
+        ${value ? `<div style="font-size:20px;font-weight:800;margin-top:8px">R$ ${value}</div>` : ''}
+      </div>
+
+      <!-- Conteúdo gerado -->
+      <div style="font-size:12px;line-height:1.7;color:var(--text);margin-bottom:16px;white-space:pre-wrap">${content}</div>
+
+      <!-- Info -->
+      ${location ? `<div style="padding:10px 14px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:11px;color:var(--text3);margin-bottom:12px">📍 ${location}</div>` : ''}
+
+      <!-- Rodapé -->
+      <div style="border-top:1px solid ${color}25;padding-top:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <div style="font-size:11px;color:var(--text3)">
+          <div style="font-weight:700;color:var(--text)">${brokerName}</div>
+          <div>S Nexus CRM Premium</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button onclick="generatePresentationPDF()" style="padding:8px 14px;background:${color};color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">📄 PDF</button>
+          <button onclick="sharePresentation()" style="padding:8px 14px;background:rgba(255,255,255,0.08);color:var(--text2);border:1px solid var(--border);border-radius:8px;font-size:11px;cursor:pointer">🔗 Link</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function generatePresentationPDF() {
+  const preview = document.getElementById('studio-preview');
+  const content = preview.innerHTML;
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>Apresentação S Nexus</title>
+    <style>body{font-family:'Plus Jakarta Sans',sans-serif;margin:0;padding:24px;background:#07090f;color:#f0f2ff}
+    @media print{body{background:#fff;color:#111}}</style></head>
+    <body>${content}<script>window.print();<\/script></body></html>`);
+  win.document.close();
+}
+
+function sharePresentation() {
+  const text = document.getElementById('studio-preview')?.innerText || '';
+  const encoded = encodeURIComponent(text.slice(0, 500));
+  showAuthInfoToast('🔗 Link copiado! (Função de link online em desenvolvimento)');
+}
+
+async function generateComparison() {
+  const c1 = {
+    name: document.getElementById('comp1-name').value || 'Imóvel 1',
+    value: document.getElementById('comp1-value').value,
+    area: document.getElementById('comp1-area').value,
+    dorms: document.getElementById('comp1-dorms').value,
+    suites: document.getElementById('comp1-suites').value,
+    vagas: document.getElementById('comp1-vagas').value,
+    loc: document.getElementById('comp1-loc').value,
+    diff: document.getElementById('comp1-diff').value,
+  };
+  const c2 = {
+    name: document.getElementById('comp2-name').value || 'Imóvel 2',
+    value: document.getElementById('comp2-value').value,
+    area: document.getElementById('comp2-area').value,
+    dorms: document.getElementById('comp2-dorms').value,
+    suites: document.getElementById('comp2-suites').value,
+    vagas: document.getElementById('comp2-vagas').value,
+    loc: document.getElementById('comp2-loc').value,
+    diff: document.getElementById('comp2-diff').value,
+  };
+
+  const result = document.getElementById('comp-result');
+  result.innerHTML = `
+    <div class="scale-in" style="overflow-x:auto;margin-top:8px">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr>
+            <th style="padding:10px;text-align:left;color:var(--text3);border-bottom:1px solid var(--border)">Critério</th>
+            <th style="padding:10px;text-align:center;color:#6366f1;border-bottom:1px solid var(--border);background:rgba(99,102,241,0.06)">${c1.name}</th>
+            <th style="padding:10px;text-align:center;color:#06b6d4;border-bottom:1px solid var(--border);background:rgba(6,182,212,0.06)">${c2.name}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${[
+            ['💰 Valor', `R$ ${c1.value}`, `R$ ${c2.value}`],
+            ['📐 Área', `${c1.area}m²`, `${c2.area}m²`],
+            ['🛏 Dormitórios', c1.dorms, c2.dorms],
+            ['🛁 Suítes', c1.suites, c2.suites],
+            ['🚗 Vagas', c1.vagas, c2.vagas],
+            ['📍 Localização', c1.loc, c2.loc],
+            ['⭐ Diferenciais', c1.diff, c2.diff],
+          ].map(([label, v1, v2]) => `
+            <tr>
+              <td style="padding:10px;color:var(--text3);border-bottom:1px solid var(--border)">${label}</td>
+              <td style="padding:10px;text-align:center;border-bottom:1px solid var(--border);background:rgba(99,102,241,0.04)">${v1 || '—'}</td>
+              <td style="padding:10px;text-align:center;border-bottom:1px solid var(--border);background:rgba(6,182,212,0.04)">${v2 || '—'}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button onclick="printComparison()" style="padding:9px 16px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">📄 Exportar PDF</button>
+      </div>
+    </div>`;
+}
+
+function printComparison() {
+  const content = document.getElementById('comp-result').innerHTML;
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>Comparativo — S Nexus</title>
+    <style>body{font-family:sans-serif;padding:24px}table{width:100%;border-collapse:collapse}
+    th,td{padding:8px;border:1px solid #ddd}th{background:#f5f5f5}
+    @media print{}</style></head><body>${content}<script>window.print();<\/script></body></html>`);
+  win.document.close();
+}
+
+async function generateDossier() {
+  const name = document.getElementById('doss-name').value || 'Empreendimento';
+  const builder = document.getElementById('doss-builder').value;
+  const loc = document.getElementById('doss-loc').value;
+  const delivery = document.getElementById('doss-delivery').value;
+  const features = document.getElementById('doss-features').value;
+  const plants = document.getElementById('doss-plants').value;
+
+  document.getElementById('doss-result').innerHTML = `
+    <div class="scale-in" style="background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.2);border-radius:14px;padding:20px">
+      <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px">📁 ${name}</div>
+      ${builder ? `<div style="font-size:12px;color:var(--text3);margin-bottom:12px">Construtora: ${builder}</div>` : ''}
+      ${loc ? `<div style="font-size:12px;color:var(--text2);margin-bottom:8px">📍 ${loc}</div>` : ''}
+      ${delivery ? `<div style="font-size:12px;color:#10b981;margin-bottom:8px">🗓 Entrega: ${delivery}</div>` : ''}
+      ${features ? `<div style="font-size:12px;color:var(--text2);margin-bottom:8px;white-space:pre-wrap">${features}</div>` : ''}
+      ${plants ? `<div style="margin-top:10px;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Plantas</div><div style="font-size:12px;color:var(--text2)">${plants}</div></div>` : ''}
+      <div style="margin-top:14px;padding:12px;border-top:1px solid rgba(99,102,241,0.15)">
+        <div style="font-size:11px;color:var(--text3)">Corretor: ${state.userName || 'S Nexus'} · S Nexus CRM Premium</div>
+      </div>
+      <button onclick="window.print()" style="margin-top:12px;padding:9px 16px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">📄 Exportar PDF</button>
+    </div>`;
+}
+
+async function generateCatalog() {
+  const title = document.getElementById('cat-title').value || 'Portfólio de Imóveis';
+  const intro = document.getElementById('cat-intro').value || '';
+  const filter = document.getElementById('cat-filter').value;
+
+  let leads = state.leads;
+  if (filter !== 'all') leads = leads.filter(l => l.status === filter);
+
+  document.getElementById('cat-result').innerHTML = `
+    <div class="scale-in" style="background:rgba(99,102,241,0.05);border:1px solid rgba(99,102,241,0.15);border-radius:14px;padding:20px">
+      <div style="font-size:16px;font-weight:800;margin-bottom:8px">${title}</div>
+      ${intro ? `<div style="font-size:12px;color:var(--text2);margin-bottom:14px">${intro}</div>` : ''}
+      ${leads.length === 0
+        ? `<div style="color:var(--text3);font-size:12px;text-align:center;padding:20px">Nenhum cliente encontrado com esse filtro</div>`
+        : leads.map(l => `
+          <div style="padding:12px;background:rgba(255,255,255,0.03);border-radius:10px;margin-bottom:8px">
+            <div style="font-weight:700;font-size:13px">${l.name}</div>
+            <div style="font-size:11px;color:var(--text3)">${l.notes || 'Sem descrição'}</div>
+          </div>`).join('')}
+      <button onclick="window.print()" style="margin-top:12px;padding:9px 16px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">📄 Exportar PDF</button>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MÓDULO 2 — ANÁLISE DE INVESTIMENTO
+// ═══════════════════════════════════════════════════════════════
+
+function initInvestment() {
+  const clients = state.leads.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+  const el = document.getElementById('inv-client');
+  if (el) el.innerHTML = `<option value="">Selecionar...</option>${clients}`;
+}
+
+function generateInvestmentAnalysis() {
+  const client = document.getElementById('inv-client');
+  const clientName = client?.value
+    ? state.leads.find(l => l.id == client.value)?.name || 'Cliente'
+    : 'Cliente';
+  const emp = document.getElementById('inv-emp').value || 'Empreendimento';
+  const unit = document.getElementById('inv-unit').value || '';
+  const value = parseFloat(document.getElementById('inv-value').value) || 0;
+  const entrada = parseFloat(document.getElementById('inv-entrada').value) || 0;
+  const parcelas = parseInt(document.getElementById('inv-parcelas').value) || 36;
+  const pmt = parseFloat(document.getElementById('inv-pmt').value) || 0;
+  const prazo = parseInt(document.getElementById('inv-prazo').value) || 48;
+  const valorizacao = parseFloat(document.getElementById('inv-valorizacao').value) || 8;
+  const aluguel = parseFloat(document.getElementById('inv-aluguel').value) || 0;
+  const indice = document.getElementById('inv-indice').value || 'INCC';
+
+  if (!value) { showAuthInfoToast('⚠️ Informe o valor do imóvel'); return; }
+
+  // Cálculos
+  const totalPago = entrada + (pmt * parcelas);
+  const custoLiquido = totalPago;
+  const valorFuturo = value * Math.pow(1 + valorizacao/100, prazo/12);
+  const lucroEstimado = valorFuturo - totalPago;
+  const rentabilidadeTotal = ((lucroEstimado / totalPago) * 100);
+  const aluguelAnual = aluguel * 12;
+  const rentabilidadeAluguel = value > 0 ? ((aluguelAnual / value) * 100) : 0;
+
+  // Gráfico simples de evolução patrimonial
+  const anos = Math.ceil(prazo/12);
+  const evolucao = Array.from({length: anos+1}, (_, i) => ({
+    ano: i,
+    valor: value * Math.pow(1 + valorizacao/100, i),
+    pago: entrada + Math.min(pmt * parcelas, pmt * (i * 12))
+  }));
+  const maxVal = Math.max(...evolucao.map(e => e.valor));
+
+  document.getElementById('inv-result').innerHTML = `
+    <div class="scale-in">
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:14px;padding:20px;color:#fff;margin-bottom:16px">
+        <div style="font-size:11px;opacity:0.8;text-transform:uppercase;letter-spacing:.08em">Análise de Investimento</div>
+        <div style="font-size:18px;font-weight:800;margin:4px 0">${emp} ${unit ? '— '+unit : ''}</div>
+        <div style="font-size:12px;opacity:0.85">Para: ${clientName} · ${new Date().toLocaleDateString('pt-BR')}</div>
+      </div>
+
+      <!-- KPIs -->
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px">
+        ${[
+          ['💰 Valor do Imóvel', `R$ ${value.toLocaleString('pt-BR')}`, '#6366f1'],
+          ['📥 Entrada', `R$ ${entrada.toLocaleString('pt-BR')}`, '#06b6d4'],
+          ['💳 Total Pago', `R$ ${totalPago.toLocaleString('pt-BR')}`, '#f59e0b'],
+          ['📈 Valor Futuro', `R$ ${Math.round(valorFuturo).toLocaleString('pt-BR')}`, '#10b981'],
+          ['💎 Lucro Estimado', `R$ ${Math.round(lucroEstimado).toLocaleString('pt-BR')}`, '#10b981'],
+          ['📊 Rentabilidade', `${rentabilidadeTotal.toFixed(1)}%`, '#8b5cf6'],
+        ].map(([label, val, color]) => `
+          <div style="background:${color}0f;border:1px solid ${color}25;border-radius:10px;padding:12px">
+            <div style="font-size:10px;color:var(--text3)">${label}</div>
+            <div style="font-size:16px;font-weight:800;color:${color};margin-top:3px">${val}</div>
+          </div>`).join('')}
+      </div>
+
+      <!-- Gráfico evolução -->
+      <div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:16px;margin-bottom:14px">
+        <div style="font-size:12px;font-weight:700;margin-bottom:12px">📈 Evolução Patrimonial</div>
+        <div style="display:flex;align-items:flex-end;gap:4px;height:80px">
+          ${evolucao.map(e => {
+            const h = Math.round((e.valor/maxVal)*100);
+            return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+              <div style="width:100%;height:${h}%;background:linear-gradient(180deg,#10b981,#059669);border-radius:3px 3px 0 0;min-height:4px"></div>
+              <div style="font-size:8px;color:var(--text3)">${e.ano}a</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      <!-- Info adicional -->
+      ${aluguel > 0 ? `<div style="padding:12px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:10px;margin-bottom:12px;font-size:12px">
+        🏠 <strong>Renda de Aluguel:</strong> R$ ${aluguel.toLocaleString('pt-BR')}/mês · 
+        Rentabilidade: ${rentabilidadeAluguel.toFixed(2)}% a.a.
+      </div>` : ''}
+
+      <div style="padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:8px;font-size:11px;color:var(--text3);margin-bottom:14px">
+        Índice de correção: ${indice} · Prazo: ${prazo} meses · Valorização estimada: ${valorizacao}% a.a.
+      </div>
+
+      <!-- Rodapé -->
+      <div style="display:flex;gap:8px">
+        <button onclick="printInvestment()" style="flex:1;padding:10px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer">📄 Exportar PDF</button>
+        <button onclick="shareInvestment()" style="padding:10px 14px;background:rgba(255,255,255,0.06);color:var(--text2);border:1px solid var(--border);border-radius:9px;font-size:12px;cursor:pointer">🔗 Compartilhar</button>
+      </div>
+    </div>`;
+}
+
+function printInvestment() {
+  const content = document.getElementById('inv-result').innerHTML;
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>Análise de Investimento — S Nexus</title>
+    <style>body{font-family:'Plus Jakarta Sans',sans-serif;margin:0;padding:24px;background:#07090f;color:#f0f2ff}
+    @media print{body{background:#fff;color:#111;padding:12px}}</style></head>
+    <body>${content}<script>window.print();<\/script></body></html>`);
+  win.document.close();
+}
+
+function shareInvestment() {
+  showAuthInfoToast('🔗 Link compartilhável em desenvolvimento!');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MÓDULO 7 — IA NEXUS COMERCIAL (perguntas sobre dados reais)
+// ═══════════════════════════════════════════════════════════════
+
+function buildAIContext() {
+  const now = new Date();
+  const reminders = getAutoReinforcements();
+  const hotLeads = state.leads.filter(l => l.temp === 'quente');
+  const coldLeads = state.leads.filter(l => {
+    const last = l.lastContact ? new Date(l.lastContact) : null;
+    return last && Math.floor((now - last)/(1000*60*60*24)) > 7;
+  });
+
+  return `Você é o assistente comercial do S Nexus CRM.
+
+DADOS REAIS DO CORRETOR (${state.userName || 'Corretor'}):
+- Meta anual: ${fmt(GOAL)}
+- Acumulado: ${fmt(state.commission)} (${GOAL > 0 ? ((state.commission/GOAL)*100).toFixed(1) : 0}% da meta)
+- Falta: ${fmt(Math.max(0, GOAL - state.commission))}
+- Vendas realizadas: ${state.sales.length}
+- Total de leads: ${state.leads.length}
+- Leads quentes: ${hotLeads.length} (${hotLeads.map(l=>l.name).join(', ')})
+- Leads sem contato há +7 dias: ${coldLeads.length} (${coldLeads.map(l=>l.name).join(', ')})
+- Leads em proposta enviada: ${state.leads.filter(l=>l.status==='proposta_enviada').length}
+- Reforços nos próximos 30 dias: ${reminders.filter(r=>r.type==='reforco').length}
+- Parcelas vencendo em 7 dias: ${reminders.filter(r=>r.type==='parcela' && r.daysLeft<=7).length}
+- Streak atual: ${state.streak} dias
+- Score hoje: ${Math.round(state.habits.reduce((a,h)=>a+Math.min(100,(h.done/h.goal)*100),0)/state.habits.length)}
+
+LEADS DETALHADOS:
+${state.leads.map(l => `- ${l.name}: ${l.status}, ${l.temp}, último contato: ${l.lastContact||'nunca'}, follow-ups: ${l.followups}`).join('\n')}
+
+VENDAS:
+${state.sales.map(s => `- ${s.buyer}: R$${s.value}, comissão R$${s.commission}`).join('\n')}
+
+Responda de forma direta, prática e acionável. Use os dados reais acima.`;
+}
+
 function checkAdminNav() {
   const navAdmin = document.getElementById('nav-admin');
   if (navAdmin) navAdmin.style.display = isAdmin() ? 'flex' : 'none';
@@ -2909,7 +3629,13 @@ function tagHTML(color, text) {
   return `<span class="tag" style="background:${color}22;color:${color};border:1px solid ${color}44">${text}</span>`;
 }
 
-const PAGE_NAMES = {dashboard:'Dashboard',crm:'CRM / Leads',financial:'Financeiro',performance:'Performance',postsale:'Pós-venda',alerts:'Alertas',ai:'IA Nexus',subscription:'Minha Assinatura',admin:'🛡 Painel Admin'};
+const PAGE_NAMES = {
+  dashboard:'Dashboard', crm:'CRM / Leads', financial:'Financeiro',
+  performance:'Performance', postsale:'Pós-venda', alerts:'Alertas',
+  ai:'IA Nexus', studio:'🎨 Presentation Studio',
+  investment:'📈 Análise de Investimento',
+  subscription:'Minha Assinatura', admin:'🛡 Painel Admin'
+};
 
 // Controle de lazy render — rastreia quais seções já foram renderizadas
 const _rendered = new Set();
@@ -2920,6 +3646,8 @@ const _renderFns = {
   postsale: () => renderPostsale(),
   alerts: () => renderAlerts(),
   ai: () => initAI(),
+  studio: () => initStudio(),
+  investment: () => initInvestment(),
   subscription: () => renderSubscription(),
   admin: () => loadAdminData(),
 };
@@ -4198,12 +4926,20 @@ function renderAlerts() {
   }
 }
 
-const QUICK_ACTIONS=[
-  "Gere follow-up para Ana Lima (lead quente, 2 dias sem contato)",
-  "Qual minha estratégia de vendas para essa semana?",
-  "Crie mensagem de follow-up para um lead quente",
-  "Analise meu pipeline e diga o que priorizar agora"
+const QUICK_ACTIONS = [
+  "Quem devo ligar hoje?",
+  "Qual cliente possui reforço próximo?",
+  "Quem está sem contato há mais de 7 dias?",
+  "Quanto falta para atingir minha meta?",
+  "Analise meu funil de vendas",
+  "Sugira estratégia para fechar essa semana",
+  "Gere mensagem de follow-up para um lead quente",
+  "Crie uma proposta comercial persuasiva",
 ];
+
+function getAISystemPrompt() {
+  return buildAIContext();
+}
 
 function initAI() {
   if (!can('ai.nexus')) {
@@ -4212,7 +4948,9 @@ function initAI() {
     return;
   }
   if(state.chatHistory.length===0) {
-    state.chatHistory=[{role:'assistant',text:'Olá! 👋 Sou o assistente S Nexus.\n\nPosso te ajudar a gerar follow-ups, analisar seu pipeline, criar mensagens para WhatsApp, sugerir estratégias e muito mais.\n\nComo posso maximizar sua performance agora?'}];
+    const hotCount = state.leads.filter(l=>l.temp==='quente').length;
+    const reminders = getAutoReinforcements();
+    state.chatHistory=[{role:'assistant',text:`Olá, ${state.userName || 'Corretor'}! 👋 Sou a IA Nexus.\n\nJá analisei seus dados:\n🔥 ${hotCount} lead${hotCount!==1?'s':''} quente${hotCount!==1?'s':''} no pipeline\n⚡ ${reminders.length} lembrete${reminders.length!==1?'s':''} nos próximos 30 dias\n🎯 Meta: ${GOAL > 0 ? ((state.commission/GOAL)*100).toFixed(1)+'%' : 'não definida ainda'} atingida\n\nComo posso ajudar você a vender mais hoje?`}];
   }
   renderChat();
   document.getElementById('quick-actions').innerHTML=QUICK_ACTIONS.map(q=>`
@@ -4260,19 +4998,9 @@ async function sendAI() {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
+        model:'claude-sonnet-4-6',
         max_tokens:1000,
-        system:`Você é o assistente de IA do S Nexus, um CRM premium para corretores de imóveis de alto padrão.
-O usuário é um corretor com meta de R$1.000.000 em comissão líquida em 2025.
-Situação atual:
-- Comissão acumulada: R$22.125 (2.2% da meta)
-- Vendas realizadas: ${state.sales.length}
-- 5 leads ativos: Ana Lima (quente/WhatsApp), Carlos Mendes (quente/reunião), Patricia Souza (morno/proposta), Roberto Alves (frio/novo), Fernanda Costa (quente/negociação)
-- Meta mensal necessária: ${fmt(neededPerMonth)}
-- ${monthsLeft} meses restantes no ano
-Responda de forma direta, prática e motivadora. Use emojis com moderação.
-Quando gerar mensagens para WhatsApp, formate claramente.
-Seja conciso mas completo.`,
+        system: buildAIContext(),
         messages
       })
     });
