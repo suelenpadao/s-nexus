@@ -1017,20 +1017,10 @@ td:last-child{padding-right:0}
       <div class="card" style="margin-bottom:16px">
         <div style="font-size:13px;font-weight:700;margin-bottom:6px">🎭 Modo Demonstração</div>
         <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Visualize o sistema como cada plano de cliente. Seus dados reais ficam preservados.</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
-          ${['starter','pro','premium'].map(p => {
-            const plan = {starter:{name:'Starter',color:'#06b6d4',emoji:'🚀',price:'R$59,90/mês'},pro:{name:'Pro',color:'#6366f1',emoji:'⚡',price:'R$99,90/mês'},premium:{name:'Premium',color:'#f59e0b',emoji:'👑',price:'R$149,90/mês'}}[p];
-            return `<div style="background:${plan.color}11;border:1px solid ${plan.color}33;border-radius:12px;padding:16px;text-align:center">
-              <div style="font-size:28px;margin-bottom:8px">${plan.emoji}</div>
-              <div style="font-weight:700;color:var(--text);margin-bottom:2px">${plan.name}</div>
-              <div style="font-size:11px;color:var(--text3);margin-bottom:12px">${plan.price}</div>
-              <button onclick="activateDemoMode('${p}')" style="width:100%;padding:8px;background:${plan.color}22;color:${plan.color};border:1px solid ${plan.color}44;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">🎭 Simular ${plan.name}</button>
-            </div>`;
-          }).join('')}
-        </div>
-        ${`<div style="margin-top:16px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;font-size:11px;color:var(--text3)">
+        <div id="demo-plans-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px"></div>
+        <div style="margin-top:16px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;font-size:11px;color:var(--text3)">
           ℹ️ O modo demonstração mostra exatamente o que cada cliente vê — incluindo paywalls e recursos bloqueados. Nenhum dado real de clientes é exposto.
-        </div>`}
+        </div>
       </div>
       <div class="card">
         <div style="font-size:13px;font-weight:700;margin-bottom:14px">📋 Histórico de demonstrações</div>
@@ -1720,6 +1710,11 @@ window.addEventListener('beforeunload', (e) => {
 
 // PLATFORM ADMIN — nunca expira, acesso total
 const PLATFORM_ADMIN_EMAIL = 'suelenpadao@snexus.local';
+const PLATFORM_ADMIN_EMAILS = [
+  'suelenpadao@snexus.local',
+  'suelenrodriguespp@snexus.local',
+  'suelenrodriguespp@gmail.com',
+];
 
 const PERMISSIONS = {
   // Trial agora = apenas Starter (não libera Pro/Premium)
@@ -1754,6 +1749,8 @@ let demoMode = null; // null | 'starter' | 'pro' | 'premium'
 
 function can(feature) {
   if (!currentBilling) return false;
+  // Platform admin sempre tem acesso total
+  if (isPlatformAdmin() && !demoMode) return true;
   // Demo mode sobrepõe tudo
   if (demoMode && isPlatformAdmin()) {
     const demoPerms = PERMISSIONS[demoMode] || [];
@@ -1768,7 +1765,7 @@ function can(feature) {
 
 function isPlatformAdmin() {
   return currentUser && (
-    currentUser.email === PLATFORM_ADMIN_EMAIL ||
+    PLATFORM_ADMIN_EMAILS.includes(currentUser.email) ||
     currentBilling?.status === 'internal_admin' ||
     currentBilling?.isPlatformAdmin === true
   );
@@ -2169,6 +2166,26 @@ function renderSubsTable(subs) {
 }
 
 async function loadDemoHistory() {
+  // Renderizar cards de plano dinamicamente
+  const grid = document.getElementById('demo-plans-grid');
+  if (grid) {
+    const demoPlansMeta = {
+      starter: {name:'Starter', color:'#06b6d4', emoji:'🚀', price:'R$59,90/mês'},
+      pro:     {name:'Pro',     color:'#6366f1', emoji:'⚡', price:'R$99,90/mês'},
+      premium: {name:'Premium', color:'#f59e0b', emoji:'👑', price:'R$149,90/mês'},
+    };
+    grid.innerHTML = Object.entries(demoPlansMeta).map(([id, p]) => `
+      <div style="background:${p.color}11;border:1px solid ${p.color}33;border-radius:12px;padding:16px;text-align:center">
+        <div style="font-size:28px;margin-bottom:8px">${p.emoji}</div>
+        <div style="font-weight:700;color:var(--text);margin-bottom:2px">${p.name}</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:12px">${p.price}</div>
+        <button onclick="activateDemoMode('${id}')"
+          style="width:100%;padding:8px;background:${p.color}22;color:${p.color};border:1px solid ${p.color}44;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">
+          🎭 Simular ${p.name}
+        </button>
+      </div>`).join('');
+  }
+
   const el = document.getElementById('demo-history-list');
   if (!el) return;
   try {
@@ -2183,7 +2200,9 @@ async function loadDemoHistory() {
           <span style="color:var(--text3);margin-left:8px">${new Date(l.created_at).toLocaleString('pt-BR')}</span>
         </div>`).join('')
       : '<div style="color:var(--text3);text-align:center;padding:16px;font-size:12px">Nenhuma demonstração realizada ainda</div>';
-  } catch(e) { el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:12px">Carregue após ativar o modo demo</div>'; }
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:12px">Ative o modo demo para ver o histórico aqui</div>';
+  }
 }
 
 async function loadAdminLogs() {
@@ -2256,14 +2275,14 @@ async function renderSubscription() {
         <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Status</div>
         <span style="background:${st.color}22;color:${st.color};border:1px solid ${st.color}44;border-radius:8px;padding:4px 12px;font-size:12px;font-weight:700">${st.label}</span>
       </div>
-      <div>
+      ${daysLeft > 0 && daysLeft < 99 ? `<div>
         <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">
           ${billing.plan === 'trial' ? 'Trial expira em' : 'Próxima cobrança'}
         </div>
         <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:18px;color:${daysLeft <= 3 ? '#ef4444' : 'var(--text)'}">
-          ${daysLeft > 0 ? `${daysLeft} dia${daysLeft !== 1 ? 's' : ''}` : '—'}
+          ${daysLeft} dia${daysLeft !== 1 ? 's' : ''}
         </div>
-      </div>
+      </div>` : ''}
       ${subData?.last_payment_at ? `<div>
         <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Último pagamento</div>
         <div style="font-size:14px;font-weight:600;color:var(--text)">${new Date(subData.last_payment_at).toLocaleDateString('pt-BR')}</div>
