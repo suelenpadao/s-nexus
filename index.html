@@ -529,6 +529,9 @@ td:last-child{padding-right:0}
       <span class="nav-icon">✦</span> IA Nexus
       <span class="nav-badge ai">AI</span>
     </button>
+    <button class="nav-item" onclick="goTo('subscription',this)">
+      <span class="nav-icon">💳</span> Minha Assinatura
+    </button>
     <button class="nav-item" id="nav-admin" onclick="goTo('admin',this)" style="display:none">
       <span class="nav-icon">🛡</span> Admin
     </button>
@@ -563,7 +566,7 @@ td:last-child{padding-right:0}
     <button onclick="openPlansModal()" style="width:100%;padding:8px;background:linear-gradient(135deg,rgba(99,102,241,0.12),rgba(139,92,246,0.08));border:1px solid rgba(99,102,241,0.25);border-radius:8px;color:#a5b4fc;font-size:11px;font-weight:700">💎 Ver Planos</button>
   </div>
   <div style="padding:8px 20px 0">
-    <button id="google-connect-btn" onclick="connectGoogleCalendar()" style="width:100%;padding:8px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:8px;color:#a5b4fc;font-size:11px;font-weight:600">📅 Conectar Google Agenda</button>
+    <button id="google-connect-btn" onclick="can('calendar.google') ? connectGoogleCalendar() : openPlansModal()" style="width:100%;padding:8px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:8px;color:#a5b4fc;font-size:11px;font-weight:600">📅 Conectar Google Agenda</button>
   </div>
   <div style="padding:8px 20px 0">
     <button onclick="resetAccountData()" style="width:100%;padding:8px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;color:#f59e0b;font-size:11px;font-weight:600">🔄 Resetar dados da conta</button>
@@ -946,6 +949,20 @@ td:last-child{padding-right:0}
   </div>
 
   <!-- ── ADMIN ── -->
+  <!-- ── MINHA ASSINATURA ── -->
+  <div id="sec-subscription" class="section">
+    <div id="subscription-content" style="max-width:680px;margin:0 auto">
+      <div style="text-align:center;padding:40px 0 20px">
+        <div style="font-size:48px;margin-bottom:12px" id="sub-icon">⏳</div>
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:24px;color:var(--text)" id="sub-title">Carregando...</div>
+        <div style="font-size:13px;color:var(--text3);margin-top:6px" id="sub-subtitle"></div>
+      </div>
+      <div id="sub-card" class="card" style="margin-bottom:16px"></div>
+      <div id="sub-features-card" class="card" style="margin-bottom:16px"></div>
+      <div id="sub-history-card" class="card"></div>
+    </div>
+  </div>
+
   <div id="sec-admin" class="section">
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px" id="admin-metrics"></div>
 
@@ -1343,6 +1360,15 @@ async function onAuthSuccess(user, username) {
 
     if (billing.plan === 'trial' && billing.daysLeft > 0) {
       showTrialBadge(billing.daysLeft);
+      // Aviso especial quando faltam 3 dias ou menos
+      if (billing.daysLeft <= 3) {
+        setTimeout(() => {
+          const msg = billing.daysLeft === 1
+            ? '⚠️ Último dia de trial! Assine agora para não perder acesso.'
+            : `⚠️ Seu trial expira em ${billing.daysLeft} dias! Garanta sua assinatura.`;
+          showAuthInfoToast(msg);
+        }, 2000);
+      }
     }
 
     await loadState();
@@ -1621,6 +1647,55 @@ window.addEventListener('beforeunload', (e) => {
 //  ETAPA 14 — LOGS ADMINISTRATIVOS
 // ═══════════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════════
+//  SISTEMA DE PERMISSÕES — Permission Guards por Plano
+// ═══════════════════════════════════════════════════════════════
+
+const PERMISSIONS = {
+  trial:   ['crm.leads.view','crm.leads.create','crm.pipeline','dashboard.basic','dashboard.premium',
+             'financial.basic','financial.full','performance.pomodoro','performance.score',
+             'ai.nexus','journey.automatic','alerts.smart','calendar.google','calendar.bulk_sync',
+             'documents.upload','backup.manual','backup.automatic','postsale.basic'],
+  starter: ['crm.leads.view','crm.leads.create','crm.pipeline','dashboard.basic',
+             'financial.basic','backup.manual'],
+  pro:     ['crm.leads.view','crm.leads.create','crm.pipeline','dashboard.basic','dashboard.premium',
+             'financial.basic','financial.full','performance.pomodoro','performance.score',
+             'ai.nexus','journey.automatic','alerts.smart','calendar.google','calendar.bulk_sync',
+             'documents.upload','backup.manual','backup.automatic','postsale.basic'],
+  premium: ['crm.leads.view','crm.leads.create','crm.pipeline','dashboard.basic','dashboard.premium',
+             'financial.basic','financial.full','performance.pomodoro','performance.score',
+             'ai.nexus','journey.automatic','alerts.smart','calendar.google','calendar.bulk_sync',
+             'documents.upload','backup.manual','backup.automatic','postsale.basic',
+             'team.manage','team.permissions'],
+};
+
+function can(feature) {
+  if (!currentBilling) return false;
+  const plan = currentBilling.blocked ? 'blocked' : (currentBilling.plan || 'trial');
+  if (plan === 'blocked' || plan === 'expired') return false;
+  const allowed = PERMISSIONS[plan] || PERMISSIONS['trial'];
+  return allowed.includes(feature);
+}
+
+function requirePlan(feature, minPlan) {
+  if (can(feature)) return true;
+  openPlansModal();
+  return false;
+}
+
+// Mostra paywall inline em vez do conteúdo bloqueado
+function paywallHTML(featureName, minPlan) {
+  const plan = PLANS_CONFIG.find(p => p.id === minPlan) || PLANS_CONFIG[1];
+  return `<div style="text-align:center;padding:40px 20px;background:rgba(99,102,241,0.04);border:1px dashed rgba(99,102,241,0.25);border-radius:16px;margin:8px 0">
+    <div style="font-size:36px;margin-bottom:12px">🔒</div>
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:15px;color:var(--text);margin-bottom:6px">${featureName}</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Disponível a partir do plano <strong style="color:${plan.color}">${plan.name}</strong></div>
+    <button onclick="openPlansModal()" style="padding:10px 22px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;box-shadow:0 4px 14px rgba(99,102,241,0.35)">
+      💎 Ver Planos
+    </button>
+  </div>`;
+}
+
 const LOG_EVENTS = {
   LOGIN:           'login',
   LOGOUT:          'logout',
@@ -1657,7 +1732,9 @@ const PLANS_CONFIG = [
     price: 59.90, priceYearly: 599.00,
     color: '#06b6d4',
     description: 'Para quem está começando',
-    features: ['Até 50 leads', 'Controle financeiro', 'Jornada de relacionamento', 'Metas e performance'],
+    checkoutUrl: 'https://pay.kiwify.com.br/5tnhhBN',
+    features: ['CRM e Pipeline completo', 'Dashboard básico', 'Financeiro básico', 'Backup manual', 'WhatsApp manual', 'Suporte padrão'],
+    locked: ['IA Nexus', 'Jornada automática', 'Google Agenda', 'Upload contratos', 'Backup automático', 'Pós-venda', 'Score e Streak', 'Pomodoro'],
     cta: 'Assinar Starter'
   },
   {
@@ -1666,7 +1743,9 @@ const PLANS_CONFIG = [
     color: '#6366f1',
     popular: true,
     description: 'Para corretores ativos',
-    features: ['CRM ilimitado', 'IA Assistente', 'Google Agenda', 'Pós-venda e reforços', 'Suporte prioritário'],
+    checkoutUrl: 'https://pay.kiwify.com.br/UsAK7Vv',
+    features: ['Tudo do Starter', 'IA Nexus', 'Jornada automática', 'Google Agenda', 'Upload contratos', 'Backup automático', 'Pós-venda completo', 'Score, Streak e Pomodoro', 'Financeiro completo', 'Suporte prioritário'],
+    locked: ['Múltiplos usuários', 'Gestão de equipe', 'Dashboard Executivo'],
     cta: 'Assinar Pro'
   },
   {
@@ -1674,7 +1753,9 @@ const PLANS_CONFIG = [
     price: 149.90, priceYearly: 1499.00,
     color: '#f59e0b',
     description: 'Alta performance',
-    features: ['Tudo do Pro', 'Múltiplos usuários*', 'Relatórios avançados*', 'Gerente dedicado', 'Onboarding VIP'],
+    checkoutUrl: 'https://pay.kiwify.com.br/ikZ80K1',
+    features: ['Tudo do Pro', 'Múltiplos usuários', 'Gestão de equipe', 'Dashboard Executivo', 'IA Premium', 'Relatórios avançados', 'Suporte VIP'],
+    locked: [],
     cta: 'Assinar Premium'
   }
 ];
@@ -1684,66 +1765,64 @@ let currentBilling = null;
 // Verifica plano/trial do usuário no Supabase
 async function checkUserBilling(userId) {
   try {
-    const { data, error } = await sb
-      .from('snexus_profiles')
-      .select('plan, trial_ends_at, plan_expires_at, is_blocked')
-      .eq('user_id', userId)
-      .maybeSingle();
+    // Tenta buscar da tabela subscriptions primeiro (nova)
+    const { data: sub } = await sb.from('subscriptions').select('*').eq('user_id', userId).maybeSingle();
 
-    // Se não tem perfil ainda, cria trial automaticamente
+    if (sub) {
+      const now = new Date();
+      const expires = sub.expires_at ? new Date(sub.expires_at) : null;
+      const daysLeft = expires ? Math.ceil((expires - now) / (1000*60*60*24)) : 999;
+
+      if (sub.status === 'blocked' || sub.status === 'refunded' || sub.status === 'chargeback') {
+        currentBilling = { plan: sub.plan_id, blocked: true, reason: sub.status, daysLeft: 0 };
+        return currentBilling;
+      }
+      if ((sub.status === 'trial' || sub.status === 'expired') && expires && expires < now) {
+        currentBilling = { plan: 'trial', blocked: true, reason: 'trial_expired', daysLeft: 0 };
+        return currentBilling;
+      }
+      if (sub.status === 'active' && expires && expires < now) {
+        currentBilling = { plan: sub.plan_id, blocked: true, reason: 'plan_expired', daysLeft: 0 };
+        return currentBilling;
+      }
+
+      currentBilling = { plan: sub.plan_id || 'trial', status: sub.status, daysLeft, blocked: false };
+      return currentBilling;
+    }
+
+    // Fallback: tabela snexus_profiles (legado)
+    const { data, error } = await sb.from('snexus_profiles').select('plan, trial_ends_at, plan_expires_at, is_blocked').eq('user_id', userId).maybeSingle();
+
     if (!data && !error) {
-      const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-      await sb.from('snexus_profiles').upsert({
-        user_id: userId,
-        plan: 'trial',
-        trial_ends_at: trialEnd.toISOString()
-      }, { onConflict: 'user_id' });
+      // Novo usuário — cria subscription + profile
+      const trialEnd = new Date(Date.now() + 7*24*60*60*1000);
+      await sb.from('snexus_profiles').upsert({ user_id: userId, plan: 'trial', trial_ends_at: trialEnd.toISOString() }, { onConflict: 'user_id' });
+      await sb.from('subscriptions').upsert({ user_id: userId, plan_id: 'trial', status: 'trial', expires_at: trialEnd.toISOString() }, { onConflict: 'user_id' });
       currentBilling = { plan: 'trial', daysLeft: 7, blocked: false };
       return currentBilling;
     }
 
     if (error || !data) {
-      // Erro ao buscar — deixa entrar (fail open, não perde cliente por bug)
-      currentBilling = { plan: 'unknown', daysLeft: 99, blocked: false };
+      currentBilling = { plan: 'trial', daysLeft: 99, blocked: false };
       return currentBilling;
     }
 
     const now = new Date();
+    if (data.is_blocked) { currentBilling = { plan: data.plan, blocked: true, reason: 'blocked' }; return currentBilling; }
 
-    // Bloqueio explícito
-    if (data.is_blocked) {
-      currentBilling = { plan: data.plan, blocked: true, reason: 'blocked' };
-      return currentBilling;
-    }
-
-    // Trial expirado
     if (data.plan === 'trial' && data.trial_ends_at) {
       const trialEnd = new Date(data.trial_ends_at);
-      const daysLeft = Math.ceil((trialEnd - now) / (1000 * 60 * 60 * 24));
-      if (daysLeft <= 0) {
-        currentBilling = { plan: 'trial', blocked: true, reason: 'trial_expired', daysLeft: 0 };
-        return currentBilling;
-      }
-      currentBilling = { plan: 'trial', daysLeft, blocked: false };
+      const daysLeft = Math.ceil((trialEnd - now)/(1000*60*60*24));
+      if (daysLeft <= 0) { currentBilling = { plan:'trial', blocked:true, reason:'trial_expired', daysLeft:0 }; return currentBilling; }
+      currentBilling = { plan:'trial', daysLeft, blocked:false };
       return currentBilling;
     }
 
-    // Plano pago expirado
-    if (['starter','pro','premium'].includes(data.plan) && data.plan_expires_at) {
-      const planEnd = new Date(data.plan_expires_at);
-      if (planEnd < now) {
-        currentBilling = { plan: data.plan, blocked: true, reason: 'plan_expired' };
-        return currentBilling;
-      }
-    }
-
-    // Plano ativo
     currentBilling = { plan: data.plan || 'trial', daysLeft: 999, blocked: false };
     return currentBilling;
 
   } catch (e) {
-    // Fail open — não bloqueia usuário por erro de rede
-    currentBilling = { plan: 'unknown', daysLeft: 99, blocked: false };
+    currentBilling = { plan: 'trial', daysLeft: 99, blocked: false };
     return currentBilling;
   }
 }
@@ -1793,14 +1872,17 @@ function renderPlansGrid(containerId, compact) {
     <div style="background:${p.popular?'linear-gradient(135deg,rgba(99,102,241,0.15),rgba(99,102,241,0.08))':'rgba(255,255,255,0.03)'};border:${p.popular?'2px solid rgba(99,102,241,0.5)':'1px solid rgba(255,255,255,0.08)'};border-radius:16px;padding:${compact?'16px':'24px'};position:relative;text-align:left">
       ${p.popular?`<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-size:9px;font-weight:800;padding:3px 12px;border-radius:20px;letter-spacing:.05em;white-space:nowrap">MAIS POPULAR</div>`:''}
       <div style="font-size:${compact?'22px':'28px'}">${p.emoji}</div>
-      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:${compact?'14px':'18px'};color:#fff;margin:6px 0 2px">${p.name}</div>
-      ${!compact?`<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:12px">${p.description}</div>`:''}
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:${compact?'14px':'18px'};color:var(--text);margin:6px 0 2px">${p.name}</div>
+      ${!compact?`<div style="font-size:11px;color:var(--text3);margin-bottom:12px">${p.description}</div>`:''}
       <div style="margin-bottom:${compact?'12px':'16px'}">
         <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:${compact?'20px':'26px'};color:${p.color}">R$${p.price.toFixed(2).replace('.',',')}</span>
-        <span style="font-size:10px;color:rgba(255,255,255,0.3)">/mês</span>
+        <span style="font-size:10px;color:var(--text3)">/mês</span>
       </div>
-      ${!compact?`<div style="margin-bottom:16px">${p.features.map(f=>`<div style="font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:4px;display:flex;align-items:center;gap:6px"><span style="color:${p.color}">✓</span>${f}</div>`).join('')}</div>`:''}
-      <button onclick="selectPlan('${p.id}')"
+      ${!compact?`<div style="margin-bottom:16px">
+        ${p.features.map(f=>`<div style="font-size:11px;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;gap:6px"><span style="color:${p.color}">✓</span>${f}</div>`).join('')}
+        ${(p.locked||[]).slice(0,2).map(f=>`<div style="font-size:11px;color:var(--text3);margin-bottom:4px;display:flex;align-items:center;gap:6px"><span>🔒</span>${f}</div>`).join('')}
+      </div>`:''}
+      <button onclick="window.open('${p.checkoutUrl}','_blank');writeLog('plan_change','Checkout: ${p.name}',{plan:'${p.id}'})"
         style="width:100%;padding:${compact?'8px':'11px'};background:${p.popular?`linear-gradient(135deg,#6366f1,#4f46e5)`:`${p.color}22`};color:${p.popular?'#fff':p.color};border:${p.popular?'none':`1px solid ${p.color}44`};border-radius:9px;font-weight:700;font-size:${compact?'11px':'12px'};cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s">
         ${compact?'Assinar':'💳 '+p.cta}
       </button>
@@ -1811,13 +1893,21 @@ function renderPlansGrid(containerId, compact) {
 function selectPlan(planId) {
   const plan = PLANS_CONFIG.find(p => p.id === planId);
   if (!plan) return;
-  writeLog(LOG_EVENTS.PLAN_CHANGE, `Interesse no plano ${plan.name}`, {
-    plan_id: planId,
-    price: plan.price,
-    current_plan: currentBilling?.plan
+  writeLog(LOG_EVENTS.PLAN_CHANGE, `Checkout iniciado: plano ${plan.name}`, {
+    plan_id: planId, price: plan.price, current_plan: currentBilling?.plan
   });
-  const msg = encodeURIComponent(`Olá! Quero assinar o S Nexus plano ${plan.name} (R$${plan.price.toFixed(2)}/mês). Meu usuário: ${currentUser?.email || ''}`);
-  window.open(`https://wa.me/5547933005437?text=${msg}`, '_blank');
+  const kiwifyUrls = {
+    starter: 'https://pay.kiwify.com.br/5tnhhBN',
+    pro:     'https://pay.kiwify.com.br/UsAK7Vv',
+    premium: 'https://pay.kiwify.com.br/ikZ80K1',
+  };
+  const url = kiwifyUrls[planId];
+  if (url) {
+    window.open(url, '_blank');
+  } else {
+    const msg = encodeURIComponent(`Olá! Quero assinar o S Nexus plano ${plan.name}. Meu usuário: ${currentUser?.email || ''}`);
+    window.open(`https://wa.me/5547933005437?text=${msg}`, '_blank');
+  }
 }
 
 // Abrir/fechar modal de planos
@@ -1849,6 +1939,241 @@ function isAdmin() {
 function checkAdminNav() {
   const navAdmin = document.getElementById('nav-admin');
   if (navAdmin) navAdmin.style.display = isAdmin() ? 'flex' : 'none';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  TELA MINHA ASSINATURA
+// ═══════════════════════════════════════════════════════════════
+
+async function renderSubscription() {
+  const billing = currentBilling;
+  if (!billing) return;
+
+  const plan = PLANS_CONFIG.find(p => p.id === billing.plan) || PLANS_CONFIG[0];
+  const statusLabels = {
+    trial: {label:'Trial Premium', color:'#6366f1', icon:'🎁'},
+    active: {label:'Ativa', color:'#10b981', icon:'✅'},
+    starter: {label:'Starter Ativo', color:'#06b6d4', icon:'🚀'},
+    pro: {label:'Pro Ativo', color:'#6366f1', icon:'⚡'},
+    premium: {label:'Premium Ativo', color:'#f59e0b', icon:'👑'},
+    expired: {label:'Expirada', color:'#ef4444', icon:'⏰'},
+    blocked: {label:'Bloqueada', color:'#ef4444', icon:'🔒'},
+    cancelled: {label:'Cancelada', color:'#6b7280', icon:'❌'},
+  };
+  const st = statusLabels[billing.reason || billing.plan] || statusLabels['active'];
+
+  // Buscar dados reais do Supabase
+  let subData = null;
+  try {
+    const { data } = await sb.from('subscriptions').select('*').eq('user_id', currentUser.id).maybeSingle();
+    subData = data;
+  } catch(e) {}
+
+  // Header
+  document.getElementById('sub-icon').textContent = st.icon;
+  document.getElementById('sub-title').textContent = `Plano ${plan?.name || billing.plan}`;
+  document.getElementById('sub-subtitle').textContent = st.label;
+
+  const daysLeft = billing.daysLeft || 0;
+  const isTrialWarning = billing.plan === 'trial' && daysLeft <= 3 && daysLeft > 0;
+
+  // Card principal
+  document.getElementById('sub-card').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px">
+      <div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Plano atual</div>
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;color:${plan?.color || '#6366f1'}">${plan?.name || billing.plan}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px">${plan?.price > 0 ? `R$${plan.price.toFixed(2)}/mês` : 'Grátis'}</div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Status</div>
+        <span style="background:${st.color}22;color:${st.color};border:1px solid ${st.color}44;border-radius:8px;padding:4px 12px;font-size:12px;font-weight:700">${st.label}</span>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">
+          ${billing.plan === 'trial' ? 'Trial expira em' : 'Próxima cobrança'}
+        </div>
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:18px;color:${daysLeft <= 3 ? '#ef4444' : 'var(--text)'}">
+          ${daysLeft > 0 ? `${daysLeft} dia${daysLeft !== 1 ? 's' : ''}` : '—'}
+        </div>
+      </div>
+      ${subData?.last_payment_at ? `<div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Último pagamento</div>
+        <div style="font-size:14px;font-weight:600;color:var(--text)">${new Date(subData.last_payment_at).toLocaleDateString('pt-BR')}</div>
+      </div>` : ''}
+    </div>
+    ${isTrialWarning ? `<div style="margin-top:16px;padding:12px 16px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:10px;color:#f59e0b;font-size:12px;font-weight:600">
+      ⚠️ Seu trial expira em ${daysLeft} dia${daysLeft !== 1 ? 's' : ''}! Assine agora para não perder acesso.
+    </div>` : ''}
+    <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+      ${billing.plan === 'trial' || billing.blocked ? `
+        <button onclick="openPlansModal()" style="padding:11px 22px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 4px 14px rgba(99,102,241,0.35)">💎 Assinar agora</button>
+      ` : `
+        <button onclick="openPlansModal()" style="padding:11px 22px;background:rgba(99,102,241,0.1);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25);border-radius:10px;font-weight:700;font-size:13px;cursor:pointer">🔄 Alterar Plano</button>
+      `}
+      <button onclick="openPlansModal()" style="padding:11px 22px;background:rgba(255,255,255,0.05);color:var(--text2);border:1px solid var(--border2);border-radius:10px;font-weight:600;font-size:13px;cursor:pointer">Ver todos os planos</button>
+    </div>`;
+
+  // Recursos liberados
+  const currentPlan = PLANS_CONFIG.find(p => p.id === billing.plan) || PLANS_CONFIG[1];
+  document.getElementById('sub-features-card').innerHTML = `
+    <div style="font-size:13px;font-weight:700;margin-bottom:14px">✅ Recursos do seu plano</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">
+      ${(currentPlan?.features || []).map(f => `
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2)">
+          <span style="color:#10b981;font-size:14px">✓</span>${f}
+        </div>`).join('')}
+    </div>
+    ${(currentPlan?.locked || []).length > 0 ? `
+      <div style="font-size:13px;font-weight:700;margin:16px 0 10px">🔒 Disponíveis em planos superiores</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">
+        ${(currentPlan.locked).map(f => `
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text3)">
+            <span style="font-size:14px">🔒</span>${f}
+          </div>`).join('')}
+      </div>` : ''}`;
+
+  // Histórico de eventos
+  let events = [];
+  try {
+    const { data } = await sb.from('subscription_events').select('*').eq('user_id', currentUser.id).order('created_at', {ascending:false}).limit(10);
+    events = data || [];
+  } catch(e) {}
+
+  document.getElementById('sub-history-card').innerHTML = `
+    <div style="font-size:13px;font-weight:700;margin-bottom:14px">📋 Histórico</div>
+    ${events.length > 0 ? events.map(e => `
+      <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+        <div style="flex:1;font-size:12px;color:var(--text)">${e.event_type}</div>
+        <div style="font-size:11px;color:var(--text3)">${new Date(e.created_at).toLocaleDateString('pt-BR')}</div>
+      </div>`).join('')
+    : `<div style="font-size:12px;color:var(--text3);text-align:center;padding:16px">Nenhum evento ainda</div>`}`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PAINEL ADMIN — EXPANDIDO
+// ═══════════════════════════════════════════════════════════════
+
+async function loadAdminData() {
+  if (!isAdmin()) return;
+
+  try {
+    const { data: profiles } = await sb.from('snexus_profiles').select('*').order('created_at', {ascending:false});
+    const { data: subs } = await sb.from('subscriptions').select('*');
+
+    const total = profiles?.length || 0;
+    const trials = profiles?.filter(p => p.plan === 'trial').length || 0;
+    const paying = profiles?.filter(p => ['starter','pro','premium'].includes(p.plan)).length || 0;
+    const blocked = profiles?.filter(p => p.is_blocked).length || 0;
+
+    // MRR calculado
+    const prices = {starter:59.90, pro:99.90, premium:149.90};
+    const mrr = profiles?.reduce((a,p) => a + (prices[p.plan] || 0), 0) || 0;
+
+    document.getElementById('admin-metrics').innerHTML = [
+      {icon:'👥', label:'Total usuários', val:total, c:'#6366f1'},
+      {icon:'🎁', label:'Em trial', val:trials, c:'#f59e0b'},
+      {icon:'💳', label:'Pagantes', val:paying, c:'#10b981'},
+      {icon:'🔒', label:'Bloqueados', val:blocked, c:'#ef4444'},
+      {icon:'💰', label:'MRR', val:`R$${mrr.toFixed(2)}`, c:'#10b981'},
+      {icon:'📈', label:'ARR', val:`R$${(mrr*12).toFixed(2)}`, c:'#06b6d4'},
+      {icon:'🔄', label:'Conversão trial→pago', val:total > 0 ? `${Math.round((paying/total)*100)}%` : '0%', c:'#8b5cf6'},
+    ].map(m => `
+      <div class="card" style="text-align:center;box-shadow:0 0 16px ${m.c}11">
+        <div style="font-size:22px;margin-bottom:4px">${m.icon}</div>
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:${typeof m.val === 'string' && m.val.includes('R$') ? '16px' : '26px'};font-weight:800;color:${m.c}">${m.val}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">${m.label}</div>
+      </div>`).join('');
+
+    // Lista de usuários com controles
+    document.getElementById('admin-users-list').innerHTML = `
+      <div style="margin-bottom:12px">
+        <input id="admin-search" type="text" placeholder="🔍 Buscar usuário..." oninput="filterAdminUsers()" style="font-size:12px;height:36px">
+      </div>
+      <div id="admin-users-table">
+      ${(profiles || []).map(p => {
+        const planColors = {trial:'#f59e0b', starter:'#06b6d4', pro:'#6366f1', premium:'#f59e0b'};
+        const color = p.is_blocked ? '#ef4444' : (planColors[p.plan] || '#666');
+        const planLabel = p.is_blocked ? 'bloqueado' : p.plan;
+        return `<div class="admin-user-row" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);flex-wrap:wrap" data-email="${p.email||''}" data-plan="${p.plan}">
+          <div style="flex:1;min-width:120px">
+            <div style="font-size:11px;font-weight:600;color:var(--text)">${p.username || p.email || p.user_id?.slice(0,8)}</div>
+            <div style="font-size:10px;color:var(--text3)">${new Date(p.created_at).toLocaleDateString('pt-BR')}</div>
+          </div>
+          <span style="background:${color}22;color:${color};border:1px solid ${color}44;border-radius:6px;font-size:9px;font-weight:700;padding:2px 8px;white-space:nowrap">${planLabel}</span>
+          <div style="display:flex;gap:4px;flex-shrink:0">
+            <button onclick="adminChangePlan('${p.user_id}')" style="padding:4px 8px;background:rgba(99,102,241,0.1);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25);border-radius:6px;font-size:9px;cursor:pointer">✏️ Plano</button>
+            <button onclick="adminToggleBlock('${p.user_id}',${p.is_blocked})" style="padding:4px 8px;background:${p.is_blocked ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)'};color:${p.is_blocked ? '#10b981' : '#ef4444'};border:1px solid ${p.is_blocked ? 'rgba(16,185,129,0.25)' : 'rgba(239,68,68,0.25)'};border-radius:6px;font-size:9px;cursor:pointer">
+              ${p.is_blocked ? '🔓 Liberar' : '🔒 Bloquear'}
+            </button>
+            <button onclick="adminGrantDays('${p.user_id}')" style="padding:4px 8px;background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.25);border-radius:6px;font-size:9px;cursor:pointer">🎁 +Dias</button>
+          </div>
+        </div>`;
+      }).join('')}
+      </div>`;
+
+  } catch(e) {
+    document.getElementById('admin-users-list').innerHTML = `<div style="color:#ef4444;font-size:12px;padding:12px">Erro ao carregar. Verifique permissões no Supabase.</div>`;
+  }
+
+  // Logs
+  try {
+    const { data: logs } = await sb.from('snexus_logs').select('*').order('created_at',{ascending:false}).limit(50);
+    const eventIcons = {login:'🔑',logout:'🚪',signup:'🎉',password_change:'🔐',plan_change:'💳',block:'🔒',unblock:'🔓',data_save:'💾',trial_start:'🎁',trial_expired:'⏰',backup_export:'📦',backup_import:'📥'};
+    document.getElementById('admin-logs-list').innerHTML = (logs||[]).map(l => `
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+        <div style="font-size:15px;flex-shrink:0">${eventIcons[l.event]||'📋'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;font-weight:600;color:var(--text)">${l.description||l.event}</div>
+          <div style="font-size:10px;color:var(--text3)">${new Date(l.created_at).toLocaleString('pt-BR')}</div>
+        </div>
+      </div>`).join('') || '<div style="color:var(--text3);text-align:center;padding:20px;font-size:12px">Nenhum log ainda</div>';
+  } catch(e) {}
+}
+
+function filterAdminUsers() {
+  const q = (document.getElementById('admin-search')?.value || '').toLowerCase();
+  document.querySelectorAll('.admin-user-row').forEach(row => {
+    const email = row.dataset.email?.toLowerCase() || '';
+    const plan = row.dataset.plan?.toLowerCase() || '';
+    row.style.display = (!q || email.includes(q) || plan.includes(q)) ? '' : 'none';
+  });
+}
+
+async function adminChangePlan(userId) {
+  const newPlan = prompt('Novo plano (trial/starter/pro/premium):');
+  if (!newPlan || !['trial','starter','pro','premium'].includes(newPlan)) return;
+  try {
+    await sb.from('snexus_profiles').update({plan: newPlan, updated_at: new Date().toISOString()}).eq('user_id', userId);
+    await sb.from('subscriptions').update({plan_id: newPlan, status: newPlan === 'trial' ? 'trial' : 'active', updated_at: new Date().toISOString()}).eq('user_id', userId);
+    await writeLog('plan_change', `Admin alterou plano para ${newPlan}`, {target_user: userId, new_plan: newPlan});
+    showAuthInfoToast(`✓ Plano alterado para ${newPlan}`);
+    loadAdminData();
+  } catch(e) { alert('Erro ao alterar plano'); }
+}
+
+async function adminToggleBlock(userId, currentlyBlocked) {
+  const action = currentlyBlocked ? 'desbloquear' : 'bloquear';
+  if (!confirm(`Tem certeza que deseja ${action} este usuário?`)) return;
+  try {
+    await sb.from('snexus_profiles').update({is_blocked: !currentlyBlocked, updated_at: new Date().toISOString()}).eq('user_id', userId);
+    await writeLog(currentlyBlocked ? 'unblock' : 'block', `Admin ${action}u usuário`, {target_user: userId});
+    showAuthInfoToast(`✓ Usuário ${action}ado com sucesso`);
+    loadAdminData();
+  } catch(e) { alert('Erro ao alterar status'); }
+}
+
+async function adminGrantDays(userId) {
+  const days = parseInt(prompt('Quantos dias grátis conceder?'));
+  if (!days || days < 1) return;
+  try {
+    const newExpiry = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+    await sb.from('snexus_profiles').update({trial_ends_at: newExpiry.toISOString(), plan: 'trial', updated_at: new Date().toISOString()}).eq('user_id', userId);
+    await sb.from('manual_grants').insert({user_id: userId, granted_by: currentUser.id, plan_id: 'trial', reason: `${days} dias extras concedidos pelo admin`, expires_at: newExpiry.toISOString()});
+    await writeLog('manual_grant', `Admin concedeu ${days} dias grátis`, {target_user: userId, days});
+    showAuthInfoToast(`✓ ${days} dias concedidos com sucesso`);
+    loadAdminData();
+  } catch(e) { alert('Erro ao conceder dias'); }
 }
 
 async function loadAdminData() {
@@ -2298,7 +2623,7 @@ function tagHTML(color, text) {
   return `<span class="tag" style="background:${color}22;color:${color};border:1px solid ${color}44">${text}</span>`;
 }
 
-const PAGE_NAMES = {dashboard:'Dashboard',crm:'CRM / Leads',financial:'Financeiro',performance:'Performance',postsale:'Pós-venda',alerts:'Alertas',ai:'IA Nexus',admin:'🛡 Painel Admin'};
+const PAGE_NAMES = {dashboard:'Dashboard',crm:'CRM / Leads',financial:'Financeiro',performance:'Performance',postsale:'Pós-venda',alerts:'Alertas',ai:'IA Nexus',subscription:'Minha Assinatura',admin:'🛡 Painel Admin'};
 
 // Controle de lazy render — rastreia quais seções já foram renderizadas
 const _rendered = new Set();
@@ -2309,6 +2634,7 @@ const _renderFns = {
   postsale: () => renderPostsale(),
   alerts: () => renderAlerts(),
   ai: () => initAI(),
+  subscription: () => renderSubscription(),
   admin: () => loadAdminData(),
 };
 
@@ -3015,9 +3341,14 @@ let pomTimer=null;
 function renderPerformance() {
   renderHabits();
   renderWeekGrid();
-  renderPomodoro();
-  document.getElementById('streak-display').textContent=state.streak;
-  document.getElementById('streak-val').textContent=state.streak;
+  if (can('performance.pomodoro')) {
+    renderPomodoro();
+  } else {
+    const pom = document.getElementById('pomodoro-section');
+    if (pom) pom.innerHTML = paywallHTML('Pomodoro Timer', 'pro');
+  }
+  document.getElementById('streak-display').textContent = can('performance.score') ? state.streak : '🔒';
+  document.getElementById('streak-val').textContent = can('performance.score') ? state.streak : '🔒';
 }
 
 function renderHabits() {
@@ -3122,6 +3453,11 @@ function setMode(type,mins) {
 }
 
 function renderPostsale() {
+  if (!can('postsale.basic')) {
+    const sec = document.getElementById('sec-postsale');
+    if (sec) sec.innerHTML = `<div style="padding:40px 20px">${paywallHTML('Pós-venda Automatizado', 'pro')}</div>`;
+    return;
+  }
   document.getElementById('postsale-metrics').innerHTML=[
     {icon:'👥',label:'Clientes Ativos',val:state.postsale.length,c:'#6366f1'},
     {icon:'📅',label:'Reforços em 30d',val:1,c:'#f59e0b'},
@@ -3442,6 +3778,11 @@ const QUICK_ACTIONS=[
 ];
 
 function initAI() {
+  if (!can('ai.nexus')) {
+    const sec = document.getElementById('sec-ai');
+    if (sec) sec.innerHTML = `<div style="padding:40px 20px">${paywallHTML('IA Nexus', 'pro')}</div>`;
+    return;
+  }
   if(state.chatHistory.length===0) {
     state.chatHistory=[{role:'assistant',text:'Olá! 👋 Sou o assistente S Nexus.\n\nPosso te ajudar a gerar follow-ups, analisar seu pipeline, criar mensagens para WhatsApp, sugerir estratégias e muito mais.\n\nComo posso maximizar sua performance agora?'}];
   }
