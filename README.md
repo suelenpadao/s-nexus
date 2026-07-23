@@ -1,0 +1,3595 @@
+[Uploading index_2.html…]()
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#07090f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="S Nexus">
+<meta name="description" content="S Nexus — CRM Premium para Corretores de Imóveis">
+<title>S Nexus — CRM Premium</title>
+
+<!-- Preconnect para recursos externos (carrega mais rápido) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://wgvefvhqogxujajcyuex.supabase.co">
+
+<!-- Fonte otimizada (só os pesos necessários) -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap&display=swap" rel="stylesheet">
+
+<!-- Supabase SDK via CDN (148KB → ~45KB gzip, cacheável) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<!-- Fallback: se CDN falhar, avisa o usuário -->
+<script>
+if (typeof supabase === 'undefined') {
+  document.addEventListener('DOMContentLoaded', function() {
+    var b = document.getElementById('boot-loading');
+    if (b) b.innerHTML = '<div style="text-align:center;color:#ef4444;padding:24px"><div style="font-size:32px;margin-bottom:12px">⚠️</div><div style="font-size:14px">Falha ao carregar recursos.</div><div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px">Verifique sua conexão e recarregue a página.</div><button onclick="location.reload()" style="margin-top:16px;padding:10px 20px;background:#6366f1;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">🔄 Recarregar</button></div>';
+  });
+}
+</script>
+
+<!-- Google Calendar integrado via link direto -->
+<style>
+:root {
+  --bg: #07090f;
+  --bg2: #0d1020;
+  --bg3: #131729;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #f0f2ff;
+  --text2: rgba(240,242,255,0.55);
+  --text3: rgba(240,242,255,0.30);
+  --indigo: #6366f1;
+  --indigo2: #4f46e5;
+  --violet: #8b5cf6;
+  --cyan: #06b6d4;
+  --green: #10b981;
+  --amber: #f59e0b;
+  --orange: #f97316;
+  --pink: #ec4899;
+  --red: #ef4444;
+}
+
+/* ─── TEMA CLARO ─── */
+body.light-mode {
+  --bg: #f0f2f8;
+  --bg2: #ffffff;
+  --bg3: #e8ebf4;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.14);
+  --text: #111827;
+  --text2: rgba(17,24,39,0.65);
+  --text3: rgba(17,24,39,0.4);
+}
+/* Inputs e selects */
+body.light-mode input,
+body.light-mode textarea,
+body.light-mode select {
+  background: rgba(0,0,0,0.04);
+  color: #111827;
+  border-color: rgba(0,0,0,0.14);
+}
+body.light-mode input::placeholder,
+body.light-mode textarea::placeholder { color: rgba(17,24,39,0.35); }
+body.light-mode select option { background: #fff; color: #111827; }
+/* Scrollbar */
+body.light-mode ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.25); }
+/* Sidebar */
+body.light-mode .sidebar {
+  background: #ffffff;
+  border-right-color: rgba(0,0,0,0.08);
+  box-shadow: 2px 0 16px rgba(0,0,0,0.06);
+}
+body.light-mode .sidebar-user { border-top-color: rgba(0,0,0,0.07); }
+body.light-mode .logo-text { color: #111827; }
+body.light-mode .logo-sub { color: rgba(17,24,39,0.45); }
+body.light-mode .nav-item { color: rgba(17,24,39,0.5); }
+body.light-mode .nav-item:hover { background: rgba(99,102,241,0.07); color: #6366f1; }
+body.light-mode .nav-item.active { background: rgba(99,102,241,0.1); color: #6366f1; }
+body.light-mode .nav-badge { background: rgba(99,102,241,0.15); color: #4f46e5; }
+body.light-mode .nav-badge.ai { background: rgba(99,102,241,0.15); color: #4f46e5; }
+body.light-mode #sidebar-user-name { color: #111827; }
+body.light-mode #sidebar-user-email { color: rgba(17,24,39,0.45); }
+/* Main */
+body.light-mode .main { background: #f0f2f8; }
+body.light-mode #page-title { color: #111827; }
+body.light-mode #page-date { color: rgba(17,24,39,0.45); }
+body.light-mode #save-status { color: rgba(17,24,39,0.4); }
+/* Cards */
+body.light-mode .card {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.07);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+/* Textos gerais */
+body.light-mode .metric-label { color: rgba(17,24,39,0.5); }
+body.light-mode .metric-sub { color: rgba(17,24,39,0.4); }
+body.light-mode .tag { background: rgba(0,0,0,0.05); color: rgba(17,24,39,0.6); }
+/* Botões */
+body.light-mode button[style*="rgba(255,255,255,0.0"] { background: rgba(0,0,0,0.05) !important; color: #374151 !important; }
+body.light-mode .btn-primary { background: linear-gradient(135deg,#6366f1,#4f46e5) !important; color: #fff !important; }
+/* Telas de auth */
+body.light-mode #boot-loading { background: #f0f2f8; }
+body.light-mode #auth-screen { background: #f0f2f8; }
+body.light-mode #auth-screen > div > div:first-child { background: transparent; }
+body.light-mode #auth-card-login,
+body.light-mode #auth-card-forgot {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.1);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+}
+body.light-mode #auth-card-login label,
+body.light-mode #auth-card-forgot label { color: rgba(17,24,39,0.5); }
+/* Pills do topo */
+body.light-mode .pill { color: #374151 !important; }
+body.light-mode .pill-indigo { background: rgba(99,102,241,0.1) !important; color: #4f46e5 !important; border-color: rgba(99,102,241,0.2) !important; }
+/* Hero do dashboard */
+body.light-mode #hero-pct-txt { color: #111827; }
+/* Kanban */
+body.light-mode .kanban-col { background: #f0f2f8; border-color: rgba(0,0,0,0.07); }
+body.light-mode .kanban-col-title { color: rgba(17,24,39,0.5); }
+body.light-mode .lead-card { background: #ffffff; border-color: rgba(0,0,0,0.07); box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+body.light-mode .lead-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+/* Modais */
+body.light-mode #change-password-modal > div {
+  background: #fff;
+  border-color: rgba(0,0,0,0.1);
+}
+body.light-mode #plans-modal > div {
+  background: #fff;
+  border-color: rgba(0,0,0,0.1);
+}
+body.light-mode #billing-wall { background: #f0f2f8; }
+/* Barras de progresso */
+body.light-mode .bar-track { background: rgba(0,0,0,0.08); }
+/* Formulários de cadastro */
+body.light-mode .form-group label { color: rgba(17,24,39,0.6); }
+/* Mobile tabbar */
+body.light-mode .mobile-tabbar {
+  background: rgba(255,255,255,0.97);
+  border-top-color: rgba(0,0,0,0.08);
+}
+body.light-mode .mobile-tabbar button { color: rgba(17,24,39,0.4); }
+body.light-mode .mobile-tabbar button.active { color: #6366f1; background: rgba(99,102,241,0.08); }
+/* Overlay */
+body.light-mode .overlay.open { background: rgba(0,0,0,0.4); }
+/* Toasts e badges */
+body.light-mode .nav-badge { color: #4f46e5; }
+/* Sidebar mini-goal */
+body.light-mode #sidebar-pct { color: #111827; }
+body.light-mode #sidebar-remain { color: rgba(17,24,39,0.45); }
+
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(99,102,241,0.4);border-radius:99px}
+input,textarea,select{font-family:'Inter',sans-serif;color:var(--text);background:rgba(255,255,255,0.06);border:1px solid var(--border2);border-radius:10px;outline:none;padding:10px 13px;font-size:13px;width:100%;transition:border-color .2s}
+input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus,input:-webkit-autofill:active{-webkit-box-shadow:0 0 0 30px #0d1020 inset !important;-webkit-text-fill-color:var(--text) !important;caret-color:var(--text) !important}
+body.light-mode input:-webkit-autofill,body.light-mode input:-webkit-autofill:hover,body.light-mode input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 30px #ffffff inset !important;-webkit-text-fill-color:#111827 !important}
+input:focus,textarea:focus,select:focus{border-color:var(--indigo)}
+select option{background:#0d1020}
+button{font-family:'Inter',sans-serif;cursor:pointer;border:none;transition:all .2s}
+.app{display:flex;min-height:100vh}
+
+/* ─── SIDEBAR ─── */
+.sidebar{width:230px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 0;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto}
+.logo{padding:0 20px 24px;display:flex;align-items:center;gap:12px}
+.logo-icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--indigo),var(--indigo2));display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;box-shadow:0 4px 20px rgba(99,102,241,0.4)}
+.logo-text{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:18px;letter-spacing:-0.02em}
+.logo-sub{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.12em;margin-top:1px}
+.goal-mini{margin:0 14px 20px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.18);border-radius:12px;padding:12px 14px}
+.goal-mini-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.goal-mini-val{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:var(--indigo)}
+.goal-mini-sub{font-size:9px;color:var(--text3);margin-top:4px}
+nav{flex:1}
+.nav-item{width:100%;display:flex;align-items:center;gap:12px;padding:11px 20px;background:transparent;border:none;border-left:2px solid transparent;color:var(--text2);font-size:13px;font-weight:500;font-family:'Inter',sans-serif;text-align:left;position:relative;transition:all .15s}
+.nav-item:hover{background:rgba(255,255,255,0.03);color:var(--text)}
+.nav-item.active{background:rgba(99,102,241,0.1);border-left-color:var(--indigo);color:#a5b4fc;font-weight:700}
+.nav-icon{font-size:17px;width:20px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;border-radius:10px;font-size:9px;font-weight:800;padding:2px 7px;line-height:1.4}
+.nav-badge.ai{background:rgba(139,92,246,0.3);color:#c4b5fd}
+.sidebar-user{padding:16px 20px 0;border-top:1px solid var(--border);margin-top:8px;display:flex;align-items:center;gap:10px}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--indigo),var(--indigo2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0}
+.user-name{font-size:12px;font-weight:700}
+.user-plan{font-size:9px;color:var(--text3)}
+
+/* ─── MAIN ─── */
+.main{margin-left:230px;flex:1;padding:28px 30px 60px;min-width:0}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:26px;flex-wrap:wrap;gap:12px}
+.page-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:24px;letter-spacing:-0.02em}
+.page-date{font-size:12px;color:var(--text3);margin-top:3px}
+.header-pills{display:flex;gap:8px}
+.pill{padding:8px 14px;border-radius:10px;font-size:11px;font-weight:700}
+.pill-green{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:var(--green)}
+.pill-indigo{background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);color:#a5b4fc}
+
+/* ─── CARDS ─── */
+.card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:16px;padding:20px 22px;backdrop-filter:blur(12px);position:relative;overflow:hidden}
+.card-glow::before{content:'';position:absolute;inset:0;border-radius:16px;opacity:.06;pointer-events:none}
+.section{display:none}
+.section.active{display:block}
+
+/* ─── GRID ─── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.grid-auto{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.flex-col{display:flex;flex-direction:column;gap:14px}
+
+/* ─── BAR ─── */
+.bar-wrap{width:100%}
+.bar-label-row{display:flex;justify-content:space-between;margin-bottom:5px;font-size:11px;color:var(--text2)}
+.bar-label-pct{font-weight:700}
+.bar-track{background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden}
+.bar-fill{border-radius:99px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+
+/* ─── TAGS ─── */
+.tag{display:inline-flex;align-items:center;gap:4px;border-radius:6px;font-size:10px;font-weight:700;padding:3px 9px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+
+/* ─── METRIC CARD ─── */
+.metric-card{display:flex;align-items:flex-start;gap:14px}
+.metric-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.metric-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.metric-val{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:22px;letter-spacing:-.02em;line-height:1}
+.metric-sub{font-size:11px;color:var(--text3);margin-top:3px}
+
+/* ─── RING ─── */
+.ring-wrap{position:relative;flex-shrink:0}
+.ring-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+
+/* ─── KANBAN ─── */
+.kanban{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px}
+.kanban-col{min-width:190px;max-width:190px;flex-shrink:0}
+.kanban-col-header{display:flex;align-items:center;gap:6px;margin-bottom:10px;padding:8px 10px;border-radius:10px;font-size:11px;font-weight:700}
+.kanban-col-count{margin-left:auto;border-radius:10px;font-size:9px;font-weight:800;padding:2px 7px;line-height:1.4}
+.lead-card{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:12px;cursor:pointer;transition:all .2s;margin-bottom:8px}
+.lead-card:hover{border-color:rgba(255,255,255,0.15);transform:translateY(-1px)}
+.lead-card.selected{box-shadow:0 0 16px rgba(99,102,241,0.3)}
+
+/* ─── TABLE ─── */
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;text-align:left;padding-bottom:10px;font-weight:600;border-bottom:1px solid var(--border)}
+td{padding:12px 8px;border-bottom:1px solid rgba(255,255,255,0.04)}
+td:first-child{padding-left:0}
+td:last-child{padding-right:0}
+
+/* ─── POMODORO ─── */
+.pomodoro-ring{filter:drop-shadow(0 0 12px rgba(99,102,241,0.4))}
+.pomodoro-btn{padding:12px 28px;border-radius:12px;font-weight:800;font-size:14px;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s}
+
+/* ─── AI CHAT ─── */
+.chat-wrap{display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:320px;padding-right:4px}
+.chat-msg{max-width:85%;padding:12px 15px;border-radius:12px;font-size:13px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.chat-msg.user{background:linear-gradient(135deg,var(--indigo),var(--indigo2));align-self:flex-end;border-radius:12px 4px 12px 12px}
+.chat-msg.assistant{background:rgba(255,255,255,0.06);align-self:flex-start;border-radius:4px 12px 12px 12px}
+.typing-dot{width:7px;height:7px;border-radius:50%;background:var(--violet);animation:bounce .8s infinite}
+.typing-dot:nth-child(2){animation-delay:.15s}
+.typing-dot:nth-child(3){animation-delay:.3s}
+
+/* ─── ANIMATIONS ─── */
+@keyframes bounce{0%,80%,100%{transform:scale(1)}40%{transform:scale(1.4)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(99,102,241,0.2)}50%{box-shadow:0 0 40px rgba(99,102,241,0.4)}}
+.fade-in{animation:fadeIn .35s ease both}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+
+/* ─── FORMS ─── */
+.form-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.form-group label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:5px}
+.form-actions{display:flex;gap:8px;margin-top:14px}
+.btn-primary{padding:10px 20px;background:linear-gradient(135deg,var(--indigo),var(--indigo2));color:#fff;border-radius:10px;font-weight:700;font-size:12px;box-shadow:0 4px 14px rgba(99,102,241,0.3)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(99,102,241,0.4)}
+.btn-ghost{padding:10px 18px;background:rgba(255,255,255,0.06);color:var(--text2);border-radius:10px;font-weight:600;font-size:12px}
+
+/* ─── WEEK GRID ─── */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.week-day-label{font-size:9px;color:var(--text3);text-align:center;margin-bottom:4px}
+.week-day-box{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;transition:all .2s}
+
+/* ─── ALERT ITEM ─── */
+.alert-item{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)}
+.alert-item:last-child{border-bottom:none}
+.alert-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+
+/* ─── RESPONSIVE ─── */
+.mobile-nav-toggle{display:none;position:fixed;top:16px;left:16px;z-index:500;width:44px;height:44px;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;align-items:center;justify-content:center;font-size:20px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.4)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:400}
+.overlay.open{display:block}
+.mobile-tabbar{display:none;position:fixed;bottom:0;left:0;right:0;z-index:450;background:rgba(13,16,32,0.97);backdrop-filter:blur(16px);border-top:1px solid var(--border);padding:6px 4px;justify-content:space-around;align-items:center}
+.mobile-tabbar button{display:flex;flex-direction:column;align-items:center;gap:2px;background:transparent;border:none;color:rgba(240,242,255,0.4);font-size:9px;padding:6px 4px;flex:1;border-radius:10px}
+.mobile-tabbar button.active{color:#a5b4fc;background:rgba(99,102,241,0.12)}
+.mobile-tabbar .tab-icon{font-size:18px}
+
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%);transition:transform .3s}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0;padding:76px 16px 86px}
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
+  .mobile-nav-toggle{display:flex !important}
+  .mobile-tabbar{display:flex !important}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ TELA DE CARREGAMENTO INICIAL ═══════════════════ -->
+<div id="boot-loading" style="position:fixed;inset:0;background:#07090f;display:flex;align-items:center;justify-content:center;z-index:1000">
+  <div style="text-align:center">
+    <img src="https://raw.githubusercontent.com/suelenpadao/s-nexus/main/ChatGPT%20Image%2011%20de%20jul.%20de%202026%2C%2011_03_45.png" style="width:80px;height:80px;object-fit:contain;margin:0 auto 16px;display:block;animation:pulse 1.6s infinite" onerror="this.style.display='none'">
+    <div style="color:rgba(240,242,255,0.4);font-size:13px">Carregando S Nexus...</div>
+  </div>
+</div>
+
+<!-- ═══════════════════ TELA DE LOGIN / CADASTRO ═══════════════════ -->
+<div id="auth-screen" style="display:none;position:fixed;inset:0;z-index:900;align-items:center;justify-content:center;padding:20px;overflow:auto">
+  <!-- Fundo com gradiente animado -->
+  <div style="position:fixed;inset:0;background:#07090f;z-index:-2"></div>
+  <div style="position:fixed;inset:0;z-index:-1;background:radial-gradient(ellipse at 20% 50%,rgba(99,102,241,0.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(139,92,246,0.06) 0%,transparent 50%)"></div>
+
+  <div style="width:100%;max-width:420px;position:relative">
+
+    <!-- Logo + nome -->
+    <div style="text-align:center;margin-bottom:28px">
+      <img src="https://raw.githubusercontent.com/suelenpadao/s-nexus/main/ChatGPT%20Image%2011%20de%20jul.%20de%202026%2C%2011_03_45.png"
+        style="width:200px;height:auto;object-fit:contain;margin:0 auto 8px;display:block;filter:drop-shadow(0 8px 32px rgba(99,102,241,0.35))"
+        onerror="this.style.display='none'">
+      <div style="font-size:11px;color:rgba(240,242,255,0.3);text-transform:uppercase;letter-spacing:.15em;margin-top:4px">CRM Premium para Corretores</div>
+    </div>
+
+    <!-- Card principal -->
+    <div id="auth-card-login" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:32px;backdrop-filter:blur(20px);box-shadow:0 24px 64px rgba(0,0,0,0.4)">
+
+      <!-- Tabs -->
+      <div style="display:flex;gap:6px;margin-bottom:24px;background:rgba(255,255,255,0.04);border-radius:12px;padding:4px">
+        <button id="auth-tab-login" onclick="setAuthTab('login')" style="flex:1;padding:10px;border-radius:9px;font-size:13px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;cursor:pointer;transition:all .2s;box-shadow:0 4px 12px rgba(99,102,241,0.3)">Entrar</button>
+        <button id="auth-tab-signup" onclick="setAuthTab('signup')" style="flex:1;padding:10px;border-radius:9px;font-size:13px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;background:transparent;color:rgba(240,242,255,0.5);border:none;cursor:pointer;transition:all .2s">Criar Conta</button>
+      </div>
+
+      <!-- Trial badge (visível só no cadastro) -->
+      <div id="auth-trial-badge" style="display:none;text-align:center;margin-bottom:16px">
+        <span style="background:linear-gradient(135deg,rgba(16,185,129,0.15),rgba(16,185,129,0.08));border:1px solid rgba(16,185,129,0.3);border-radius:20px;padding:6px 16px;font-size:11px;font-weight:700;color:#10b981;letter-spacing:.05em">🎁 7 DIAS GRÁTIS — Sem cartão de crédito</span>
+      </div>
+
+      <!-- Mensagens -->
+      <div id="auth-error" style="display:none;margin-bottom:16px;padding:12px 14px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:10px;color:#ef4444;font-size:13px;display:flex;align-items:flex-start;gap:8px">
+        <span style="flex-shrink:0;margin-top:1px">⚠</span><span id="auth-error-text"></span>
+      </div>
+      <div id="auth-info" style="display:none;margin-bottom:16px;padding:12px 14px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);border-radius:10px;color:#10b981;font-size:13px;display:flex;align-items:flex-start;gap:8px">
+        <span style="flex-shrink:0;margin-top:1px">✓</span><span id="auth-info-text"></span>
+      </div>
+
+      <!-- Campo usuário -->
+      <div style="margin-bottom:14px">
+        <label style="font-size:10px;color:rgba(240,242,255,0.45);text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:6px;font-weight:600">Nome de Usuário</label>
+        <div style="position:relative">
+          <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;opacity:0.4">👤</span>
+          <input id="auth-email" type="text" placeholder="ex: joaosilva" autocomplete="username"
+            style="padding-left:38px;font-size:14px;height:46px;border-radius:11px"
+            oninput="clearAuthMessages()">
+        </div>
+      </div>
+
+      <!-- Campo senha -->
+      <div style="margin-bottom:20px">
+        <label style="font-size:10px;color:rgba(240,242,255,0.45);text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:6px;font-weight:600">Senha</label>
+        <div style="position:relative">
+          <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;opacity:0.4">🔒</span>
+          <input id="auth-password" type="password" placeholder="mínimo 6 caracteres" autocomplete="current-password"
+            style="padding-left:38px;padding-right:46px;font-size:14px;height:46px;border-radius:11px"
+            onkeydown="if(event.key==='Enter')submitAuth()"
+            oninput="clearAuthMessages()">
+          <button onclick="togglePasswordVisibility()" id="auth-pwd-toggle"
+            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:transparent;border:none;cursor:pointer;font-size:16px;opacity:0.4;padding:4px"
+            title="Mostrar/ocultar senha">👁</button>
+        </div>
+        <!-- Força da senha (visível só no cadastro) -->
+        <div id="auth-password-strength" style="display:none;margin-top:8px">
+          <div style="display:flex;gap:4px;margin-bottom:4px">
+            <div id="pstr-1" style="flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,0.1);transition:all .3s"></div>
+            <div id="pstr-2" style="flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,0.1);transition:all .3s"></div>
+            <div id="pstr-3" style="flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,0.1);transition:all .3s"></div>
+            <div id="pstr-4" style="flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,0.1);transition:all .3s"></div>
+          </div>
+          <div id="pstr-label" style="font-size:10px;color:rgba(255,255,255,0.3)"></div>
+        </div>
+      </div>
+
+      <!-- Botão principal -->
+      <button id="auth-submit-btn" onclick="submitAuth()"
+        style="width:100%;padding:14px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border-radius:12px;font-weight:800;font-size:15px;font-family:'Plus Jakarta Sans',sans-serif;border:none;cursor:pointer;box-shadow:0 6px 20px rgba(99,102,241,0.4);transition:all .2s;letter-spacing:.01em">
+        Entrar
+      </button>
+
+      <!-- Esqueci senha -->
+      <div id="auth-forgot" style="text-align:center;margin-top:16px">
+        <button onclick="showForgotPassword()"
+          style="background:transparent;border:none;color:rgba(240,242,255,0.4);font-size:12px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:underline;text-underline-offset:3px">
+          Esqueci minha senha
+        </button>
+      </div>
+    </div>
+
+    <!-- Card recuperação de senha -->
+    <div id="auth-card-forgot" style="display:none;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:32px;backdrop-filter:blur(20px);box-shadow:0 24px 64px rgba(0,0,0,0.4)">
+      <button onclick="hideForgotPassword()" style="background:transparent;border:none;color:rgba(255,255,255,0.4);font-size:12px;cursor:pointer;margin-bottom:16px;font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;gap:4px">
+        ← Voltar ao login
+      </button>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:18px;color:#fff;margin-bottom:6px">Recuperar senha</div>
+      <div style="font-size:12px;color:rgba(240,242,255,0.45);margin-bottom:20px">Informe seu e-mail cadastrado. Vamos enviar um link para redefinir sua senha.</div>
+
+      <div id="forgot-error" style="display:none;margin-bottom:14px;padding:12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:10px;color:#ef4444;font-size:12px"></div>
+      <div id="forgot-info" style="display:none;margin-bottom:14px;padding:12px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);border-radius:10px;color:#10b981;font-size:12px"></div>
+
+      <div style="margin-bottom:16px">
+        <label style="font-size:10px;color:rgba(240,242,255,0.45);text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:6px;font-weight:600">E-mail cadastrado</label>
+        <input id="forgot-email" type="email" placeholder="seu@email.com" style="font-size:14px;height:46px;border-radius:11px">
+      </div>
+      <button onclick="submitForgotPassword()" id="forgot-btn"
+        style="width:100%;padding:14px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border-radius:12px;font-weight:700;font-size:14px;font-family:'Plus Jakarta Sans',sans-serif;border:none;cursor:pointer;box-shadow:0 6px 20px rgba(99,102,241,0.35)">
+        Enviar link de recuperação
+      </button>
+    </div>
+
+    <!-- Rodapé -->
+    <div style="text-align:center;margin-top:20px">
+      <div style="font-size:11px;color:rgba(240,242,255,0.2)">🔒 Dados protegidos com criptografia de ponta</div>
+      <div style="font-size:10px;color:rgba(240,242,255,0.15);margin-top:4px">S Nexus CRM · Todos os direitos reservados</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ BILLING WALL ═══════════════════════════ -->
+<div id="billing-wall" style="display:none;position:fixed;inset:0;background:#07090f;z-index:950;align-items:center;justify-content:center;padding:20px;overflow:auto">
+  <div style="width:100%;max-width:480px;text-align:center">
+    <div style="font-size:56px;margin-bottom:16px" id="billing-wall-icon">⏰</div>
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:24px;color:#fff;margin-bottom:8px" id="billing-wall-title">Seu período de teste encerrou</div>
+    <div style="font-size:14px;color:rgba(255,255,255,0.5);margin-bottom:32px;line-height:1.6" id="billing-wall-msg">Escolha um plano para continuar usando o S Nexus e não perder seus dados.</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px" id="billing-plans-grid"></div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:16px">
+      Dúvidas? Fale com a gente · S Nexus CRM Premium
+    </div>
+    <button onclick="logout()" style="margin-top:16px;background:transparent;border:none;color:rgba(255,255,255,0.3);font-size:12px;cursor:pointer;text-decoration:underline">Sair da conta</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODAL DE PLANOS ═══════════════════════════ -->
+<div id="plans-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:600;align-items:center;justify-content:center;padding:20px;overflow:auto" onclick="if(event.target===this)closePlansModal()">
+  <div style="width:100%;max-width:860px;background:#0d1020;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:36px;box-shadow:0 32px 80px rgba(0,0,0,0.5)">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+      <div>
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:22px;color:#fff">Escolha seu plano</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.4);margin-top:4px">Cancele quando quiser · Sem fidelidade</div>
+      </div>
+      <button onclick="closePlansModal()" style="background:rgba(255,255,255,0.07);border:none;color:rgba(255,255,255,0.5);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:14px">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:24px" id="plans-modal-grid"></div>
+  </div>
+</div>
+
+<div id="app-wrapper" style="display:none">
+
+<div class="overlay" id="overlay" onclick="toggleMobile()"></div>
+<button class="mobile-nav-toggle" onclick="toggleMobile()">☰</button>
+
+<nav class="mobile-tabbar" id="mobile-tabbar">
+  <button class="mtab-btn active" data-section="dashboard" onclick="goToFromTab('dashboard',this)"><span class="tab-icon">⬡</span>Início</button>
+  <button class="mtab-btn" data-section="crm" onclick="goToFromTab('crm',this)"><span class="tab-icon">◈</span>CRM</button>
+  <button class="mtab-btn" data-section="financial" onclick="goToFromTab('financial',this)"><span class="tab-icon">◎</span>Financ.</button>
+  <button class="mtab-btn" data-section="alerts" onclick="goToFromTab('alerts',this)"><span class="tab-icon">⚡</span>Alertas</button>
+  <button class="mtab-btn" data-section="ai" onclick="goToFromTab('ai',this)"><span class="tab-icon">✦</span>IA</button>
+</nav>
+
+<div class="app">
+<!-- ───────────────── SIDEBAR ───────────────── -->
+<aside class="sidebar" id="sidebar">
+  <div class="logo">
+    <img src="https://raw.githubusercontent.com/suelenpadao/s-nexus/main/ChatGPT%20Image%2011%20de%20jul.%20de%202026%2C%2011_03_45.png" style="width:40px;height:40px;border-radius:10px;object-fit:contain" onerror="this.outerHTML='<div class=logo-icon>S</div>'">
+    <div>
+      <div class="logo-text">S Nexus</div>
+      <div class="logo-sub">CRM Premium</div>
+    </div>
+  </div>
+
+  <div class="goal-mini">
+    <div class="goal-mini-label">Meta R$ 1.000.000</div>
+    <div class="goal-mini-val" id="sidebar-pct">2.2%</div>
+    <div style="margin-top:7px"><div class="bar-track" style="height:4px"><div class="bar-fill" id="sidebar-bar" style="height:4px;background:var(--indigo)"></div></div></div>
+    <div class="goal-mini-sub" id="sidebar-remain"></div>
+  </div>
+
+  <nav>
+    <button class="nav-item active" onclick="goTo('dashboard',this)">
+      <span class="nav-icon">⬡</span> Dashboard
+    </button>
+    <button class="nav-item" onclick="goTo('crm',this)">
+      <span class="nav-icon">◈</span> CRM / Leads
+    </button>
+    <button class="nav-item" onclick="goTo('financial',this)">
+      <span class="nav-icon">◎</span> Financeiro
+    </button>
+    <button class="nav-item" onclick="goTo('performance',this)">
+      <span class="nav-icon">◉</span> Performance
+    </button>
+    <button class="nav-item" onclick="goTo('postsale',this)">
+      <span class="nav-icon">♥</span> Pós-venda
+    </button>
+    <button class="nav-item" onclick="goTo('alerts',this)">
+      <span class="nav-icon">⚡</span> Alertas
+      <span class="nav-badge" id="alert-badge">2</span>
+    </button>
+    <button class="nav-item" onclick="goTo('ai',this)">
+      <span class="nav-icon">✦</span> IA Nexus
+      <span class="nav-badge ai">AI</span>
+    </button>
+    <button class="nav-item" id="nav-admin" onclick="goTo('admin',this)" style="display:none">
+      <span class="nav-icon">🛡</span> Admin
+    </button>
+  </nav>
+
+  <div class="sidebar-user">
+    <input type="file" id="avatar-file-input" accept="image/*" style="display:none" onchange="handleAvatarUpload(this.files[0])">
+    <div class="avatar" id="sidebar-avatar" onclick="document.getElementById('avatar-file-input').click()" style="cursor:pointer;position:relative;background-size:cover;background-position:center" title="Clique para alterar a foto">
+      <span id="sidebar-avatar-letter">S</span>
+    </div>
+    <div style="flex:1;min-width:0">
+      <div class="user-name" id="sidebar-user-name" onclick="promptUserName()" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer" title="Clique para editar seu nome">Corretor Premium</div>
+      <div class="user-plan" id="sidebar-user-email">S Nexus · 2025</div>
+    </div>
+  </div>
+
+  <div style="padding:14px 20px 0;display:flex;gap:6px">
+    <input type="file" id="backup-file-input" accept=".json" style="display:none" onchange="importBackup(this.files[0])">
+    <button onclick="exportBackup()" title="Baixar uma cópia de segurança de todos os dados" style="flex:1;padding:7px;background:rgba(255,255,255,0.05);border:1px solid var(--border2);border-radius:8px;color:var(--text2);font-size:10px">⬇ Backup</button>
+    <button onclick="document.getElementById('backup-file-input').click()" title="Restaurar dados de um arquivo de backup" style="flex:1;padding:7px;background:rgba(255,255,255,0.05);border:1px solid var(--border2);border-radius:8px;color:var(--text2);font-size:10px">⬆ Restaurar</button>
+  </div>
+  <!-- Badge de trial -->
+  <div id="trial-badge-sidebar" style="display:none;padding:10px 16px 0">
+    <div style="background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(139,92,246,0.1));border:1px solid rgba(99,102,241,0.3);border-radius:10px;padding:10px 12px;text-align:center">
+      <div style="font-size:10px;color:#a5b4fc;font-weight:700;letter-spacing:.05em">🎁 TRIAL ATIVO</div>
+      <div id="trial-days-label" style="font-size:18px;font-weight:800;color:#fff;margin:2px 0">7</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.4)">dias restantes</div>
+      <button onclick="openPlansModal()" style="margin-top:8px;width:100%;padding:6px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer">Assinar agora</button>
+    </div>
+  </div>
+  <div style="padding:8px 20px 0">
+    <button onclick="openPlansModal()" style="width:100%;padding:8px;background:linear-gradient(135deg,rgba(99,102,241,0.12),rgba(139,92,246,0.08));border:1px solid rgba(99,102,241,0.25);border-radius:8px;color:#a5b4fc;font-size:11px;font-weight:700">💎 Ver Planos</button>
+  </div>
+  <div style="padding:8px 20px 0">
+    <button id="google-connect-btn" onclick="connectGoogleCalendar()" style="width:100%;padding:8px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:8px;color:#a5b4fc;font-size:11px;font-weight:600">📅 Conectar Google Agenda</button>
+  </div>
+  <div style="padding:8px 20px 0">
+    <button onclick="resetAccountData()" style="width:100%;padding:8px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;color:#f59e0b;font-size:11px;font-weight:600">🔄 Resetar dados da conta</button>
+  </div>
+  <div style="padding:8px 20px 0">
+    <button onclick="openChangePassword()" style="width:100%;padding:8px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:8px;color:#a5b4fc;font-size:11px;font-weight:600">🔐 Trocar Senha</button>
+  </div>
+  <div style="padding:8px 20px 0">
+    <button id="theme-toggle-btn" onclick="toggleTheme()" style="width:100%;padding:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text2);font-size:11px;font-weight:600">🌙 Tema Escuro</button>
+  </div>
+  <div style="padding:8px 20px 0">
+    <button onclick="logout()" style="width:100%;padding:8px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;color:#ef4444;font-size:11px;font-weight:600">⎋ Sair da conta</button>
+  </div>
+</aside>
+
+<!-- ───────────────── MAIN ───────────────── -->
+<main class="main">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div>
+      <div class="page-title" id="page-title">Dashboard</div>
+      <div class="page-date" id="page-date"></div>
+    </div>
+    <div class="header-pills">
+      <div id="save-status" style="font-size:10px;color:var(--text3);align-self:center;margin-right:4px;display:flex;align-items:center;gap:5px"></div>
+      <button id="save-btn" onclick="saveState(true)" class="pill" style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);color:#10b981;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:6px">
+        💾 Salvar Alterações
+      </button>
+      <div class="pill pill-green">🔥 Streak: <span id="streak-val">3</span>d</div>
+      <div class="pill pill-indigo">⚡ Score: <span id="score-val">0</span></div>
+    </div>
+  </div>
+
+  <!-- ── DASHBOARD ── -->
+  <div id="sec-dashboard" class="section active fade-in">
+
+    <!-- SAUDAÇÃO PERSONALIZADA -->
+    <div class="card" style="margin-bottom:14px;padding:22px 26px;background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(139,92,246,0.06));border-color:rgba(99,102,241,0.2)">
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <div id="hero-avatar" style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--indigo),var(--indigo2));display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:24px;flex-shrink:0;background-size:cover;background-position:center;box-shadow:0 4px 18px rgba(99,102,241,0.35)">S</div>
+        <div style="flex:1;min-width:200px">
+          <div id="greeting-text" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.01em">Olá!</div>
+          <div id="motivational-quote" style="font-size:12px;color:var(--text2);margin-top:5px;line-height:1.5;font-style:italic"></div>
+        </div>
+        <button onclick="newQuote()" title="Nova frase" style="padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid var(--border2);border-radius:9px;color:var(--text2);font-size:12px;flex-shrink:0">🔄</button>
+      </div>
+    </div>
+
+    <!-- HERO GOAL -->
+    <div class="card" style="margin-bottom:14px;padding:28px;box-shadow:0 0 40px rgba(99,102,241,0.1)">
+      <div style="display:flex;align-items:center;gap:32px;flex-wrap:wrap">
+        <div class="ring-wrap" style="width:150px;height:150px">
+          <svg width="150" height="150" style="transform:rotate(-90deg)">
+            <circle cx="75" cy="75" r="62" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="12"/>
+            <circle id="hero-ring" cx="75" cy="75" r="62" fill="none" stroke="var(--indigo)" stroke-width="12" stroke-linecap="round"
+              stroke-dasharray="0 389" style="filter:drop-shadow(0 0 8px rgba(99,102,241,0.7));transition:stroke-dasharray 1.2s cubic-bezier(.4,0,.2,1)"/>
+          </svg>
+          <div class="ring-inner">
+            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:22px;color:var(--text)" id="hero-pct-txt">0.0%</div>
+            <div style="font-size:9px;color:var(--text3)">da meta</div>
+          </div>
+        </div>
+
+        <div style="flex:1;min-width:260px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+            <span style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em" id="meta-year-label">Meta Anual 2025</span>
+            <span class="tag" style="background:rgba(99,102,241,0.15);color:var(--indigo);border:1px solid rgba(99,102,241,0.3)">🏆 Ativo</span>
+            <button onclick="editGoal()" title="Editar meta anual" style="padding:2px 8px;background:rgba(255,255,255,0.07);border:1px solid var(--border2);border-radius:6px;color:var(--text3);font-size:10px">✎ Editar</button>
+          </div>
+          <div id="hero-goal-display" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:40px;letter-spacing:-.03em;line-height:1;cursor:pointer" onclick="editGoal()" title="Clique para editar a meta">R$ 1.000.000</div>
+          <div style="font-size:13px;color:var(--text2);margin-top:5px;margin-bottom:18px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span>Acumulado: <span style="color:var(--indigo);font-weight:700" id="hero-acc"></span></span>
+            <button onclick="editCommission()" title="Editar comissão acumulada" style="padding:2px 8px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);border-radius:6px;color:#a5b4fc;font-size:10px">✎</button>
+            <span style="color:var(--text3)">·</span>
+            <span>Faltam: <span style="color:var(--amber);font-weight:700" id="hero-remain"></span></span>
+          </div>
+          <div class="bar-track" style="height:10px"><div class="bar-fill" id="hero-bar" style="height:10px;background:linear-gradient(90deg,var(--indigo),#818cf8);box-shadow:0 0 10px rgba(99,102,241,0.4)"></div></div>
+          <div style="display:flex;gap:28px;margin-top:16px;flex-wrap:wrap" id="goal-stats"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- METRICS -->
+    <div class="grid-auto" style="margin-bottom:14px" id="dash-metrics"></div>
+
+    <!-- CHART + PAYMENTS -->
+    <div class="grid-2" style="margin-bottom:14px">
+      <div class="card">
+        <div style="font-size:13px;font-weight:700;margin-bottom:18px">Projeção de Comissão 2025</div>
+        <div style="display:flex;align-items:flex-end;gap:5px;height:130px" id="chart-bars"></div>
+        <div style="display:flex;gap:16px;margin-top:10px">
+          <div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;border-radius:2px;background:var(--indigo)"></div><span style="font-size:10px;color:var(--text3)">Realizado</span></div>
+          <div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;border-radius:2px;background:rgba(255,255,255,0.1)"></div><span style="font-size:10px;color:var(--text3)">Projetado</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:700;margin-bottom:16px">📅 Próximos Recebimentos</div>
+        <div id="upcoming-payments"></div>
+      </div>
+    </div>
+
+    <!-- DAILY PERFORMANCE -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <div style="font-size:13px;font-weight:700">Performance Diária — Hoje</div>
+        <span class="tag" style="background:rgba(16,185,129,0.12);color:var(--green);border:1px solid rgba(16,185,129,0.25)">Score: <span id="perf-score-tag">0</span> pts</span>
+      </div>
+      <div id="daily-goals" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px"></div>
+    </div>
+
+  </div><!-- /dashboard -->
+
+  <!-- ── CRM ── -->
+  <div id="sec-crm" class="section">
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+      <div style="flex:1;min-width:200px;position:relative">
+        <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px">🔍</span>
+        <input id="crm-search" style="padding-left:36px" placeholder="Buscar lead por nome ou telefone..." oninput="filterLeads()">
+      </div>
+      <button onclick="setCRMView('kanban')" id="btn-kanban" class="btn-primary" style="padding:10px 16px;font-size:12px">🗂 Kanban</button>
+      <button onclick="setCRMView('lista')" id="btn-lista" class="btn-ghost" style="padding:10px 16px;font-size:12px">☰ Lista</button>
+      <button onclick="toggleAddLead()" class="btn-primary" style="padding:10px 18px;font-size:12px">+ Novo Lead</button>
+    </div>
+
+    <!-- ADD LEAD FORM -->
+    <div id="add-lead-form" class="card" style="display:none;margin-bottom:14px;border-color:rgba(99,102,241,0.25);box-shadow:0 0 20px rgba(99,102,241,0.08)">
+      <div style="font-size:13px;font-weight:700;margin-bottom:14px">Cadastrar Novo Lead</div>
+      <div class="form-row">
+        <div class="form-group"><label>Nome completo</label><input id="new-name" placeholder="Ex: Carlos Silva"></div>
+        <div class="form-group"><label>WhatsApp</label><input id="new-phone" placeholder="47 9 9999-9999"></div>
+        <div class="form-group"><label>Origem</label>
+          <select id="new-origin"><option>Instagram</option><option>Indicação</option><option>Portal</option><option>Site</option><option>Evento</option><option>Google</option></select>
+        </div>
+        <div class="form-group"><label>Temperatura</label>
+          <select id="new-temp"><option value="quente">🔴 Quente</option><option value="morno" selected>🟡 Morno</option><option value="frio">🔵 Frio</option></select>
+        </div>
+        <div class="form-group" style="grid-column:1/-1"><label>Observações</label><textarea id="new-notes" rows="2" placeholder="Interesse principal, orçamento, urgência..."></textarea></div>
+      </div>
+      <div class="form-actions"><button onclick="saveLead()" class="btn-primary">Salvar Lead</button><button onclick="toggleAddLead()" class="btn-ghost">Cancelar</button></div>
+    </div>
+
+    <div id="crm-kanban" style=""></div>
+    <div id="crm-lista" style="display:none"></div>
+    <div id="lead-detail" style="margin-top:14px"></div>
+  </div>
+
+  <!-- ── FINANCIAL ── -->
+  <div id="sec-financial" class="section">
+    <div class="grid-4" id="fin-metrics" style="margin-bottom:14px"></div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:14px;font-weight:700">Vendas Realizadas</div>
+      <button onclick="toggleAddSale()" class="btn-primary" style="font-size:12px;padding:9px 16px">+ Registrar Venda</button>
+    </div>
+
+    <div id="add-sale-form" class="card" style="display:none;margin-bottom:14px;border-color:rgba(99,102,241,0.25)">
+      <div style="font-size:13px;font-weight:700;margin-bottom:14px" id="sale-form-title">Registrar Nova Venda</div>
+      <div class="form-row">
+        <div class="form-group"><label>Comprador</label><input id="s-buyer" placeholder="Nome do cliente"></div>
+        <div class="form-group"><label>Empreendimento</label><input id="s-seller" placeholder="Nome do empreendimento"></div>
+        <div class="form-group"><label>Valor da Venda (R$)</label><input id="s-value" type="number" placeholder="885000"></div>
+        <div class="form-group"><label>Comissão Líquida (%)</label><input id="s-pct" type="number" value="2.5" step="0.1"></div>
+        <div class="form-group">
+          <label>Comissão Total (R$) <span style="color:var(--indigo);font-weight:600">— editável</span></label>
+          <input id="s-comm-manual" type="number" step="0.01" placeholder="Calculado automaticamente">
+          <div style="font-size:9px;color:var(--text3);margin-top:4px">Deixe em branco para usar o % acima, ou digite um valor manual</div>
+        </div>
+        <div class="form-group"><label>Data do contrato</label><input id="s-date" type="date"></div>
+        <div class="form-group" id="s-inst-group"><label>Nº de parcelas</label><input id="s-inst" type="number" value="1" min="1" max="36"><div style="font-size:9px;color:var(--text3);margin-top:4px">Altere para adicionar ou remover parcelas</div></div>
+        <div class="form-group" style="grid-column:1/-1"><label>Observações</label><textarea id="s-notes" rows="2"></textarea></div>
+      </div>
+      <div id="sale-preview" style="margin:12px 0;padding:14px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:10px;display:none">
+        <span style="font-size:11px;color:var(--text3)" id="sale-preview-label">Comissão líquida calculada: </span>
+        <span id="sale-preview-val" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:800;color:var(--green)"></span>
+      </div>
+      <div class="form-actions">
+        <button onclick="saveSale()" class="btn-primary" id="sale-form-save-btn">Salvar Venda</button>
+        <button onclick="toggleAddSale()" class="btn-ghost">Cancelar</button>
+      </div>
+    </div>
+
+    <div id="sales-list" class="card" style="margin-bottom:14px"></div>
+
+    <!-- SIMULATOR -->
+    <div class="card" style="box-shadow:0 0 24px rgba(6,182,212,0.08);border-color:rgba(6,182,212,0.15)">
+      <div style="font-size:13px;font-weight:700;margin-bottom:16px">🧮 Simulador de Comissão</div>
+      <div class="grid-2">
+        <div class="form-group"><label>Valor do Imóvel (R$)</label><input id="sim-val" type="number" value="500000" oninput="calcSim()"></div>
+        <div class="form-group"><label>Comissão Líquida (%)</label><input id="sim-pct" type="number" value="2.5" step="0.1" oninput="calcSim()"></div>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:24px;flex-wrap:wrap;padding:16px;background:rgba(6,182,212,0.06);border-radius:12px;border:1px solid rgba(6,182,212,0.15)">
+        <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em">Comissão líquida</div><div id="sim-comm" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:800;color:var(--cyan);margin-top:3px"></div></div>
+        <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em">% da meta</div><div id="sim-meta" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:800;color:var(--indigo);margin-top:3px"></div></div>
+        <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em">Falta após venda</div><div id="sim-remain" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:800;color:var(--amber);margin-top:3px"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PERFORMANCE ── -->
+  <div id="sec-performance" class="section">
+    <div class="grid-2" style="margin-bottom:14px">
+      <!-- POMODORO -->
+      <div class="card" style="box-shadow:0 0 24px rgba(99,102,241,0.1)">
+        <div style="font-size:13px;font-weight:700;margin-bottom:20px">⏱ Timer Pomodoro</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:16px">
+          <div style="position:relative;width:180px;height:180px">
+            <svg width="180" height="180" id="pom-svg" style="transform:rotate(-90deg)">
+              <circle cx="90" cy="90" r="76" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="13"/>
+              <circle id="pom-ring" cx="90" cy="90" r="76" fill="none" stroke="var(--indigo)" stroke-width="13" stroke-linecap="round"
+                stroke-dasharray="0 478" style="transition:stroke-dasharray .5s linear;filter:drop-shadow(0 0 8px rgba(99,102,241,0.6))"/>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+              <div id="pom-time" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:34px;letter-spacing:-.02em">25:00</div>
+              <div id="pom-type" style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em">Foco</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button id="pom-btn" onclick="togglePomodoro()" class="pomodoro-btn" style="background:linear-gradient(135deg,var(--indigo),var(--indigo2));color:#fff;box-shadow:0 4px 14px rgba(99,102,241,0.35)">▶ Iniciar</button>
+            <button onclick="resetPomodoro()" class="btn-ghost" style="padding:12px 18px;border-radius:12px;font-size:13px">Reset</button>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
+            <button onclick="setMode('foco',25)" class="btn-ghost" style="font-size:10px;padding:5px 11px;border-radius:7px" id="mode-foco">Foco 25m</button>
+            <button onclick="setMode('pausa',5)" class="btn-ghost" style="font-size:10px;padding:5px 11px;border-radius:7px" id="mode-pausa">Pausa 5m</button>
+            <button onclick="setMode('descanso',15)" class="btn-ghost" style="font-size:10px;padding:5px 11px;border-radius:7px" id="mode-descanso">Descanso 15m</button>
+          </div>
+          <div style="text-align:center;font-size:11px;color:var(--text3)">🍅 <span id="pom-count">0</span> Pomodoros hoje</div>
+        </div>
+      </div>
+
+      <!-- STREAK -->
+      <div class="card" style="box-shadow:0 0 24px rgba(245,158,11,0.08)">
+        <div style="font-size:13px;font-weight:700;margin-bottom:16px">🔥 Streak & Consistência</div>
+        <div style="text-align:center;margin-bottom:20px">
+          <div style="font-size:64px;line-height:1;filter:drop-shadow(0 0 16px #f59e0b)">🔥</div>
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:42px;font-weight:800;color:var(--amber);margin-top:4px" id="streak-display">3</div>
+          <div style="font-size:11px;color:var(--text3)">dias consecutivos produtivos</div>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Esta semana</div>
+          <div class="week-grid" id="week-grid"></div>
+        </div>
+        <div style="margin-top:16px;padding:12px;background:rgba(245,158,11,0.08);border-radius:10px;border:1px solid rgba(245,158,11,0.2)">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Recorde pessoal</div>
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:18px;color:var(--amber)">7 dias 🏆</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HABITS -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <div style="font-size:13px;font-weight:700">Metas Diárias — Hoje</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="tag" style="background:rgba(16,185,129,0.1);color:var(--green);border:1px solid rgba(16,185,129,0.2)">Score: <span id="perf-score-tag2">0</span>/100</span>
+          <button onclick="resetDay()" class="btn-ghost" style="font-size:10px;padding:5px 11px">Novo Dia</button>
+        </div>
+      </div>
+      <div id="habit-list" style="display:flex;flex-direction:column;gap:14px"></div>
+    </div>
+  </div>
+
+  <!-- ── PÓS-VENDA ── -->
+  <div id="sec-postsale" class="section">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-bottom:14px" id="postsale-metrics"></div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div style="font-size:13px;font-weight:700;margin-bottom:16px">📋 Clientes em Pós-venda</div>
+        <div id="postsale-clients"></div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:700;margin-bottom:16px">📎 Contratos & Documentos</div>
+
+        <input type="file" id="contract-file-input" accept=".pdf,.png,.jpg,.jpeg" multiple style="display:none" onchange="handleContractFiles(this.files)">
+
+        <div id="dropzone" style="padding:24px 20px;text-align:center;border:2px dashed var(--border2);border-radius:12px;margin-bottom:14px;cursor:pointer;transition:all .2s"
+          onclick="document.getElementById('contract-file-input').click()"
+          ondragover="event.preventDefault();this.style.borderColor='var(--indigo)';this.style.background='rgba(99,102,241,0.06)'"
+          ondragleave="this.style.borderColor='';this.style.background='transparent'"
+          ondrop="event.preventDefault();this.style.borderColor='';this.style.background='transparent';handleContractFiles(event.dataTransfer.files)">
+          <div style="font-size:28px;margin-bottom:8px">📄</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:4px">Arraste um contrato aqui ou clique para selecionar</div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:12px">PDF, PNG ou JPG · até 10MB por arquivo</div>
+          <button type="button" class="btn-primary" style="font-size:11px;padding:8px 16px" onclick="event.stopPropagation();document.getElementById('contract-file-input').click()">Selecionar Arquivo</button>
+        </div>
+
+        <div id="upload-pending" style="display:none;margin-bottom:14px"></div>
+        <div id="contracts-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTRACT VIEWER MODAL -->
+  <div id="contract-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:300;align-items:center;justify-content:center;padding:24px" onclick="if(event.target===this)closeContractModal()">
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:16px;max-width:780px;width:100%;max-height:88vh;display:flex;flex-direction:column;overflow:hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)">
+        <div id="modal-title" style="font-weight:700;font-size:14px">Contrato</div>
+        <div style="display:flex;gap:8px">
+          <a id="modal-download" download style="padding:6px 14px;background:rgba(99,102,241,0.15);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3);border-radius:7px;font-size:11px;font-weight:700;text-decoration:none">⬇ Baixar</a>
+          <button onclick="closeContractModal()" style="padding:6px 12px;background:rgba(255,255,255,0.07);color:var(--text2);border-radius:7px;font-size:12px">✕</button>
+        </div>
+      </div>
+      <div id="modal-body" style="flex:1;overflow:auto;background:#1a1a1a;display:flex;align-items:center;justify-content:center;padding:12px"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: TROCAR SENHA -->
+  <div id="change-password-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:500;align-items:center;justify-content:center;padding:24px" onclick="if(event.target===this)closeChangePassword()">
+    <div style="background:#0d1020;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,0.5)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:18px;color:#fff">🔐 Trocar Senha</div>
+        <button onclick="closeChangePassword()" style="background:rgba(255,255,255,0.07);border:none;color:var(--text2);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:13px">✕</button>
+      </div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:24px">Crie uma nova senha para sua conta</div>
+
+      <div id="chpwd-error" style="display:none;margin-bottom:14px;padding:12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:10px;color:#ef4444;font-size:12px"></div>
+      <div id="chpwd-info" style="display:none;margin-bottom:14px;padding:12px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);border-radius:10px;color:#10b981;font-size:12px"></div>
+
+      <div style="margin-bottom:14px">
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:6px;font-weight:600">Nova senha</label>
+        <input id="chpwd-new" type="password" placeholder="mínimo 6 caracteres" style="font-size:14px;height:46px;border-radius:11px">
+      </div>
+      <div style="margin-bottom:20px">
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:6px;font-weight:600">Confirmar nova senha</label>
+        <input id="chpwd-confirm" type="password" placeholder="repita a nova senha" style="font-size:14px;height:46px;border-radius:11px" onkeydown="if(event.key==='Enter')submitChangePassword()">
+      </div>
+      <button onclick="submitChangePassword()" id="chpwd-btn"
+        style="width:100%;padding:14px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border-radius:12px;font-weight:700;font-size:14px;font-family:'Plus Jakarta Sans',sans-serif;border:none;cursor:pointer;box-shadow:0 6px 20px rgba(99,102,241,0.35)">
+        Salvar nova senha
+      </button>
+    </div>
+  </div>
+
+  <!-- ── ALERTS ── -->
+  <div id="sec-alerts" class="section">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:14px" id="alert-summary"></div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:13px;font-weight:700">🚀 Jornada de Relacionamento — Pendentes</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span id="journey-alert-badge" style="display:none;background:#ef4444;color:#fff;border-radius:10px;font-size:10px;font-weight:800;padding:2px 8px"></span>
+          <button onclick="syncAllPendingJourneyToGoogle()" style="padding:6px 12px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);border-radius:7px;color:#a5b4fc;font-size:10px;font-weight:600">📅 Sincronizar com Google Agenda</button>
+        </div>
+      </div>
+      <div id="journey-pending-list"></div>
+    </div>
+
+    <div class="card" id="alerts-list"></div>
+  </div>
+
+  <!-- ── AI ── -->
+  <div id="sec-ai" class="section">
+    <div class="card" style="box-shadow:0 0 30px rgba(139,92,246,0.12);border-color:rgba(139,92,246,0.2);display:flex;flex-direction:column;min-height:560px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#8b5cf6,#6366f1);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 14px rgba(139,92,246,0.4)">✦</div>
+        <div>
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px">S Nexus AI</div>
+          <div style="font-size:10px;color:var(--text3)">Assistente de Vendas & Produtividade</div>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+          <div class="live-dot"></div>
+          <span style="font-size:10px;color:var(--green)">Online</span>
+        </div>
+      </div>
+
+      <div id="chat-messages" class="chat-wrap" style="flex:1;margin-bottom:14px"></div>
+
+      <div style="margin-bottom:12px">
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px">Ações rápidas</div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap" id="quick-actions"></div>
+      </div>
+
+      <div style="display:flex;gap:8px">
+        <input id="ai-input" placeholder="Pergunte, peça um follow-up, análise de lead..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI()}" style="flex:1">
+        <button onclick="sendAI()" id="ai-send" style="padding:12px 22px;background:linear-gradient(135deg,#8b5cf6,var(--indigo));color:#fff;border-radius:10px;font-size:16px;font-weight:800;min-width:52px">→</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ADMIN ── -->
+  <div id="sec-admin" class="section">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px" id="admin-metrics"></div>
+
+    <div class="grid-2" style="gap:14px">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div style="font-size:13px;font-weight:700">👥 Usuários</div>
+          <button onclick="loadAdminData()" style="padding:5px 11px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);border-radius:7px;color:#a5b4fc;font-size:10px">↻ Atualizar</button>
+        </div>
+        <div id="admin-users-list"><div style="color:var(--text3);font-size:12px;text-align:center;padding:20px">Carregando...</div></div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:700;margin-bottom:14px">📋 Logs Recentes</div>
+        <div id="admin-logs-list"><div style="color:var(--text3);font-size:12px;text-align:center;padding:20px">Carregando...</div></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+</div><!-- /app-wrapper -->
+
+<script>
+let GOAL = 0;
+
+let state = {
+  commission: 0,
+  sales: [],
+  leads: [],
+  habits: [
+    {id:"contacts",label:"Contatos novos",done:0,goal:30,icon:"👥",color:"#6366f1"},
+    {id:"followups",label:"Follow-ups",done:0,goal:15,icon:"🔄",color:"#06b6d4"},
+    {id:"calls",label:"Ligações fortes",done:0,goal:5,icon:"📞",color:"#10b981"},
+    {id:"meetings",label:"Reuniões online",done:0,goal:2,icon:"💻",color:"#f59e0b"},
+    {id:"visits",label:"Visitas",done:0,goal:1,icon:"🏠",color:"#ec4899"},
+    {id:"proposals",label:"Propostas enviadas",done:0,goal:2,icon:"📄",color:"#f97316"}
+  ],
+  streak: 0,
+  pomActive: false,
+  pomTime: 25*60,
+  pomTotal: 25*60,
+  pomType: "foco",
+  pomCount: 0,
+  crmView: "kanban",
+  editingSaleId: null,
+  userName: "Corretor",
+  userPhoto: null,
+  selectedLead: null,
+  chatHistory: [],
+  weekScores: [0,0,0,0,0,0,0],
+  postsale: [],
+  contracts: [],
+  journeys: [],
+  googleCalendarConnected: false,
+  goal: 0
+};
+
+const SUPABASE_URL = 'https://wgvefvhqogxujajcyuex.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndndmVmdmhxb2d4dWphamN5dWV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1Njk3NjgsImV4cCI6MjA5ODE0NTc2OH0.sIMA_TsFI-7DtSHDUU8gD2OumG5yh3n9PlhUSq580A8';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let hasUnsavedChanges = false;
+let autoSaveTimer = null;
+let authMode = 'login'; // 'login' | 'signup'
+
+// ─── AUTENTICAÇÃO ───────────────────────────────────────────────
+
+// ── Controle de sessão segura ──────────────────────────────────
+const SESSION_TIMEOUT_MS = 60 * 60 * 1000; // 1 hora de inatividade
+let sessionTimer = null;
+
+function resetSessionTimer() {
+  clearTimeout(sessionTimer);
+  sessionTimer = setTimeout(() => {
+    if (currentUser) {
+      showAuthInfoToast('⏱ Sessão expirada por inatividade. Faça login novamente.');
+      logout();
+    }
+  }, SESSION_TIMEOUT_MS);
+}
+
+// Reinicia o timer em qualquer interação do usuário
+['click','keydown','mousemove','touchstart'].forEach(evt => {
+  document.addEventListener(evt, resetSessionTimer, { passive: true });
+});
+
+// ── Tabs de login / cadastro ───────────────────────────────────
+function setAuthTab(mode) {
+  authMode = mode;
+  const loginTab = document.getElementById('auth-tab-login');
+  const signupTab = document.getElementById('auth-tab-signup');
+  const btn = document.getElementById('auth-submit-btn');
+  const forgot = document.getElementById('auth-forgot');
+  const trialBadge = document.getElementById('auth-trial-badge');
+  const pwdStrength = document.getElementById('auth-password-strength');
+  hideAuthMessages();
+
+  if (mode === 'login') {
+    loginTab.style.cssText = 'flex:1;padding:10px;border-radius:9px;font-size:13px;font-weight:700;font-family:inherit;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;cursor:pointer;box-shadow:0 4px 12px rgba(99,102,241,0.3)';
+    signupTab.style.cssText = 'flex:1;padding:10px;border-radius:9px;font-size:13px;font-weight:700;font-family:inherit;background:transparent;color:rgba(240,242,255,0.5);border:none;cursor:pointer';
+    btn.textContent = 'Entrar';
+    if (forgot) forgot.style.display = '';
+    if (trialBadge) trialBadge.style.display = 'none';
+    if (pwdStrength) pwdStrength.style.display = 'none';
+    document.getElementById('auth-password').removeEventListener('input', checkPasswordStrength);
+  } else {
+    signupTab.style.cssText = 'flex:1;padding:10px;border-radius:9px;font-size:13px;font-weight:700;font-family:inherit;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;cursor:pointer;box-shadow:0 4px 12px rgba(99,102,241,0.3)';
+    loginTab.style.cssText = 'flex:1;padding:10px;border-radius:9px;font-size:13px;font-weight:700;font-family:inherit;background:transparent;color:rgba(240,242,255,0.5);border:none;cursor:pointer';
+    btn.textContent = 'Criar Conta Grátis';
+    if (forgot) forgot.style.display = 'none';
+    if (trialBadge) trialBadge.style.display = 'block';
+    if (pwdStrength) pwdStrength.style.display = 'block';
+    document.getElementById('auth-password').addEventListener('input', checkPasswordStrength);
+  }
+}
+
+// ── Força da senha ─────────────────────────────────────────────
+function checkPasswordStrength() {
+  const pwd = document.getElementById('auth-password').value;
+  const bars = [1,2,3,4].map(i => document.getElementById(`pstr-${i}`));
+  const label = document.getElementById('pstr-label');
+  if (!bars[0] || !label) return;
+  let score = 0;
+  if (pwd.length >= 6) score++;
+  if (pwd.length >= 10) score++;
+  if (/[A-Z]/.test(pwd) && /[0-9]/.test(pwd)) score++;
+  if (/[^A-Za-z0-9]/.test(pwd)) score++;
+  const colors = ['#ef4444','#f97316','#f59e0b','#10b981'];
+  const labels = ['Muito fraca','Fraca','Boa','Forte'];
+  bars.forEach((b,i) => {
+    b.style.background = i < score ? colors[score-1] : 'rgba(255,255,255,0.1)';
+  });
+  label.textContent = pwd.length > 0 ? labels[score-1] || '' : '';
+  label.style.color = score > 0 ? colors[score-1] : 'rgba(255,255,255,0.3)';
+}
+
+// ── Mostrar/ocultar senha ──────────────────────────────────────
+function togglePasswordVisibility() {
+  const input = document.getElementById('auth-password');
+  const btn = document.getElementById('auth-pwd-toggle');
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (btn) btn.style.opacity = '0.8';
+  } else {
+    input.type = 'password';
+    if (btn) btn.style.opacity = '0.4';
+  }
+}
+
+// ── Mensagens de erro/info ─────────────────────────────────────
+function showAuthError(msg) {
+  const errEl = document.getElementById('auth-error');
+  const errText = document.getElementById('auth-error-text');
+  if (errText) errText.textContent = msg; else if (errEl) errEl.textContent = msg;
+  if (errEl) errEl.style.display = 'flex';
+  const infoEl = document.getElementById('auth-info');
+  if (infoEl) infoEl.style.display = 'none';
+}
+
+function showAuthInfo(msg) {
+  const infoEl = document.getElementById('auth-info');
+  const infoText = document.getElementById('auth-info-text');
+  if (infoText) infoText.textContent = msg; else if (infoEl) infoEl.textContent = msg;
+  if (infoEl) infoEl.style.display = 'flex';
+  const errEl = document.getElementById('auth-error');
+  if (errEl) errEl.style.display = 'none';
+}
+
+function hideAuthMessages() {
+  const e = document.getElementById('auth-error');
+  const i = document.getElementById('auth-info');
+  if (e) e.style.display = 'none';
+  if (i) i.style.display = 'none';
+}
+
+function clearAuthMessages() { hideAuthMessages(); }
+
+// ── Username → email interno ───────────────────────────────────
+function usernameToEmail(username) {
+  const clean = username.toLowerCase().trim().replace(/[^a-z0-9._-]/g, '');
+  return `${clean}@snexus.local`;
+}
+
+// ── Submit Login / Cadastro ────────────────────────────────────
+async function submitAuth() {
+  const username = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  hideAuthMessages();
+
+  if (!username || !password) { showAuthError('Preencha usuário e senha.'); return; }
+  if (username.length < 3) { showAuthError('O usuário precisa ter pelo menos 3 caracteres.'); return; }
+  if (password.length < 6) { showAuthError('A senha precisa ter pelo menos 6 caracteres.'); return; }
+
+  const email = usernameToEmail(username);
+  const btn = document.getElementById('auth-submit-btn');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.style.opacity = '0.7';
+  btn.textContent = authMode === 'login' ? '⏳ Entrando...' : '⏳ Criando conta...';
+
+  try {
+    if (authMode === 'login') {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      await onAuthSuccess(data.user, username);
+    } else {
+      const { data, error } = await sb.auth.signUp({ email, password });
+      if (error) throw error;
+      if (data.session) {
+        await onAuthSuccess(data.user, username);
+      } else {
+        showAuthInfo('Conta criada com sucesso! Clique em "Entrar" e use o mesmo usuário e senha.');
+        setAuthTab('login');
+      }
+    }
+  } catch (err) {
+    showAuthError(translateAuthError(err.message));
+  } finally {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.textContent = originalText;
+  }
+}
+
+function translateAuthError(msg) {
+  if (!msg) return 'Ocorreu um erro. Tente novamente.';
+  if (msg.includes('Invalid login credentials')) return 'Usuário ou senha incorretos. Verifique e tente novamente.';
+  if (msg.includes('User already registered')) return 'Esse nome de usuário já está cadastrado. Clique em "Entrar".';
+  if (msg.includes('Password should be')) return 'A senha precisa ter pelo menos 6 caracteres.';
+  if (msg.includes('Unable to validate email')) return 'Nome de usuário inválido — use apenas letras e números.';
+  if (msg.includes('Email not confirmed')) return 'Cadastro pendente. Tente novamente em alguns instantes.';
+  if (msg.includes('Too many requests')) return 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
+  if (msg.includes('Network')) return 'Sem conexão com a internet. Verifique sua rede.';
+  return 'Erro inesperado. Tente novamente.';
+}
+
+// ── Esqueci minha senha ────────────────────────────────────────
+function showForgotPassword() {
+  document.getElementById('auth-card-login').style.display = 'none';
+  document.getElementById('auth-card-forgot').style.display = 'block';
+  const fi = document.getElementById('forgot-info');
+  const fe = document.getElementById('forgot-error');
+  if (fi) fi.style.display = 'none';
+  if (fe) fe.style.display = 'none';
+  setTimeout(() => {
+    const inp = document.getElementById('forgot-email');
+    if (inp) inp.focus();
+  }, 100);
+}
+
+function hideForgotPassword() {
+  document.getElementById('auth-card-forgot').style.display = 'none';
+  document.getElementById('auth-card-login').style.display = 'block';
+}
+
+async function submitForgotPassword() {
+  const email = (document.getElementById('forgot-email').value || '').trim();
+  const errEl = document.getElementById('forgot-error');
+  const infoEl = document.getElementById('forgot-info');
+  if (errEl) errEl.style.display = 'none';
+  if (infoEl) infoEl.style.display = 'none';
+
+  if (!email || !email.includes('@')) {
+    if (errEl) { errEl.textContent = 'Informe um e-mail válido.'; errEl.style.display = 'block'; }
+    return;
+  }
+  const btn = document.getElementById('forgot-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Enviando...';
+  try {
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://suelenpadao.github.io/s-nexus/'
+    });
+    if (error) throw error;
+    if (infoEl) {
+      infoEl.textContent = '✓ Link enviado! Verifique sua caixa de entrada (e a pasta de spam).';
+      infoEl.style.display = 'block';
+    }
+    btn.textContent = '✓ Link enviado';
+  } catch (err) {
+    if (errEl) {
+      errEl.textContent = err.message || 'Erro ao enviar. Tente novamente.';
+      errEl.style.display = 'block';
+    }
+    btn.disabled = false;
+    btn.textContent = 'Enviar link de recuperação';
+  }
+}
+
+function sendPasswordReset() { showForgotPassword(); }
+
+// ── Trocar senha (dentro do app) ───────────────────────────────
+// ─── TEMA CLARO / ESCURO ───────────────────────────────────────
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light-mode');
+  try { localStorage.setItem('snexus_theme', isLight ? 'light' : 'dark'); } catch(e) {}
+  updateThemeButton(isLight);
+}
+
+function updateThemeButton(isLight) {
+  const btn = document.getElementById('theme-toggle-btn');
+  if (!btn) return;
+  btn.textContent = isLight ? '🌙 Tema Escuro' : '☀️ Tema Claro';
+}
+
+function applyStoredTheme() {
+  try {
+    const stored = localStorage.getItem('snexus_theme');
+    const isLight = stored === 'light';
+    if (isLight) document.body.classList.add('light-mode');
+    updateThemeButton(isLight);
+  } catch(e) {}
+}
+
+// Aplicar tema salvo assim que possível
+applyStoredTheme();
+
+function openChangePassword() {
+  const modal = document.getElementById('change-password-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+    document.getElementById('chpwd-new').value = '';
+    document.getElementById('chpwd-confirm').value = '';
+    const e = document.getElementById('chpwd-error');
+    const i = document.getElementById('chpwd-info');
+    if (e) e.style.display = 'none';
+    if (i) i.style.display = 'none';
+  }
+  closeMobile();
+}
+
+function closeChangePassword() {
+  const modal = document.getElementById('change-password-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function submitChangePassword() {
+  const newPwd = document.getElementById('chpwd-new').value;
+  const confirmPwd = document.getElementById('chpwd-confirm').value;
+  const errEl = document.getElementById('chpwd-error');
+  const infoEl = document.getElementById('chpwd-info');
+  if (errEl) errEl.style.display = 'none';
+  if (infoEl) infoEl.style.display = 'none';
+
+  if (!newPwd || newPwd.length < 6) {
+    if (errEl) { errEl.textContent = 'A nova senha precisa ter pelo menos 6 caracteres.'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (newPwd !== confirmPwd) {
+    if (errEl) { errEl.textContent = 'As senhas não coincidem. Verifique e tente novamente.'; errEl.style.display = 'block'; }
+    return;
+  }
+  const btn = document.getElementById('chpwd-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Salvando...';
+  try {
+    const { error } = await sb.auth.updateUser({ password: newPwd });
+    if (error) throw error;
+    await writeLog(LOG_EVENTS.PASSWORD_CHANGE, 'Senha alterada com sucesso');
+    if (infoEl) { infoEl.textContent = '✓ Senha alterada com sucesso!'; infoEl.style.display = 'block'; }
+    showAuthInfoToast('✓ Senha atualizada com sucesso!');
+    setTimeout(() => closeChangePassword(), 2000);
+  } catch (err) {
+    if (errEl) { errEl.textContent = err.message || 'Erro ao trocar senha.'; errEl.style.display = 'block'; }
+    btn.disabled = false;
+    btn.textContent = 'Salvar nova senha';
+  }
+}
+
+async function onAuthSuccess(user, username) {
+  currentUser = user;
+  resetSessionTimer();
+  try {
+    document.getElementById('boot-loading').style.display = 'none';
+    document.getElementById('auth-screen').style.display = 'none';
+
+    // Verificar plano/trial antes de mostrar o app
+    const billing = await checkUserBilling(user.id);
+
+    // Log de login
+    await writeLog(LOG_EVENTS.LOGIN, `Login realizado`, { plan: billing.plan, username });
+
+    if (billing.blocked) {
+      if (billing.reason === 'trial_expired') {
+        await writeLog(LOG_EVENTS.TRIAL_EXPIRED, 'Acesso bloqueado — trial expirado');
+      }
+      showBillingWall(billing);
+      return;
+    }
+
+    document.getElementById('app-wrapper').style.display = '';
+    const emailEl = document.getElementById('sidebar-user-email');
+    if (emailEl) emailEl.textContent = username ? `@${username}` : 'S Nexus';
+
+    if (billing.plan === 'trial' && billing.daysLeft > 0) {
+      showTrialBadge(billing.daysLeft);
+    }
+
+    await loadState();
+    init();
+  } catch (e) {
+    document.getElementById('boot-loading').style.display = 'none';
+    document.getElementById('app-wrapper').style.display = '';
+    try { init(); } catch (e2) {}
+  }
+}
+
+async function resetAccountData() {
+  if (!confirm('Isso vai apagar TODOS os seus dados (leads, vendas, financeiro, jornadas, hábitos, score) e começar do zero. Tem certeza?')) return;
+
+  // Estado zerado padrão
+  const emptyState = {
+    commission: 0,
+    sales: [],
+    leads: [],
+    habits: [
+      {id:"contacts",label:"Contatos novos",done:0,goal:30,icon:"👥",color:"#6366f1"},
+      {id:"followups",label:"Follow-ups",done:0,goal:15,icon:"🔄",color:"#06b6d4"},
+      {id:"calls",label:"Ligações fortes",done:0,goal:5,icon:"📞",color:"#10b981"},
+      {id:"meetings",label:"Reuniões online",done:0,goal:2,icon:"💻",color:"#f59e0b"},
+      {id:"visits",label:"Visitas",done:0,goal:1,icon:"🏠",color:"#ec4899"},
+      {id:"proposals",label:"Propostas enviadas",done:0,goal:2,icon:"📄",color:"#f97316"}
+    ],
+    streak: 0,
+    pomActive: false,
+    pomTime: 25*60,
+    pomTotal: 25*60,
+    pomType: "foco",
+    pomCount: 0,
+    crmView: "kanban",
+    editingSaleId: null,
+    userName: state.userName || "Corretor",
+    userPhoto: state.userPhoto || null,
+    selectedLead: null,
+    chatHistory: [],
+    weekScores: [0,0,0,0,0,0,0],
+    postsale: [],
+    contracts: [],
+    journeys: [],
+    googleCalendarConnected: false,
+    goal: 0
+  };
+
+  // Aplicar no state atual
+  Object.assign(state, emptyState);
+  GOAL = 0;
+
+  try {
+    // Apagar registro antigo do Supabase e recriar zerado
+    await sb.from('snexus_data').delete().eq('user_id', currentUser.id);
+    await sb.from('snexus_data').insert({ user_id: currentUser.id, data: emptyState });
+    hasUnsavedChanges = false;
+    updateSaveStatus('saved-manual');
+  } catch(e) {
+    // Se falhar, tenta upsert normal
+    await saveState(true);
+  }
+
+  // Atualizar toda a UI
+  renderDashboard();
+  renderHabits();
+  showAuthInfoToast('✓ Conta zerada com sucesso!');
+  closeMobile();
+}
+
+async function logout() {
+  if (!confirm('Tem certeza que deseja sair?')) return;
+  await writeLog(LOG_EVENTS.LOGOUT, 'Logout realizado');
+  if (hasUnsavedChanges) await saveState(false);
+  await sb.auth.signOut();
+  currentUser = null;
+  location.reload();
+}
+
+// ─── CORREÇÃO PONTUAL DE DADOS (mantém o restante intocado) ───────────────────
+// Corrige apenas as vendas de exemplo (João Petri id=1 e Liege id=2) com os valores
+// e parcelas corretos, sem apagar nenhum outro dado que você já tenha cadastrado.
+
+// ─── PERSISTÊNCIA DE DADOS (tabela snexus_data) ───────────────────
+
+async function loadState() {
+  if (!currentUser) return false;
+  try {
+    const { data, error } = await sb
+      .from('snexus_data')
+      .select('data, user_id')
+      .eq('user_id', currentUser.id)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    // Segurança extra: só carrega se o user_id bater exatamente
+    if (data && data.data && data.user_id === currentUser.id) {
+      // Merge seguro: preserva estrutura do state padrão, só sobrescreve com dados do usuário
+      const loaded = data.data;
+      // Campos de array e objetos só sobrescrevem se existirem no banco
+      if (Array.isArray(loaded.sales)) state.sales = loaded.sales;
+      if (Array.isArray(loaded.leads)) state.leads = loaded.leads;
+      if (Array.isArray(loaded.postsale)) state.postsale = loaded.postsale;
+      if (Array.isArray(loaded.contracts)) state.contracts = loaded.contracts;
+      if (Array.isArray(loaded.journeys)) state.journeys = loaded.journeys;
+      if (Array.isArray(loaded.chatHistory)) state.chatHistory = loaded.chatHistory;
+      if (Array.isArray(loaded.weekScores)) state.weekScores = loaded.weekScores;
+      if (loaded.habits && Array.isArray(loaded.habits)) state.habits = loaded.habits;
+      if (typeof loaded.commission === 'number') state.commission = loaded.commission;
+      if (typeof loaded.streak === 'number') state.streak = loaded.streak;
+      if (typeof loaded.goal === 'number') state.goal = loaded.goal;
+      if (typeof loaded.userName === 'string') state.userName = loaded.userName;
+      if (typeof loaded.crmView === 'string') state.crmView = loaded.crmView;
+      if (loaded.userPhoto) state.userPhoto = loaded.userPhoto;
+      if (typeof loaded.pomCount === 'number') state.pomCount = loaded.pomCount;
+      if (Array.isArray(loaded.pomTime)) state.pomTime = loaded.pomTime;
+      return true;
+    }
+
+    // Usuário novo — começa zerado (não carrega nada)
+    return false;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function saveState(manual) {
+  if (!currentUser) return false;
+  try {
+    const { error } = await sb
+      .from('snexus_data')
+      .upsert({ user_id: currentUser.id, data: state }, { onConflict: 'user_id' });
+    if (error) throw error;
+    hasUnsavedChanges = false;
+    updateSaveStatus(manual ? 'saved-manual' : 'saved-auto');
+    return true;
+  } catch (e) {
+    updateSaveStatus('error');
+    if (manual) alert('Não foi possível salvar. Verifique sua conexão com a internet e tente novamente.');
+    return false;
+  }
+}
+
+function markDirty() {
+  hasUnsavedChanges = true;
+  updateSaveStatus('dirty');
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => saveState(false), 2500);
+}
+
+function updateSaveStatus(status) {
+  const el = document.getElementById('save-status');
+  const btn = document.getElementById('save-btn');
+  if (!el || !btn) return;
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+  if (status === 'dirty') {
+    el.innerHTML = '<span style="color:#f59e0b">● Alterações não salvas</span>';
+    btn.style.background = 'rgba(245,158,11,0.15)';
+    btn.style.borderColor = 'rgba(245,158,11,0.35)';
+    btn.style.color = '#f59e0b';
+    btn.innerHTML = '💾 Salvar Alterações';
+  } else if (status === 'saved-manual') {
+    el.innerHTML = `<span style="color:#10b981">✓ Salvo na nuvem às ${timeStr}</span>`;
+    btn.style.background = 'rgba(16,185,129,0.12)';
+    btn.style.borderColor = 'rgba(16,185,129,0.25)';
+    btn.style.color = '#10b981';
+    btn.innerHTML = '✓ Salvo';
+    setTimeout(()=>{ if(!hasUnsavedChanges) btn.innerHTML = '💾 Salvar Alterações'; }, 2000);
+  } else if (status === 'saved-auto') {
+    el.innerHTML = `<span style="color:var(--text3)">✓ Salvo na nuvem às ${timeStr}</span>`;
+    btn.style.background = 'rgba(16,185,129,0.12)';
+    btn.style.borderColor = 'rgba(16,185,129,0.25)';
+    btn.style.color = '#10b981';
+    btn.innerHTML = '💾 Salvar Alterações';
+  } else if (status === 'saving') {
+    el.innerHTML = '<span style="color:var(--text3)">Salvando na nuvem...</span>';
+  } else if (status === 'error') {
+    el.innerHTML = '<span style="color:#ef4444">⚠ Erro ao salvar — verifique sua internet</span>';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ETAPA 15 — SISTEMA DE BACKUP
+// ═══════════════════════════════════════════════════════════════
+
+const BACKUP_VERSION = '2.0';
+const AUTO_BACKUP_INTERVAL_MS = 30 * 60 * 1000; // 30 minutos
+let autoBackupTimer = null;
+
+// Backup manual — download de arquivo JSON
+function exportBackup() {
+  const backupData = {
+    version: BACKUP_VERSION,
+    exportedAt: new Date().toISOString(),
+    userId: currentUser?.id || 'unknown',
+    app: 'S Nexus CRM',
+    state
+  };
+  const blob = new Blob([JSON.stringify(backupData, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const dateStr = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+  a.download = `s-nexus-backup-${dateStr}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  writeLog('backup_export', 'Backup manual exportado');
+  showAuthInfoToast('✅ Backup exportado com sucesso!');
+}
+
+// Importar backup de arquivo
+function importBackup(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      // Suporta backup novo (com versão) e backup antigo (estado direto)
+      const data = imported.state || imported;
+      if (!data || typeof data !== 'object') throw new Error('Formato inválido');
+
+      const confirmMsg = imported.exportedAt
+        ? `Restaurar backup de ${new Date(imported.exportedAt).toLocaleString('pt-BR')}?\n\nIsso vai substituir todos os dados atuais.`
+        : 'Restaurar este backup? Todos os dados atuais serão substituídos.';
+
+      if (!confirm(confirmMsg)) return;
+      Object.assign(state, data);
+      await saveState(true);
+      writeLog('backup_import', `Backup importado (versão ${imported.version || 'legado'})`);
+      showAuthInfoToast('✅ Backup restaurado! Recarregando...');
+      setTimeout(() => location.reload(), 1500);
+    } catch (err) {
+      alert('Arquivo de backup inválido ou corrompido. Verifique o arquivo e tente novamente.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// Backup automático na nuvem (salva no Supabase com tag de backup)
+async function autoBackupToCloud() {
+  if (!currentUser || !hasUnsavedChanges) return;
+  try {
+    const backupKey = `backup_${new Date().toISOString().split('T')[0]}`;
+    await sb.from('snexus_data').upsert({
+      user_id: currentUser.id,
+      data: { ...state, _backup: true, _backupAt: new Date().toISOString() }
+    }, { onConflict: 'user_id' });
+    writeLog('backup_auto', 'Backup automático salvo na nuvem');
+  } catch(e) {
+    // Silencioso — backup é best-effort
+  }
+}
+
+// Iniciar backup automático periódico
+function startAutoBackup() {
+  clearInterval(autoBackupTimer);
+  autoBackupTimer = setInterval(autoBackupToCloud, AUTO_BACKUP_INTERVAL_MS);
+}
+
+window.addEventListener('beforeunload', (e) => {
+  if (hasUnsavedChanges && currentUser) {
+    saveState(false);
+  }
+});
+
+// ─── VERIFICAÇÃO DE SESSÃO AO CARREGAR A PÁGINA ───────────────────
+
+// ═══════════════════════════════════════════════════════════════
+//  ETAPA 13 — ESTRUTURA DE COBRANÇA
+// ═══════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════
+//  ETAPA 14 — LOGS ADMINISTRATIVOS
+// ═══════════════════════════════════════════════════════════════
+
+const LOG_EVENTS = {
+  LOGIN:           'login',
+  LOGOUT:          'logout',
+  SIGNUP:          'signup',
+  PASSWORD_CHANGE: 'password_change',
+  PLAN_CHANGE:     'plan_change',
+  BLOCK:           'block',
+  UNBLOCK:         'unblock',
+  IMPERSONATE:     'impersonate',
+  DATA_SAVE:       'data_save',
+  TRIAL_START:     'trial_start',
+  TRIAL_EXPIRED:   'trial_expired',
+};
+
+async function writeLog(event, description, metadata) {
+  if (!currentUser) return;
+  try {
+    await sb.from('snexus_logs').insert({
+      user_id:     currentUser.id,
+      actor_id:    currentUser.id,
+      event,
+      description: description || '',
+      metadata:    metadata || {},
+      user_agent:  navigator.userAgent.substring(0, 200),
+    });
+  } catch (e) {
+    // Log silencioso — nunca bloqueia fluxo por falha de log
+  }
+}
+
+const PLANS_CONFIG = [
+  {
+    id: 'starter', name: 'Starter', emoji: '🚀',
+    price: 59.90, priceYearly: 599.00,
+    color: '#06b6d4',
+    description: 'Para quem está começando',
+    features: ['Até 50 leads', 'Controle financeiro', 'Jornada de relacionamento', 'Metas e performance'],
+    cta: 'Assinar Starter'
+  },
+  {
+    id: 'pro', name: 'Pro', emoji: '⚡',
+    price: 99.90, priceYearly: 999.00,
+    color: '#6366f1',
+    popular: true,
+    description: 'Para corretores ativos',
+    features: ['CRM ilimitado', 'IA Assistente', 'Google Agenda', 'Pós-venda e reforços', 'Suporte prioritário'],
+    cta: 'Assinar Pro'
+  },
+  {
+    id: 'premium', name: 'Premium', emoji: '👑',
+    price: 149.90, priceYearly: 1499.00,
+    color: '#f59e0b',
+    description: 'Alta performance',
+    features: ['Tudo do Pro', 'Múltiplos usuários*', 'Relatórios avançados*', 'Gerente dedicado', 'Onboarding VIP'],
+    cta: 'Assinar Premium'
+  }
+];
+
+let currentBilling = null;
+
+// Verifica plano/trial do usuário no Supabase
+async function checkUserBilling(userId) {
+  try {
+    const { data, error } = await sb
+      .from('snexus_profiles')
+      .select('plan, trial_ends_at, plan_expires_at, is_blocked')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    // Se não tem perfil ainda, cria trial automaticamente
+    if (!data && !error) {
+      const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      await sb.from('snexus_profiles').upsert({
+        user_id: userId,
+        plan: 'trial',
+        trial_ends_at: trialEnd.toISOString()
+      }, { onConflict: 'user_id' });
+      currentBilling = { plan: 'trial', daysLeft: 7, blocked: false };
+      return currentBilling;
+    }
+
+    if (error || !data) {
+      // Erro ao buscar — deixa entrar (fail open, não perde cliente por bug)
+      currentBilling = { plan: 'unknown', daysLeft: 99, blocked: false };
+      return currentBilling;
+    }
+
+    const now = new Date();
+
+    // Bloqueio explícito
+    if (data.is_blocked) {
+      currentBilling = { plan: data.plan, blocked: true, reason: 'blocked' };
+      return currentBilling;
+    }
+
+    // Trial expirado
+    if (data.plan === 'trial' && data.trial_ends_at) {
+      const trialEnd = new Date(data.trial_ends_at);
+      const daysLeft = Math.ceil((trialEnd - now) / (1000 * 60 * 60 * 24));
+      if (daysLeft <= 0) {
+        currentBilling = { plan: 'trial', blocked: true, reason: 'trial_expired', daysLeft: 0 };
+        return currentBilling;
+      }
+      currentBilling = { plan: 'trial', daysLeft, blocked: false };
+      return currentBilling;
+    }
+
+    // Plano pago expirado
+    if (['starter','pro','premium'].includes(data.plan) && data.plan_expires_at) {
+      const planEnd = new Date(data.plan_expires_at);
+      if (planEnd < now) {
+        currentBilling = { plan: data.plan, blocked: true, reason: 'plan_expired' };
+        return currentBilling;
+      }
+    }
+
+    // Plano ativo
+    currentBilling = { plan: data.plan || 'trial', daysLeft: 999, blocked: false };
+    return currentBilling;
+
+  } catch (e) {
+    // Fail open — não bloqueia usuário por erro de rede
+    currentBilling = { plan: 'unknown', daysLeft: 99, blocked: false };
+    return currentBilling;
+  }
+}
+
+// Exibe a tela de bloqueio com os planos
+function showBillingWall(billing) {
+  document.getElementById('boot-loading').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-wrapper').style.display = 'none';
+  const wall = document.getElementById('billing-wall');
+  wall.style.display = 'flex';
+
+  const icon = document.getElementById('billing-wall-icon');
+  const title = document.getElementById('billing-wall-title');
+  const msg = document.getElementById('billing-wall-msg');
+
+  if (billing.reason === 'blocked') {
+    icon.textContent = '🔒';
+    title.textContent = 'Conta suspensa';
+    msg.textContent = 'Sua conta foi suspensa. Entre em contato com o suporte para mais informações.';
+  } else if (billing.reason === 'trial_expired') {
+    icon.textContent = '⏰';
+    title.textContent = 'Seu período de teste encerrou';
+    msg.textContent = 'Seus 7 dias de teste gratuito chegaram ao fim. Escolha um plano para continuar usando o S Nexus e manter todos os seus dados.';
+  } else if (billing.reason === 'plan_expired') {
+    icon.textContent = '📅';
+    title.textContent = 'Sua assinatura venceu';
+    msg.textContent = 'Renove sua assinatura para continuar acessando o S Nexus sem interrupção.';
+  }
+
+  renderPlansGrid('billing-plans-grid', true);
+}
+
+// Mostra badge de trial na sidebar
+function showTrialBadge(daysLeft) {
+  const badge = document.getElementById('trial-badge-sidebar');
+  const label = document.getElementById('trial-days-label');
+  if (badge) badge.style.display = 'block';
+  if (label) label.textContent = daysLeft;
+}
+
+// Renderiza os cards de planos
+function renderPlansGrid(containerId, compact) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = PLANS_CONFIG.map(p => `
+    <div style="background:${p.popular?'linear-gradient(135deg,rgba(99,102,241,0.15),rgba(99,102,241,0.08))':'rgba(255,255,255,0.03)'};border:${p.popular?'2px solid rgba(99,102,241,0.5)':'1px solid rgba(255,255,255,0.08)'};border-radius:16px;padding:${compact?'16px':'24px'};position:relative;text-align:left">
+      ${p.popular?`<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-size:9px;font-weight:800;padding:3px 12px;border-radius:20px;letter-spacing:.05em;white-space:nowrap">MAIS POPULAR</div>`:''}
+      <div style="font-size:${compact?'22px':'28px'}">${p.emoji}</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:${compact?'14px':'18px'};color:#fff;margin:6px 0 2px">${p.name}</div>
+      ${!compact?`<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:12px">${p.description}</div>`:''}
+      <div style="margin-bottom:${compact?'12px':'16px'}">
+        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:${compact?'20px':'26px'};color:${p.color}">R$${p.price.toFixed(2).replace('.',',')}</span>
+        <span style="font-size:10px;color:rgba(255,255,255,0.3)">/mês</span>
+      </div>
+      ${!compact?`<div style="margin-bottom:16px">${p.features.map(f=>`<div style="font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:4px;display:flex;align-items:center;gap:6px"><span style="color:${p.color}">✓</span>${f}</div>`).join('')}</div>`:''}
+      <button onclick="selectPlan('${p.id}')"
+        style="width:100%;padding:${compact?'8px':'11px'};background:${p.popular?`linear-gradient(135deg,#6366f1,#4f46e5)`:`${p.color}22`};color:${p.popular?'#fff':p.color};border:${p.popular?'none':`1px solid ${p.color}44`};border-radius:9px;font-weight:700;font-size:${compact?'11px':'12px'};cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s">
+        ${compact?'Assinar':'💳 '+p.cta}
+      </button>
+    </div>`).join('');
+}
+
+// Selecionar plano (abre link de pagamento — será integrado depois)
+function selectPlan(planId) {
+  const plan = PLANS_CONFIG.find(p => p.id === planId);
+  if (!plan) return;
+  writeLog(LOG_EVENTS.PLAN_CHANGE, `Interesse no plano ${plan.name}`, {
+    plan_id: planId,
+    price: plan.price,
+    current_plan: currentBilling?.plan
+  });
+  const msg = encodeURIComponent(`Olá! Quero assinar o S Nexus plano ${plan.name} (R$${plan.price.toFixed(2)}/mês). Meu usuário: ${currentUser?.email || ''}`);
+  window.open(`https://wa.me/5547933005437?text=${msg}`, '_blank');
+}
+
+// Abrir/fechar modal de planos
+function openPlansModal() {
+  const modal = document.getElementById('plans-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+    renderPlansGrid('plans-modal-grid', false);
+  }
+  closeMobile();
+}
+
+function closePlansModal() {
+  const modal = document.getElementById('plans-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PAINEL ADMIN — Logs e Gestão de Usuários
+// ═══════════════════════════════════════════════════════════════
+
+// E-mail do admin (você, Suelen) — único com acesso ao painel admin
+const ADMIN_EMAIL = 'suelenpadao@snexus.local'; // usuário: suelenpadao
+
+function isAdmin() {
+  return currentUser && currentUser.email === ADMIN_EMAIL;
+}
+
+function checkAdminNav() {
+  const navAdmin = document.getElementById('nav-admin');
+  if (navAdmin) navAdmin.style.display = isAdmin() ? 'flex' : 'none';
+}
+
+async function loadAdminData() {
+  if (!isAdmin()) return;
+
+  // Métricas resumidas
+  try {
+    const { data: profiles } = await sb.from('snexus_profiles').select('plan, created_at, is_blocked');
+    if (profiles) {
+      const total = profiles.length;
+      const trials = profiles.filter(p => p.plan === 'trial').length;
+      const paying = profiles.filter(p => ['starter','pro','premium'].includes(p.plan)).length;
+      const blocked = profiles.filter(p => p.is_blocked).length;
+
+      document.getElementById('admin-metrics').innerHTML = [
+        {icon:'👥', label:'Total usuários', val:total, c:'#6366f1'},
+        {icon:'🎁', label:'Em trial', val:trials, c:'#f59e0b'},
+        {icon:'💳', label:'Pagantes', val:paying, c:'#10b981'},
+        {icon:'🔒', label:'Bloqueados', val:blocked, c:'#ef4444'},
+      ].map(m => `
+        <div class="card" style="text-align:center;box-shadow:0 0 16px ${m.c}11">
+          <div style="font-size:26px;margin-bottom:4px">${m.icon}</div>
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:28px;font-weight:800;color:${m.c}">${m.val}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">${m.label}</div>
+        </div>`).join('');
+    }
+
+    // Lista de usuários
+    document.getElementById('admin-users-list').innerHTML = (profiles || [])
+      .sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice(0, 20)
+      .map(p => {
+        const planColors = {trial:'#f59e0b', starter:'#06b6d4', pro:'#6366f1', premium:'#f59e0b', blocked:'#ef4444'};
+        const plan = p.is_blocked ? 'blocked' : p.plan;
+        const color = planColors[plan] || '#666';
+        return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:11px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+              ${new Date(p.created_at).toLocaleDateString('pt-BR')}
+            </div>
+          </div>
+          <span style="background:${color}22;color:${color};border:1px solid ${color}44;border-radius:6px;font-size:9px;font-weight:700;padding:2px 8px;text-transform:uppercase;white-space:nowrap">${plan}</span>
+        </div>`;
+      }).join('') || '<div style="color:var(--text3);text-align:center;padding:20px;font-size:12px">Nenhum usuário</div>';
+
+  } catch(e) {
+    document.getElementById('admin-users-list').innerHTML = '<div style="color:#ef4444;font-size:12px;padding:12px">Erro ao carregar usuários. Verifique as permissões de admin no Supabase.</div>';
+  }
+
+  // Logs recentes
+  try {
+    const { data: logs } = await sb.from('snexus_logs')
+      .select('event, description, created_at, metadata')
+      .order('created_at', { ascending: false })
+      .limit(30);
+
+    const eventIcons = {
+      login:'🔑', logout:'🚪', signup:'🎉', password_change:'🔐',
+      plan_change:'💳', block:'🔒', unblock:'🔓', data_save:'💾',
+      trial_start:'🎁', trial_expired:'⏰'
+    };
+
+    document.getElementById('admin-logs-list').innerHTML = (logs || [])
+      .map(l => `
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
+          <div style="font-size:16px;flex-shrink:0">${eventIcons[l.event] || '📋'}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:11px;font-weight:600;color:var(--text)">${l.description || l.event}</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:1px">${new Date(l.created_at).toLocaleString('pt-BR')}</div>
+          </div>
+        </div>`).join('') || '<div style="color:var(--text3);text-align:center;padding:20px;font-size:12px">Nenhum log ainda</div>';
+  } catch(e) {
+    document.getElementById('admin-logs-list').innerHTML = '<div style="color:var(--text3);font-size:12px;padding:12px">Logs disponíveis após rodar o setup-logs.sql</div>';
+  }
+}
+
+async function checkExistingSession() {
+  // Timeout de segurança absoluto: se em 10s nada resolveu, força a tela de login a aparecer
+  // (evita ficar travado para sempre em "Carregando..." por instabilidade de rede)
+  let safetyTimeout = setTimeout(() => {
+    const boot = document.getElementById('boot-loading');
+    const authScreen = document.getElementById('auth-screen');
+    if (boot && boot.style.display !== 'none') {
+      boot.style.display = 'none';
+      authScreen.style.display = 'flex';
+      setAuthTab('login');
+    }
+  }, 10000);
+
+  try {
+    const { data, error } = await sb.auth.getSession();
+    clearTimeout(safetyTimeout);
+    if (error) throw error;
+    if (data && data.session && data.session.user) {
+      await onAuthSuccess(data.session.user);
+      return;
+    }
+  } catch (e) {
+    clearTimeout(safetyTimeout);
+  }
+  document.getElementById('boot-loading').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  setAuthTab('login');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  GOOGLE AGENDA — Integração via link direto (sem OAuth)
+//  Abre o Google Calendar com o evento já preenchido, 1 clique
+// ═══════════════════════════════════════════════════════════════
+
+function initGoogleCalendar() { /* não precisa mais inicializar nada */ }
+function updateGoogleConnectButton() {
+  const btn = document.getElementById('google-connect-btn');
+  if (btn) {
+    btn.innerHTML = '📅 Abrir Google Agenda';
+    btn.style.background = 'rgba(99,102,241,0.08)';
+    btn.style.borderColor = 'rgba(99,102,241,0.2)';
+    btn.style.color = '#a5b4fc';
+    btn.onclick = () => window.open('https://calendar.google.com', '_blank');
+  }
+}
+
+function showAuthInfoToast(msg) {
+  const toast = document.createElement('div');
+  toast.textContent = msg;
+  toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:rgba(16,185,129,0.95);color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.3)';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3500);
+}
+
+// Gera uma URL do Google Calendar para criar um evento com 1 clique
+// dateStr: 'YYYY-MM-DD'
+function googleCalendarLink({ title, description, dateStr, reminderDaysBefore }) {
+  const d = dateStr.replace(/-/g, '');
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: title,
+    details: description || '',
+    dates: `${d}/${d}`,
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+function syncJourneyStepToGoogle(journeyId, stepId) {
+  const journey = state.journeys.find(j => j.id === journeyId);
+  if (!journey) return;
+  const step = journey.steps.find(s => s.id === stepId);
+  if (!step) return;
+  const url = googleCalendarLink({
+    title: `${step.icon} ${step.label} — ${journey.leadName}`,
+    description: `Etapa da jornada de relacionamento S Nexus (dia ${step.day}) para o cliente ${journey.leadName}.`,
+    dateStr: step.date,
+  });
+  window.open(url, '_blank');
+  step.googleEventId = 'link';
+  markDirty();
+  showAuthInfoToast('✓ Google Agenda aberto com o evento preenchido!');
+  renderCRM();
+}
+
+function syncReinforcementToGoogle(clientId) {
+  const c = state.postsale.find(c => c.id === clientId);
+  if (!c) return;
+  const url = googleCalendarLink({
+    title: `🔔 Reforço de contrato — ${c.client}`,
+    description: `Reforço ${c.reinforcementType} do contrato de ${c.client}. ${c.notes || ''}`,
+    dateStr: c.reinforcementDate,
+  });
+  window.open(url, '_blank');
+  c.googleEventId = 'link';
+  markDirty();
+  showAuthInfoToast('✓ Google Agenda aberto com o reforço preenchido!');
+  renderPostsale();
+}
+
+function syncInstallmentToGoogle(saleId, instId) {
+  const sale = state.sales.find(s => s.id === saleId);
+  if (!sale) return;
+  const inst = sale.installments.find(i => i.id === instId);
+  if (!inst) return;
+  const url = googleCalendarLink({
+    title: `💰 Parcela de comissão — ${sale.buyer}`,
+    description: `Parcela ${inst.id} de ${sale.installments.length} · ${fmt(inst.value)} · Venda: ${sale.buyer}`,
+    dateStr: inst.date,
+  });
+  window.open(url, '_blank');
+  inst.googleEventId = 'link';
+  markDirty();
+  showAuthInfoToast('✓ Google Agenda aberto com a parcela preenchida!');
+  renderFinancial();
+}
+
+function syncAllPendingJourneyToGoogle() {
+  const steps = getUpcomingJourneySteps(30).filter(s => !s.googleEventId);
+  if (!steps.length) { showAuthInfoToast('Nada novo para sincronizar nos próximos 30 dias!'); return; }
+  if (!confirm(`Isso vai abrir ${steps.length} aba(s) do Google Agenda com os eventos preenchidos. Continuar?`)) return;
+  steps.forEach(s => {
+    const journey = state.journeys.find(j => j.id === s.journeyId);
+    const step = journey.steps.find(st => st.id === s.id);
+    const url = googleCalendarLink({
+      title: `${step.icon} ${step.label} — ${journey.leadName}`,
+      description: `Etapa da jornada S Nexus (dia ${step.day}) — ${journey.leadName}`,
+      dateStr: step.date,
+    });
+    window.open(url, '_blank');
+    step.googleEventId = 'link';
+  });
+  markDirty();
+  renderAlerts();
+  showAuthInfoToast(`✓ ${steps.length} evento(s) enviados ao Google Agenda!`);
+}
+
+const QUOTES = [
+  { text: "Tudo posso naquele que me fortalece.", source: "Filipenses 4:13" },
+  { text: "Entrega o teu caminho ao Senhor, confia nele, e ele tudo fará.", source: "Salmos 37:5" },
+  { text: "Não temas, porque eu sou contigo; não te assombres, porque eu sou o teu Deus.", source: "Isaías 41:10" },
+  { text: "Tudo quanto te vier à mão para fazer, faze-o conforme as tuas forças.", source: "Eclesiastes 9:10" },
+  { text: "O Senhor é o meu pastor, nada me faltará.", source: "Salmos 23:1" },
+  { text: "Porque para Deus nada é impossível.", source: "Lucas 1:37" },
+  { text: "Não andeis ansiosos por coisa alguma; em tudo, pela oração e súplicas, apresentai os vossos pedidos a Deus.", source: "Filipenses 4:6" },
+  { text: "O Senhor é a minha força e o meu escudo; nele confia o meu coração.", source: "Salmos 28:7" },
+  { text: "Tudo o que fizerem, façam de todo o coração, como para o Senhor.", source: "Colossenses 3:23" },
+  { text: "A fé é o firme fundamento das coisas que se esperam.", source: "Hebreus 11:1" },
+  { text: "Você é mais forte do que imagina e mais capaz do que acredita.", source: "Paulo Vieira" },
+  { text: "Disciplina é fazer o que precisa ser feito, mesmo sem vontade.", source: "Paulo Vieira" },
+  { text: "Foco no processo gera resultado; foco só no resultado gera ansiedade.", source: "Paulo Vieira" },
+  { text: "Quem tem motivo, sempre encontra um jeito. Quem não tem, sempre encontra uma desculpa.", source: "Paulo Vieira" },
+  { text: "A consistência vence a intensidade. Pequenas ações diárias constroem grandes resultados.", source: "Paulo Vieira" },
+  { text: "Não espere motivação para agir, aja e a motivação vai aparecer.", source: "Paulo Vieira" },
+  { text: "Seu maior concorrente é a versão de ontem de você mesmo.", source: "Paulo Vieira" },
+  { text: "Metas sem prazo são apenas sonhos. Coloque data e vire ação.", source: "Paulo Vieira" },
+  { text: "O sucesso é a soma de pequenos esforços repetidos todos os dias.", source: "Paulo Vieira" },
+  { text: "Quem cuida da sua rotina, garante o seu resultado.", source: "Paulo Vieira" },
+];
+
+function pickGreeting(name) {
+  const h = new Date().getHours();
+  // 00h–05h59 = Boa noite (madrugada) | 06h–11h59 = Bom dia | 12h–17h59 = Boa tarde | 18h–23h59 = Boa noite
+  let period;
+  if (h >= 6 && h < 12) period = 'Bom dia';
+  else if (h >= 12 && h < 18) period = 'Boa tarde';
+  else period = 'Boa noite';
+  return `${period.toUpperCase()}, ${name.toUpperCase()}! Seja bem-vinda(o) 🙌`;
+}
+
+function newQuote() {
+  const q = QUOTES[Math.floor(Math.random()*QUOTES.length)];
+  const el = document.getElementById('motivational-quote');
+  if (el) el.textContent = `"${q.text}" — ${q.source}`;
+}
+
+function editGoal() {
+  const current = GOAL;
+  const input = prompt(`Meta anual (R$)\nAtual: ${fmt(current)}\n\nDigite o novo valor (apenas números):`, current);
+  if (input === null) return;
+  const val = parseFloat(input.replace(/[^\d.,]/g,'').replace(',','.'));
+  if (isNaN(val) || val <= 0) { alert('Valor inválido.'); return; }
+  GOAL = val;
+  state.goal = val;
+  markDirty();
+  renderDashboard();
+  showAuthInfoToast(`✓ Meta atualizada para ${fmt(val)}`);
+}
+
+function editCommission() {
+  const input = prompt(`Comissão acumulada (R$)\nAtual: ${fmt(state.commission)}\n\nDigite o novo valor total acumulado:`, state.commission);
+  if (input === null) return;
+  const val = parseFloat(input.replace(/[^\d.,]/g,'').replace(',','.'));
+  if (isNaN(val) || val < 0) { alert('Valor inválido.'); return; }
+  state.commission = val;
+  markDirty();
+  renderDashboard();
+  showAuthInfoToast(`✓ Comissão acumulada atualizada para ${fmt(val)}`);
+}
+
+function renderGreeting() {
+  document.getElementById('greeting-text').textContent = pickGreeting(state.userName || 'Corretor');
+  newQuote();
+}
+
+const STAGES = [
+  {id:"lead_novo",label:"Lead Novo",color:"#6366f1",icon:"✦"},
+  {id:"contato_iniciado",label:"Contato Iniciado",color:"#8b5cf6",icon:"◈"},
+  {id:"atendimento_whatsapp",label:"WhatsApp",color:"#a78bfa",icon:"◎"},
+  {id:"ligacao_realizada",label:"Ligação",color:"#06b6d4",icon:"◉"},
+  {id:"reuniao_online",label:"Reunião Online",color:"#0ea5e9",icon:"◆"},
+  {id:"visita_agendada",label:"Visita",color:"#10b981",icon:"◐"},
+  {id:"proposta_enviada",label:"Proposta",color:"#f59e0b",icon:"◑"},
+  {id:"negociacao",label:"Negociação",color:"#f97316",icon:"◒"},
+  {id:"fechamento",label:"Fechamento",color:"#ef4444",icon:"★"},
+  {id:"pos_venda",label:"Pós-venda",color:"#ec4899",icon:"♥"}
+];
+
+// Sequência fixa de toques nos primeiros ~2 meses após o cadastro do lead/cliente.
+// Depois do dia 60, a jornada entra em modo de "acompanhamento mensal" recorrente.
+const JOURNEY_TEMPLATE = [
+  { day: 0,  type: "whatsapp",  icon: "📱", label: "1ª Mensagem de WhatsApp" },
+  { day: 0,  type: "whatsapp",  icon: "📱", label: "2ª Mensagem de WhatsApp" },
+  { day: 1,  type: "ligacao",   icon: "📞", label: "Ligação" },
+  { day: 4,  type: "video",     icon: "🎥", label: "Vídeo personalizado" },
+  { day: 11, type: "contato",   icon: "🔔", label: "Novo contato" },
+  { day: 18, type: "mercado",   icon: "📊", label: "Atualização do mercado" },
+  { day: 25, type: "video",     icon: "🎥", label: "Novo vídeo" },
+];
+const JOURNEY_MONTHLY_START_DAY = 60; // a partir daqui, vira acompanhamento mensal
+
+function addDays(dateStr, days) {
+  const d = new Date(dateStr);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+}
+
+// Cria a jornada completa de um cliente/lead a partir da data de cadastro.
+// Gera os 7 toques fixos + as 4 primeiras rodadas de acompanhamento mensal (renovado conforme o tempo passa).
+function createJourney(leadId, leadName, startDate) {
+  const steps = JOURNEY_TEMPLATE.map((t, idx) => ({
+    id: idx + 1,
+    day: t.day,
+    type: t.type,
+    icon: t.icon,
+    label: t.label,
+    date: addDays(startDate, t.day),
+    status: "pendente"
+  }));
+  // Gera algumas rodadas iniciais de acompanhamento mensal (recorrente); novas rodadas são geradas conforme o tempo passa
+  for (let i = 0; i < 4; i++) {
+    const day = JOURNEY_MONTHLY_START_DAY + (i * 30);
+    steps.push({
+      id: steps.length + 1,
+      day,
+      type: "mensal",
+      icon: "🗓️",
+      label: "Acompanhamento mensal",
+      date: addDays(startDate, day),
+      status: "pendente"
+    });
+  }
+  return {
+    id: Date.now() + Math.random(),
+    leadId,
+    leadName,
+    startDate,
+    steps
+  };
+}
+
+function ensureJourneyForLead(leadId, leadName, startDate) {
+  const exists = state.journeys.find(j => j.leadId === leadId);
+  if (exists) return exists;
+  const journey = createJourney(leadId, leadName, startDate || new Date().toISOString().split('T')[0]);
+  state.journeys.push(journey);
+  return journey;
+}
+
+// Garante que sempre existam próximas rodadas mensais geradas com antecedência,
+// para uma jornada que já passou da fase inicial de 60 dias.
+function extendMonthlyStepsIfNeeded(journey) {
+  const today = new Date();
+  const lastStep = journey.steps[journey.steps.length - 1];
+  const lastDate = new Date(lastStep.date);
+  const sixtyDaysAhead = new Date(today);
+  sixtyDaysAhead.setDate(sixtyDaysAhead.getDate() + 60);
+  if (lastStep.type === 'mensal' && lastDate < sixtyDaysAhead) {
+    const nextDay = lastStep.day + 30;
+    journey.steps.push({
+      id: journey.steps.length + 1,
+      day: nextDay,
+      type: "mensal",
+      icon: "🗓️",
+      label: "Acompanhamento mensal",
+      date: addDays(journey.startDate, nextDay),
+      status: "pendente"
+    });
+  }
+}
+
+function getJourneyByLeadId(leadId) {
+  const j = state.journeys.find(j => j.leadId === leadId);
+  if (j) extendMonthlyStepsIfNeeded(j);
+  return j;
+}
+
+function toggleJourneyStep(journeyId, stepId) {
+  const journey = state.journeys.find(j => j.id === journeyId);
+  if (!journey) return;
+  const step = journey.steps.find(s => s.id === stepId);
+  if (!step) return;
+  step.status = step.status === 'feito' ? 'pendente' : 'feito';
+  if (step.status === 'feito') step.completedAt = new Date().toISOString().split('T')[0];
+  extendMonthlyStepsIfNeeded(journey);
+  markDirty();
+  renderCRM();
+  renderJourneyWidgets();
+}
+
+// Retorna todas as etapas de todas as jornadas que estão pendentes e já venceram ou vencem nos próximos N dias
+function getUpcomingJourneySteps(daysAhead) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const limit = new Date(today); limit.setDate(limit.getDate() + (daysAhead || 7));
+  const result = [];
+  state.journeys.forEach(j => {
+    extendMonthlyStepsIfNeeded(j);
+    j.steps.forEach(s => {
+      if (s.status === 'pendente') {
+        const d = new Date(s.date);
+        if (d <= limit) {
+          result.push({ ...s, journeyId: j.id, leadName: j.leadName, overdue: d < today });
+        }
+      }
+    });
+  });
+  result.sort((a,b) => new Date(a.date) - new Date(b.date));
+  return result;
+}
+
+function renderJourneyWidgets() {
+  // Atualiza badge de pendências da jornada no menu de Alertas, se a página estiver montada
+  const badge = document.getElementById('journey-alert-badge');
+  if (badge) {
+    const overdue = getUpcomingJourneySteps(0).filter(s => s.overdue).length;
+    badge.textContent = overdue;
+    badge.style.display = overdue > 0 ? '' : 'none';
+  }
+}
+
+// Cache do formatador de moeda (criar 1x é muito mais rápido que criar a cada chamada)
+const _currencyFormatter = new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
+const fmt = v => _currencyFormatter.format(v || 0);
+const pct = (v,t) => (!t || !v) ? 0 : Math.min(100, Math.max(0, (v/t)*100));
+const today = new Date();
+
+// monthsLeft e neededPerMonth são funções para sempre refletir GOAL e commission atuais
+function getMonthsLeft() { return Math.max(1, 12 - new Date().getMonth()); }
+function getNeededPerMonth() { return (GOAL - state.commission) / getMonthsLeft(); }
+// Aliases para compatibilidade com código existente
+const monthsLeft = 12 - today.getMonth();
+let neededPerMonth = (GOAL - state.commission) / monthsLeft;
+
+function ring(svgId, val, max, circumference) {
+  const el = document.getElementById(svgId);
+  if(!el) return;
+  const filled = circumference * (val/max);
+  el.setAttribute('stroke-dasharray', filled + ' ' + circumference);
+}
+
+function tagHTML(color, text) {
+  return `<span class="tag" style="background:${color}22;color:${color};border:1px solid ${color}44">${text}</span>`;
+}
+
+const PAGE_NAMES = {dashboard:'Dashboard',crm:'CRM / Leads',financial:'Financeiro',performance:'Performance',postsale:'Pós-venda',alerts:'Alertas',ai:'IA Nexus',admin:'🛡 Painel Admin'};
+
+// Controle de lazy render — rastreia quais seções já foram renderizadas
+const _rendered = new Set();
+const _renderFns = {
+  crm: () => renderCRM(),
+  financial: () => renderFinancial(),
+  performance: () => renderPerformance(),
+  postsale: () => renderPostsale(),
+  alerts: () => renderAlerts(),
+  ai: () => initAI(),
+  admin: () => loadAdminData(),
+};
+
+function goTo(id, btn) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const sec = document.getElementById('sec-'+id);
+  if(sec) { sec.classList.add('active'); sec.classList.remove('fade-in'); void sec.offsetWidth; sec.classList.add('fade-in'); }
+  if(btn) btn.classList.add('active');
+  document.getElementById('page-title').textContent = PAGE_NAMES[id] || id;
+  closeMobile();
+  syncMobileTabbar(id);
+  // Lazy render: só executa o render se a seção mudou desde a última vez
+  if (_renderFns[id]) {
+    _renderFns[id]();
+  }
+}
+
+// Permite navegar a partir da barra de abas fixa do mobile, mantendo tudo sincronizado com o menu lateral
+function goToFromTab(id) {
+  const sidebarBtn = Array.from(document.querySelectorAll('.nav-item')).find(b => b.getAttribute('onclick')?.includes(`'${id}'`));
+  goTo(id, sidebarBtn);
+}
+
+function syncMobileTabbar(id) {
+  document.querySelectorAll('.mtab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.section === id);
+  });
+}
+
+function toggleMobile() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+function closeMobile() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
+function renderDashboard() {
+  // Recalcular valores dinâmicos com base no estado atual
+  if (state.goal) GOAL = state.goal;
+  neededPerMonth = GOAL > 0 ? getNeededPerMonth() : 0;
+  const remain = GOAL > 0 ? GOAL - state.commission : 0;
+  const goalPct = pct(state.commission, GOAL);
+
+  // Atualiza exibição da meta editável
+  const goalDisplay = document.getElementById('hero-goal-display');
+  if (goalDisplay) goalDisplay.textContent = GOAL > 0 ? fmt(GOAL) : 'Definir meta';
+  const sidebarLabel = document.getElementById('goal-mini-label-val');
+  if (sidebarLabel) sidebarLabel.textContent = GOAL > 0 ? fmt(GOAL) : '—';
+
+  // sidebar
+  document.getElementById('sidebar-pct').textContent = GOAL > 0 ? goalPct.toFixed(1)+'%' : '0.0%';
+  document.getElementById('sidebar-bar').style.width = goalPct+'%';
+  document.getElementById('sidebar-remain').textContent = GOAL > 0 ? 'Faltam '+fmt(remain) : 'Meta não definida';
+
+  // hero ring
+  setTimeout(()=>{ ring('hero-ring', state.commission, GOAL || 1, 2*Math.PI*62); }, 100);
+  document.getElementById('hero-pct-txt').textContent = goalPct.toFixed(1)+'%';
+  document.getElementById('hero-acc').textContent = fmt(state.commission);
+  document.getElementById('hero-remain').textContent = GOAL > 0 ? fmt(remain) : '—';
+  setTimeout(()=>{ document.getElementById('hero-bar').style.width = goalPct+'%'; }, 100);
+
+  // goal stats — mostrar traço quando meta não definida
+  document.getElementById('goal-stats').innerHTML = GOAL > 0 ? [
+    {l:'Necessário/Mês', v:fmt(neededPerMonth), c:'#06b6d4'},
+    {l:'Por Semana', v:fmt(neededPerMonth/4.3), c:'#10b981'},
+    {l:'Por Dia útil', v:fmt(neededPerMonth/22), c:'#f59e0b'},
+    {l:'Imóveis ~', v:`${Math.ceil(remain/(885000*0.025))} vendas`, c:'#ec4899'}
+  ].map(s=>`<div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em">${s.l}</div><div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:${s.c};margin-top:3px">${s.v}</div></div>`).join('')
+  : `<div style="font-size:12px;color:var(--text3);padding:4px 0">👆 Clique em <strong style="color:var(--indigo)">Editar</strong> para definir sua meta anual</div>`;
+
+  // metrics
+  const totalVGV = state.sales.reduce((a,s)=>a+s.value,0);
+  const avgVGV = state.sales.length ? totalVGV/state.sales.length : 0;
+  const avgComm = state.sales.length ? state.commission/state.sales.length : 0;
+  const hotLeads = state.leads.filter(l=>l.temp==='quente').length;
+  const propostas = state.leads.filter(l=>l.status==='proposta_enviada').length;
+  const pipelineSub = state.leads.length > 0
+    ? `${hotLeads} quente${hotLeads!==1?'s':''} · ${propostas} proposta${propostas!==1?'s':''}`
+    : 'Nenhum lead cadastrado';
+  document.getElementById('dash-metrics').innerHTML = [
+    {icon:'💰',label:'Comissão Líquida',val:state.commission>0?fmt(state.commission):'—',sub:`${state.sales.length} venda(s) realizadas`,c:'#6366f1',p:state.commission,pm:GOAL||1},
+    {icon:'🏢',label:'VGV Total Vendido',val:totalVGV>0?fmt(totalVGV):'—',sub:`${state.sales.length} venda(s)`,c:'#06b6d4'},
+    {icon:'📈',label:'Necessário/Mês',val:GOAL>0?fmt(neededPerMonth):'Defina sua meta',sub:GOAL>0?`${monthsLeft} meses restantes`:'clique em Editar',c:'#10b981'},
+    {icon:'🔥',label:'Pipeline Ativo',val:`${state.leads.length} lead${state.leads.length!==1?'s':''}`,sub:pipelineSub,c:'#f97316'},
+    {icon:'⚡',label:'Ticket Médio VGV',val:avgVGV>0?fmt(avgVGV):'—',sub:avgComm>0?`comissão média: ${fmt(avgComm)}`:'cadastre vendas',c:'#f59e0b'},
+    {icon:'🎯',label:'Conversão',val:state.leads.length>0?`${Math.round((state.sales.length/state.leads.length)*100)}%`:'—',sub:'vendas / leads ativos',c:'#ec4899'}
+  ].map(m=>`
+    <div class="card" style="box-shadow:0 0 20px ${m.c}11">
+      <div class="metric-card">
+        <div class="metric-icon" style="background:${m.c}18;border:1px solid ${m.c}33;filter:drop-shadow(0 0 6px ${m.c}44)">${m.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div class="metric-label">${m.label}</div>
+          <div class="metric-val">${m.val}</div>
+          <div class="metric-sub">${m.sub||''}</div>
+          ${m.p!=null?`<div style="margin-top:8px"><div class="bar-track" style="height:4px"><div class="bar-fill" style="width:${pct(m.p,m.pm)}%;height:4px;background:${m.c}"></div></div></div>`:''}
+        </div>
+      </div>
+    </div>`).join('');
+
+  // chart
+  const months=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const curM = today.getMonth();
+  const projPerM = neededPerMonth;
+  document.getElementById('chart-bars').innerHTML = months.map((m,i)=>{
+    const h = GOAL > 0 ? ((projPerM*(i+1))/(projPerM*12))*100 : 0;
+    const isActual = i===curM;
+    const isPast = i<curM && !isActual;
+    const bg = isActual?'linear-gradient(180deg,#6366f1,#4f46e5)':isPast?'rgba(99,102,241,0.25)':'rgba(255,255,255,0.06)';
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+      <div style="width:100%;height:100%;display:flex;align-items:flex-end">
+        <div style="width:100%;height:${Math.max(h,2)}%;background:${bg};border-radius:4px 4px 0 0;position:relative;${isActual?'box-shadow:0 0 10px rgba(99,102,241,0.5)':''}">
+          ${isActual?`<div style="position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:7px;color:#6366f1;font-weight:800;white-space:nowrap">atual</div>`:''}
+        </div>
+      </div>
+      <div style="font-size:7px;color:var(--text3)">${m}</div>
+    </div>`;
+  }).join('');
+
+  // upcoming
+  const allInst = state.sales.flatMap(s=>(s.installments||[]).map(i=>({...i,buyer:s.buyer})));
+  const pending = allInst.filter(i=>i.status!=='pago').slice(0,3);
+  document.getElementById('upcoming-payments').innerHTML = pending.map((p,i)=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:11px 0;${i<pending.length-1?'border-bottom:1px solid var(--border)':''}">
+      <div style="min-width:46px;padding:5px 6px;background:rgba(99,102,241,0.12);border-radius:8px;text-align:center">
+        <div style="font-size:9px;color:var(--indigo);font-weight:700">${p.date.split('-')[1]}/${p.date.split('-')[0].slice(2)}</div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:12px;color:var(--text2)">${p.buyer} · Parcela ${p.id}</div>
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px">${fmt(p.value)}</div>
+      </div>
+      ${tagHTML('#f59e0b','pendente')}
+    </div>`).join('') +
+    `<div style="padding:12px 0 0;border-top:1px solid var(--border);display:flex;justify-content:space-between;margin-top:4px">
+      <span style="font-size:11px;color:var(--text3)">Total previsto</span>
+      <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14px;color:var(--green)">${fmt(pending.reduce((a,p)=>a+p.value,0))}</span>
+    </div>`;
+
+  // daily goals
+  document.getElementById('daily-goals').innerHTML = state.habits.map(h=>`
+    <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:13px">
+      <div style="font-size:20px;margin-bottom:6px">${h.icon}</div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:6px">${h.label}</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:19px;font-weight:800">${h.done}<span style="font-size:11px;color:var(--text3);font-weight:400">/${h.goal}</span></div>
+      <div style="margin-top:6px"><div class="bar-track" style="height:4px"><div class="bar-fill" style="width:${pct(h.done,h.goal)}%;height:4px;background:${h.done>=h.goal?'#10b981':h.color}"></div></div></div>
+    </div>`).join('');
+}
+
+function renderCRM() {
+  if(state.crmView==='kanban') renderKanban();
+  else renderLeadList();
+}
+
+function setCRMView(v) {
+  state.crmView=v;
+  document.getElementById('crm-kanban').style.display = v==='kanban'?'':'none';
+  document.getElementById('crm-lista').style.display = v==='lista'?'':'none';
+  document.getElementById('btn-kanban').className = v==='kanban'?'btn-primary':'btn-ghost';
+  document.getElementById('btn-lista').className = v==='lista'?'btn-primary':'btn-ghost';
+  document.getElementById('btn-kanban').style.cssText = 'padding:10px 16px;font-size:12px';
+  document.getElementById('btn-lista').style.cssText = 'padding:10px 16px;font-size:12px';
+  renderCRM();
+}
+
+function filterLeads() { renderCRM(); }
+
+function getFiltered() {
+  const q = document.getElementById('crm-search').value.toLowerCase();
+  return q ? state.leads.filter(l=>l.name.toLowerCase().includes(q)||l.phone.includes(q)) : state.leads;
+}
+
+function renderKanban() {
+  const filtered = getFiltered();
+  const el = document.getElementById('crm-kanban');
+  el.style.display='';
+  el.innerHTML = `<div class="kanban">` +
+    STAGES.map(s=>{
+      const stageLeads = filtered.filter(l=>l.status===s.id);
+      return `<div class="kanban-col">
+        <div class="kanban-col-header" style="background:${s.color}14;border:1px solid ${s.color}28">
+          <span style="font-size:13px">${s.icon}</span>
+          <span style="color:${s.color}">${s.label}</span>
+          <span class="kanban-col-count" style="background:${s.color}28;color:${s.color}">${stageLeads.length}</span>
+        </div>
+        ${stageLeads.map(l=>leadCardHTML(l,s)).join('')}
+      </div>`;
+    }).join('') + `</div>`;
+}
+
+function tempDot(t) {
+  const c={quente:'#ef4444',morno:'#f59e0b',frio:'#06b6d4'}[t]||'#666';
+  return `<div style="width:8px;height:8px;border-radius:50%;background:${c};box-shadow:0 0 5px ${c};flex-shrink:0"></div>`;
+}
+
+function leadCardHTML(l,s) {
+  const sel = state.selectedLead===l.id;
+  const sc = s||STAGES.find(st=>st.id===l.status)||STAGES[0];
+  return `<div class="lead-card ${sel?'selected':''}" onclick="selectLead(${l.id})" style="${sel?`border-color:${sc.color};box-shadow:0 0 14px ${sc.color}33`:''}">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px">
+      <div style="font-size:12px;font-weight:700;line-height:1.3">${l.name}</div>
+      ${tempDot(l.temp)}
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-top:2px">${l.origin}</div>
+    <div style="font-size:10px;color:var(--text2);margin-top:6px;line-height:1.4">${(l.notes||'').slice(0,55)}${l.notes&&l.notes.length>55?'…':''}</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:8px">
+      <span style="font-size:9px;color:var(--text3)">🔄 ${l.followups}x</span>
+      <button onclick="event.stopPropagation();addFollowup(${l.id})" style="margin-left:auto;padding:3px 9px;background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:6px;color:var(--text2);font-size:9px;font-weight:700">+FU</button>
+    </div>
+  </div>`;
+}
+
+function renderLeadList() {
+  const filtered = getFiltered();
+  document.getElementById('crm-lista').style.display='';
+  document.getElementById('crm-lista').innerHTML = `
+    <div class="card">
+      <table>
+        <thead><tr>
+          <th>Nome</th><th>WhatsApp</th><th>Etapa</th><th>Temp.</th><th>FU</th><th>Último Contato</th><th>Ações</th>
+        </tr></thead>
+        <tbody>${filtered.map(l=>{
+          const s=STAGES.find(st=>st.id===l.status)||STAGES[0];
+          return `<tr>
+            <td style="font-weight:600">${l.name}</td>
+            <td style="color:var(--text2)">${l.phone}</td>
+            <td>${tagHTML(s.color,s.label)}</td>
+            <td><div style="display:flex;align-items:center;gap:5px">${tempDot(l.temp)}<span style="font-size:11px;color:var(--text2);text-transform:capitalize">${l.temp}</span></div></td>
+            <td style="font-weight:700;color:${l.followups>5?'#10b981':'inherit'}">${l.followups}x</td>
+            <td style="font-size:11px;color:var(--text3)">${l.lastContact}</td>
+            <td>
+              <div style="display:flex;gap:6px">
+                <button onclick="addFollowup(${l.id})" style="padding:4px 10px;background:rgba(16,185,129,0.12);color:#10b981;border:1px solid rgba(16,185,129,0.3);border-radius:6px;font-size:10px;font-weight:700">+FU</button>
+                <button onclick="openWhatsApp('${l.phone}','${l.name}')" style="padding:4px 10px;background:rgba(99,102,241,0.12);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3);border-radius:6px;font-size:10px">WA</button>
+              </div>
+            </td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`;
+}
+
+function selectLead(id) {
+  state.selectedLead = state.selectedLead===id ? null : id;
+  renderCRM();
+  if(state.selectedLead) renderLeadDetail(state.leads.find(l=>l.id===id));
+  else document.getElementById('lead-detail').innerHTML='';
+}
+
+function renderLeadDetail(l) {
+  if(!l) return;
+  const s=STAGES.find(st=>st.id===l.status)||STAGES[0];
+  const tColors={quente:'#ef4444',morno:'#f59e0b',frio:'#06b6d4'};
+  const waMsg = `Olá ${l.name.split(' ')[0]}, tudo bem? 😊\nPassando para acompanhar nosso atendimento. Tenho uma novidade que pode ser do seu interesse!\nTem um minutinho agora?`;
+  const journey = getJourneyByLeadId(l.id);
+
+  document.getElementById('lead-detail').innerHTML=`
+    <div class="card fade-in" style="border-color:rgba(99,102,241,0.25);box-shadow:0 0 20px rgba(99,102,241,0.08)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+        <div>
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px">${l.name}</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px">${l.phone} · ${l.origin}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          ${tagHTML(tColors[l.temp],l.temp)}
+          <button onclick="selectLead(${l.id})" style="padding:5px 12px;background:rgba(255,255,255,0.06);color:var(--text3);border-radius:7px;font-size:11px">✕ Fechar</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px">
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Mover para etapa</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${STAGES.map(st=>`
+            <button onclick="moveStage(${l.id},'${st.id}')" style="padding:6px 11px;border-radius:8px;font-size:10px;font-weight:700;
+              background:${l.status===st.id?st.color+'28':'rgba(255,255,255,0.05)'};
+              border:1px solid ${l.status===st.id?st.color:'rgba(255,255,255,0.08)'};
+              color:${l.status===st.id?st.color:'rgba(255,255,255,0.45)'}">
+              ${st.icon} ${st.label}
+            </button>`).join('')}
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
+        <div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Mensagem WhatsApp</div>
+          <div style="background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.18);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--text2);line-height:1.6;white-space:pre-line">${waMsg}</div>
+          <button onclick="openWhatsApp('${l.phone}','${l.name}')" style="margin-top:8px;padding:8px 16px;background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3);border-radius:8px;font-size:11px;font-weight:700">📱 Abrir WhatsApp</button>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Observações</div>
+
+          <!-- Histórico de observações -->
+          <div id="notes-history-${l.id}" style="max-height:180px;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:6px">
+            ${(l.noteHistory && l.noteHistory.length > 0)
+              ? l.noteHistory.slice().reverse().map(n => `
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;padding:10px 12px;position:relative">
+                  <div style="font-size:11px;color:var(--text);line-height:1.5;white-space:pre-wrap">${n.text}</div>
+                  <div style="font-size:9px;color:var(--text3);margin-top:5px">${new Date(n.date).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+                </div>`).join('')
+              : (l.notes ? `<div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;padding:10px 12px">
+                  <div style="font-size:11px;color:var(--text);line-height:1.5;white-space:pre-wrap">${l.notes}</div>
+                  <div style="font-size:9px;color:var(--text3);margin-top:5px">Observação anterior</div>
+                </div>` : `<div style="font-size:11px;color:var(--text3);text-align:center;padding:12px">Nenhuma observação ainda</div>`)
+            }
+          </div>
+
+          <!-- Campo para nova observação -->
+          <textarea id="new-note-${l.id}" rows="2" style="resize:none;font-size:12px" placeholder="Nova observação..."></textarea>
+          <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+            <button onclick="addNote(${l.id})" style="padding:8px 14px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border-radius:8px;font-size:11px;font-weight:700;border:none">+ Adicionar</button>
+            <button onclick="addFollowup(${l.id})" class="btn-primary" style="font-size:11px;padding:8px 14px;background:rgba(99,102,241,0.12);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25)">+1 Follow-up</button>
+            <span style="font-size:11px;color:var(--text3)">Total: ${l.followups}x</span>
+          </div>
+        </div>
+      </div>
+
+      ${journey ? renderJourneyTimelineHTML(journey) : ''}
+    </div>`;
+}
+
+function renderJourneyTimelineHTML(journey) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const doneCount = journey.steps.filter(s=>s.status==='feito').length;
+  const totalCount = journey.steps.length;
+  return `
+    <div style="border-top:1px solid var(--border);padding-top:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em">🚀 Jornada de Relacionamento</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="tag" style="background:rgba(99,102,241,0.12);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25)">${doneCount}/${totalCount} concluídas</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto">
+        ${journey.steps.map(step => {
+          const d = new Date(step.date);
+          const isOverdue = step.status === 'pendente' && d < today;
+          const isToday = step.date === today.toISOString().split('T')[0];
+          const dateFmt = d.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit', year:'2-digit'});
+          return `
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;
+              background:${step.status==='feito' ? 'rgba(16,185,129,0.08)' : isOverdue ? 'rgba(239,68,68,0.08)' : isToday ? 'rgba(245,158,11,0.08)' : 'rgba(255,255,255,0.03)'};
+              border:1px solid ${step.status==='feito' ? 'rgba(16,185,129,0.2)' : isOverdue ? 'rgba(239,68,68,0.25)' : isToday ? 'rgba(245,158,11,0.25)' : 'var(--border)'}">
+              <div onclick="toggleJourneyStep(${journey.id},${step.id})" style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;cursor:pointer">
+                <div style="font-size:16px;flex-shrink:0;opacity:${step.status==='feito'?0.5:1}">${step.icon}</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:12px;font-weight:600;color:${step.status==='feito'?'var(--text3)':'var(--text)'};text-decoration:${step.status==='feito'?'line-through':'none'}">${step.label}</div>
+                  <div style="font-size:10px;color:${isOverdue?'#ef4444':'var(--text3)'}">Dia ${step.day} · ${dateFmt}${isOverdue?' · atrasado':''}${isToday?' · hoje':''}</div>
+                </div>
+                <div style="width:22px;height:22px;border-radius:50%;border:2px solid ${step.status==='feito'?'#10b981':'rgba(255,255,255,0.2)'};background:${step.status==='feito'?'#10b981':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  ${step.status==='feito' ? '<span style="color:#fff;font-size:11px">✓</span>' : ''}
+                </div>
+              </div>
+              <button onclick="event.stopPropagation();syncJourneyStepToGoogle(${journey.id},${step.id})" title="Adicionar à Google Agenda" style="flex-shrink:0;width:28px;height:28px;border-radius:7px;background:${step.googleEventId?'rgba(99,102,241,0.2)':'rgba(255,255,255,0.06)'};border:1px solid ${step.googleEventId?'rgba(99,102,241,0.35)':'var(--border2)'};color:${step.googleEventId?'#a5b4fc':'var(--text3)'};font-size:13px;display:flex;align-items:center;justify-content:center">📅</button>
+            </div>`;
+        }).join('')}
+      </div>
+      <button onclick="syncAllPendingJourneyToGoogle()" style="width:100%;margin-top:12px;padding:8px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:8px;color:#a5b4fc;font-size:11px;font-weight:600">📅 Sincronizar pendências com Google Agenda</button>
+    </div>`;
+}
+
+function toggleAddLead() {
+  const f = document.getElementById('add-lead-form');
+  f.style.display = f.style.display==='none' ? '' : 'none';
+}
+
+function saveLead() {
+  markDirty();
+  const name=document.getElementById('new-name').value.trim();
+  if(!name){alert('Insira o nome do lead');return;}
+  const newId = Date.now();
+  const startDate = new Date().toISOString().split('T')[0];
+  state.leads.push({
+    id:newId,name,
+    phone:document.getElementById('new-phone').value,
+    origin:document.getElementById('new-origin').value,
+    temp:document.getElementById('new-temp').value,
+    status:'lead_novo',
+    followups:0,
+    lastContact:startDate,
+    notes:document.getElementById('new-notes').value,
+    priority:'media'
+  });
+  ensureJourneyForLead(newId, name, startDate);
+  toggleAddLead();
+  renderCRM();
+}
+
+function addNote(id) {
+  const input = document.getElementById(`new-note-${id}`);
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) { input.focus(); return; }
+
+  const l = state.leads.find(l => l.id === id);
+  if (!l) return;
+
+  // Inicializa histórico se não existir
+  if (!Array.isArray(l.noteHistory)) {
+    l.noteHistory = [];
+    // Migra nota antiga para o histórico
+    if (l.notes) {
+      l.noteHistory.push({ text: l.notes, date: new Date().toISOString() });
+    }
+  }
+
+  l.noteHistory.push({ text, date: new Date().toISOString() });
+  l.notes = text; // mantém compatibilidade com código existente
+  input.value = '';
+  markDirty();
+  renderLeadDetail(l);
+  showAuthInfoToast('✓ Observação adicionada!');
+}
+
+function addFollowup(id) {
+  markDirty();
+  const l = state.leads.find(l=>l.id===id);
+  if(l){l.followups++;l.lastContact=new Date().toISOString().split('T')[0];}
+  renderCRM();
+  if(state.selectedLead===id) renderLeadDetail(l);
+}
+
+function moveStage(id, status) {
+  markDirty();
+  const l=state.leads.find(l=>l.id===id);
+  if(l) l.status=status;
+  renderCRM();
+  renderLeadDetail(state.leads.find(l=>l.id===id));
+}
+
+function openWhatsApp(phone, name) {
+  const msg = encodeURIComponent(`Olá ${name.split(' ')[0]}, tudo bem? 😊\nPassando para acompanhar nosso atendimento. Tenho novidades para você!`);
+  window.open(`https://wa.me/55${phone}?text=${msg}`,'_blank');
+}
+
+function renderFinancial() {
+  const totalComm = state.sales.reduce((a,s)=>a+s.commission,0);
+  const totalPaid = state.sales.flatMap(s=>s.installments||[]).filter(i=>i.status==='pago').reduce((a,i)=>a+i.value,0);
+  const totalPending = state.sales.flatMap(s=>s.installments||[]).filter(i=>i.status==='pendente').reduce((a,i)=>a+i.value,0);
+  const totalVGV = state.sales.reduce((a,s)=>a+s.value,0);
+
+  document.getElementById('fin-metrics').innerHTML = [
+    {icon:'✅',label:'Comissão Recebida',val:fmt(totalPaid),sub:'recebido confirmado',c:'#10b981',p:totalPaid,pm:GOAL},
+    {icon:'⏳',label:'Pendente Receber',val:fmt(totalPending),sub:'a receber confirmado',c:'#f59e0b'},
+    {icon:'🔮',label:'Projeção Anual',val:fmt(neededPerMonth*12),sub:'se mantiver ritmo',c:'#6366f1'},
+    {icon:'📊',label:'VGV Total Vendido',val:fmt(totalVGV),sub:`${state.sales.length} venda(s)`,c:'#06b6d4'}
+  ].map(m=>`
+    <div class="card" style="box-shadow:0 0 20px ${m.c}11">
+      <div class="metric-card">
+        <div class="metric-icon" style="background:${m.c}18;border:1px solid ${m.c}33">${m.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div class="metric-label">${m.label}</div>
+          <div class="metric-val">${m.val}</div>
+          <div class="metric-sub">${m.sub}</div>
+          ${m.p!=null?`<div style="margin-top:8px"><div class="bar-track" style="height:4px"><div class="bar-fill" style="width:${pct(m.p,m.pm)}%;height:4px;background:${m.c}"></div></div></div>`:''}
+        </div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('sales-list').innerHTML = state.sales.map(s=>`
+    <div style="padding:16px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+        <div>
+          <div style="font-weight:700;font-size:14px">${s.buyer}</div>
+          <div style="font-size:11px;color:var(--text3)">${s.seller||'—'} · ${s.date}</div>
+          ${s.notes?`<div style="font-size:11px;color:var(--text2);margin-top:3px">${s.notes}</div>`:''}
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:11px;color:var(--text3)">VGV: ${fmt(s.value)}</div>
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;color:#10b981">${fmt(s.commission)}</div>
+          <div style="font-size:10px;color:var(--text3)">${s.commissionPct}% líquido</div>
+        </div>
+      </div>
+      ${(s.installments||[]).length?`
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+          ${s.installments.map(i=>`
+            <div style="padding:7px 12px;border-radius:9px;background:${i.status==='pago'?'rgba(16,185,129,0.1)':'rgba(245,158,11,0.1)'};border:1px solid ${i.status==='pago'?'rgba(16,185,129,0.3)':'rgba(245,158,11,0.3)'}">
+              <div style="font-size:9px;color:var(--text3)">Parcela ${i.id}</div>
+              <input type="number" value="${i.value.toFixed(2)}" onchange="editInstallmentValue(${s.id},${i.id},this.value)"
+                style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13px;color:${i.status==='pago'?'#10b981':'#f59e0b'};background:transparent;border:none;padding:0;width:90px;margin-top:2px">
+              <input type="date" value="${i.date}" onchange="editInstallmentDate(${s.id},${i.id},this.value)"
+                style="font-size:9px;color:var(--text3);background:transparent;border:none;padding:0;margin-top:2px;width:100%">
+              <button onclick="toggleInstStatus(${s.id},${i.id})" style="margin-top:4px;padding:2px 8px;background:rgba(255,255,255,0.08);border:none;border-radius:5px;color:var(--text2);font-size:9px;cursor:pointer">
+                ${i.status==='pago'?'↺ Pendente':'✓ Pago'}
+              </button>
+              <button onclick="syncInstallmentToGoogle(${s.id},${i.id})" title="Adicionar à Google Agenda" style="margin-top:4px;margin-left:4px;padding:2px 7px;background:${i.googleEventId?'rgba(99,102,241,0.2)':'rgba(255,255,255,0.06)'};border:1px solid ${i.googleEventId?'rgba(99,102,241,0.35)':'transparent'};border-radius:5px;color:#a5b4fc;font-size:9px;cursor:pointer">📅</button>
+            </div>`).join('')}
+        </div>`:''
+      }
+      <div style="display:flex;gap:8px">
+        <button onclick="editSale(${s.id})" style="padding:6px 13px;background:rgba(99,102,241,0.12);color:#a5b4fc;border:1px solid rgba(99,102,241,0.28);border-radius:7px;font-size:11px;font-weight:600">✎ Editar venda</button>
+        <button onclick="deleteSale(${s.id})" style="padding:6px 13px;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.25);border-radius:7px;font-size:11px;font-weight:600">🗑 Excluir</button>
+      </div>
+    </div>`).join('') || '<div style="color:var(--text3);padding:16px;text-align:center">Nenhuma venda registrada</div>';
+
+  calcSim();
+}
+
+function toggleAddSale(forceClose) {
+  const f=document.getElementById('add-sale-form');
+  const willOpen = forceClose ? false : f.style.display==='none';
+  f.style.display = willOpen ? '' : 'none';
+  if(!willOpen) {
+    state.editingSaleId = null;
+    document.getElementById('sale-form-title').textContent = 'Registrar Nova Venda';
+    document.getElementById('sale-form-save-btn').textContent = 'Salvar Venda';
+    document.getElementById('s-inst-group').style.display = '';
+    clearSaleForm();
+    return;
+  }
+  if (state.editingSaleId === null) {
+    document.getElementById('sale-form-title').textContent = 'Registrar Nova Venda';
+    document.getElementById('sale-form-save-btn').textContent = 'Salvar Venda';
+    document.getElementById('s-inst-group').style.display = '';
+    clearSaleForm();
+    document.getElementById('s-date').value=new Date().toISOString().split('T')[0];
+  }
+  document.getElementById('s-value').oninput = calcSalePreview;
+  document.getElementById('s-pct').oninput = calcSalePreview;
+  document.getElementById('s-comm-manual').oninput = calcSalePreview;
+  f.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function clearSaleForm() {
+  document.getElementById('s-buyer').value='';
+  document.getElementById('s-seller').value='';
+  document.getElementById('s-value').value='';
+  document.getElementById('s-pct').value='2.5';
+  document.getElementById('s-comm-manual').value='';
+  document.getElementById('s-date').value='';
+  document.getElementById('s-inst').value='1';
+  document.getElementById('s-notes').value='';
+  document.getElementById('sale-preview').style.display='none';
+}
+
+function editSale(id) {
+  const s = state.sales.find(s=>s.id===id);
+  if (!s) return;
+  state.editingSaleId = id;
+  document.getElementById('sale-form-title').textContent = 'Editar Venda — ' + s.buyer;
+  document.getElementById('sale-form-save-btn').textContent = 'Salvar Alterações';
+  document.getElementById('s-inst-group').style.display = '';
+  document.getElementById('s-buyer').value = s.buyer;
+  document.getElementById('s-seller').value = s.seller || '';
+  document.getElementById('s-value').value = s.value;
+  document.getElementById('s-pct').value = s.commissionPct;
+  document.getElementById('s-comm-manual').value = s.commission.toFixed(2);
+  document.getElementById('s-date').value = s.date;
+  document.getElementById('s-inst').value = (s.installments && s.installments.length) || 1;
+  document.getElementById('s-notes').value = s.notes || '';
+  document.getElementById('add-sale-form').style.display = '';
+  calcSalePreview();
+  document.getElementById('s-value').oninput = calcSalePreview;
+  document.getElementById('s-pct').oninput = calcSalePreview;
+  document.getElementById('s-comm-manual').oninput = calcSalePreview;
+  document.getElementById('add-sale-form').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function calcSalePreview() {
+  const v=parseFloat(document.getElementById('s-value').value)||0;
+  const p=parseFloat(document.getElementById('s-pct').value)||0;
+  const manual=document.getElementById('s-comm-manual').value;
+  const comm = manual!=='' ? parseFloat(manual)||0 : v*(p/100);
+  const prev=document.getElementById('sale-preview');
+  prev.style.display = (v>0||manual!=='')?'':'none';
+  document.getElementById('sale-preview-label').textContent = manual!=='' ? 'Comissão total (manual): ' : 'Comissão líquida calculada: ';
+  document.getElementById('sale-preview-val').textContent = fmt(comm);
+}
+
+function saveSale() {
+  markDirty();
+  const buyer=document.getElementById('s-buyer').value.trim();
+  const value=parseFloat(document.getElementById('s-value').value);
+  if(!buyer||!value){alert('Preencha comprador e valor');return;}
+  const pctVal=parseFloat(document.getElementById('s-pct').value)||2.5;
+  const baseDate=document.getElementById('s-date').value||new Date().toISOString().split('T')[0];
+  const seller=document.getElementById('s-seller').value;
+  const notes=document.getElementById('s-notes').value;
+
+  // Comissão total: usa o campo manual se preenchido, senão calcula automaticamente
+  const manualCommInput = document.getElementById('s-comm-manual').value;
+  const comm = manualCommInput !== '' ? parseFloat(manualCommInput) : value*(pctVal/100);
+
+  if (state.editingSaleId !== null) {
+    const sale = state.sales.find(s=>s.id===state.editingSaleId);
+    if (sale) {
+      sale.buyer = buyer;
+      sale.seller = seller;
+      sale.value = value;
+      sale.commissionPct = pctVal;
+      sale.commission = comm;
+      sale.date = baseDate;
+      sale.notes = notes;
+      sale.installments = rebuildInstallments(sale.installments || [], comm, parseInt(document.getElementById('s-inst').value)||1, baseDate);
+    }
+  } else {
+    const nInst=parseInt(document.getElementById('s-inst').value)||1;
+    const installments = rebuildInstallments([], comm, nInst, baseDate);
+    const newSaleId = Date.now();
+    state.sales.push({
+      id:newSaleId,buyer,seller,
+      value,commission:comm,commissionPct:pctVal,
+      date:baseDate,status:'fechamento',
+      notes,installments
+    });
+    ensureJourneyForLead(newSaleId, buyer, baseDate);
+  }
+
+  state.commission = state.sales.reduce((a,s)=>a+s.commission,0);
+  toggleAddSale(true);
+  renderFinancial();
+  renderDashboard();
+}
+
+// Reconstrói as parcelas para somar EXATAMENTE o valor da comissão.
+// Mantém status "pago" e valor das parcelas já pagas que ainda existem (até o limite de nInst),
+// e distribui o restante igualmente entre as parcelas pendentes/novas, ajustando centavos na última.
+function rebuildInstallments(existing, totalComm, nInst, baseDate) {
+  nInst = Math.max(1, nInst);
+  const paid = existing.filter(i => i.status === 'pago').slice(0, nInst);
+  const paidTotal = paid.reduce((a,i)=>a+i.value, 0);
+  const remainingSlots = Math.max(0, nInst - paid.length);
+  const remainingValue = Math.max(0, totalComm - paidTotal);
+
+  const result = [...paid];
+  if (remainingSlots > 0) {
+    const evenVal = Math.round((remainingValue / remainingSlots) * 100) / 100;
+    // Use a data da última parcela paga (ou baseDate) como ponto de partida
+    const startDate = paid.length ? new Date(paid[paid.length-1].date) : new Date(baseDate);
+    const usedIds = new Set(existing.map(i=>i.id));
+    let nextId = existing.length ? Math.max(...existing.map(i=>i.id)) + 1 : 1;
+    let runningTotal = 0;
+    for (let k = 0; k < remainingSlots; k++) {
+      const isLast = k === remainingSlots - 1;
+      const val = isLast ? Math.round((remainingValue - runningTotal) * 100) / 100 : evenVal;
+      runningTotal += val;
+      const d = new Date(startDate);
+      d.setMonth(d.getMonth() + k + (paid.length ? 1 : 0));
+      result.push({ id: nextId++, date: d.toISOString().split('T')[0], value: val, status: 'pendente' });
+    }
+  }
+  // Reordena por data e renumera sequencialmente para exibição limpa (Parcela 1, 2, 3...)
+  result.sort((a,b) => new Date(a.date) - new Date(b.date));
+  result.forEach((inst, idx) => { inst.id = idx + 1; });
+  return result;
+}
+
+function deleteSale(id) {
+  markDirty();
+  const s = state.sales.find(s=>s.id===id);
+  if (!s) return;
+  if (!confirm(`Excluir a venda de "${s.buyer}"? Essa ação não pode ser desfeita.`)) return;
+  state.sales = state.sales.filter(s=>s.id!==id);
+  state.commission = state.sales.reduce((a,s)=>a+s.commission,0);
+  renderFinancial();
+  renderDashboard();
+}
+
+function toggleInstStatus(saleId, instId) {
+  markDirty();
+  const sale=state.sales.find(s=>s.id===saleId);
+  if(!sale) return;
+  const inst=sale.installments.find(i=>i.id===instId);
+  if(inst) inst.status=inst.status==='pago'?'pendente':'pago';
+  renderFinancial();
+}
+
+function editInstallmentValue(saleId, instId, newValue) {
+  markDirty();
+  const sale=state.sales.find(s=>s.id===saleId);
+  if(!sale) return;
+  const inst=sale.installments.find(i=>i.id===instId);
+  const v=parseFloat(newValue);
+  if(inst && !isNaN(v) && v>=0){
+    inst.value = v;
+    sale.commission = sale.installments.reduce((a,i)=>a+i.value,0);
+    state.commission = state.sales.reduce((a,s)=>a+s.commission,0);
+  }
+  renderFinancial();
+  renderDashboard();
+}
+
+function editInstallmentDate(saleId, instId, newDate) {
+  markDirty();
+  const sale=state.sales.find(s=>s.id===saleId);
+  if(!sale) return;
+  const inst=sale.installments.find(i=>i.id===instId);
+  if(inst && newDate) inst.date = newDate;
+  renderFinancial();
+  renderDashboard();
+}
+
+function calcSim() {
+  const v=parseFloat(document.getElementById('sim-val').value)||0;
+  const p=parseFloat(document.getElementById('sim-pct').value)||0;
+  const comm=v*(p/100);
+  document.getElementById('sim-comm').textContent=fmt(comm);
+  document.getElementById('sim-meta').textContent=((comm/GOAL)*100).toFixed(2)+'%';
+  document.getElementById('sim-remain').textContent=fmt(Math.max(0,GOAL-state.commission-comm));
+}
+
+let pomTimer=null;
+
+function renderPerformance() {
+  renderHabits();
+  renderWeekGrid();
+  renderPomodoro();
+  document.getElementById('streak-display').textContent=state.streak;
+  document.getElementById('streak-val').textContent=state.streak;
+}
+
+function renderHabits() {
+  const score=Math.round(state.habits.reduce((a,h)=>a+Math.min(100,(h.done/h.goal)*100),0)/state.habits.length);
+  // Atualiza todos os lugares que mostram o score
+  ['score-val','perf-score-tag','perf-score-tag2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = score;
+  });
+  document.getElementById('streak-val').textContent = state.streak;
+  document.getElementById('habit-list').innerHTML=state.habits.map(h=>`
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="width:38px;height:38px;border-radius:10px;background:${h.color}14;border:1px solid ${h.color}2a;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${h.icon}</div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <span style="font-size:12px;color:var(--text2)">${h.label}</span>
+          <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:800;color:${h.done>=h.goal?'#10b981':'inherit'}">${h.done}/${h.goal}</span>
+        </div>
+        <div class="bar-track" style="height:6px"><div class="bar-fill" style="width:${pct(h.done,h.goal)}%;height:6px;background:${h.done>=h.goal?'#10b981':h.color}"></div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <button onclick="changeHabit('${h.id}',1)" style="width:26px;height:26px;border-radius:6px;background:rgba(255,255,255,0.08);border:1px solid var(--border);color:var(--text2);font-size:13px;font-weight:700">+</button>
+        <button onclick="changeHabit('${h.id}',-1)" style="width:26px;height:26px;border-radius:6px;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text3);font-size:12px">−</button>
+      </div>
+      ${h.done>=h.goal?'<span style="font-size:18px">✅</span>':'<span style="width:22px"></span>'}
+    </div>`).join('');
+}
+
+function changeHabit(id, delta) {
+  markDirty();
+  const h=state.habits.find(h=>h.id===id);
+  if(h) h.done=Math.max(0,h.done+delta);
+  renderHabits();
+}
+
+function resetDay() {
+  if(!confirm('Resetar todas as metas do dia?')) return;
+  state.habits.forEach(h=>h.done=0);
+  markDirty();
+  renderHabits();
+}
+
+function renderWeekGrid() {
+  const days=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+  document.getElementById('week-grid').innerHTML = `
+    <div style="display:contents">${days.map(d=>`<div class="week-day-label">${d}</div>`).join('')}</div>` +
+    state.weekScores.map((s,i)=>`
+      <div class="week-day-box" style="background:${s>80?'#10b981':s>60?'#f59e0b':s>0?'#ef4444':'rgba(255,255,255,0.06)'};color:${s>0?'#fff':'transparent'};${s>80?'box-shadow:0 0 8px #10b98144':''}">
+        ${s||''}
+      </div>`).join('');
+}
+
+function renderPomodoro() {
+  const mins=Math.floor(state.pomTime/60).toString().padStart(2,'0');
+  const secs=(state.pomTime%60).toString().padStart(2,'0');
+  document.getElementById('pom-time').textContent=`${mins}:${secs}`;
+  document.getElementById('pom-type').textContent=state.pomType==='foco'?'Foco':state.pomType==='pausa'?'Pausa Curta':'Descanso';
+  document.getElementById('pom-count').textContent=state.pomCount;
+  const circ=2*Math.PI*76;
+  const filled=circ*(1-state.pomTime/state.pomTotal);
+  document.getElementById('pom-ring').setAttribute('stroke-dasharray',filled+' '+circ);
+  const btn=document.getElementById('pom-btn');
+  btn.textContent=state.pomActive?'⏸ Pausar':'▶ Iniciar';
+  btn.style.background=state.pomActive?'linear-gradient(135deg,#ef4444,#dc2626)':'linear-gradient(135deg,var(--indigo),var(--indigo2))';
+  btn.style.boxShadow=state.pomActive?'0 4px 14px rgba(239,68,68,0.35)':'0 4px 14px rgba(99,102,241,0.35)';
+}
+
+function togglePomodoro() {
+  state.pomActive=!state.pomActive;
+  if(state.pomActive) {
+    pomTimer=setInterval(()=>{
+      state.pomTime--;
+      if(state.pomTime<=0) {
+        clearInterval(pomTimer);
+        state.pomActive=false;
+        if(state.pomType==='foco') { state.pomCount++; markDirty(); }
+        state.pomTime=state.pomTotal;
+        alert('⏰ Tempo encerrado! '+( state.pomType==='foco'?'Hora de uma pausa!':'Hora de volcar ao foco!'));
+      }
+      renderPomodoro();
+    },1000);
+  } else {
+    clearInterval(pomTimer);
+  }
+  renderPomodoro();
+}
+
+function resetPomodoro() {
+  clearInterval(pomTimer);
+  state.pomActive=false;
+  state.pomTime=state.pomTotal;
+  renderPomodoro();
+}
+
+function setMode(type,mins) {
+  clearInterval(pomTimer);
+  state.pomActive=false;
+  state.pomType=type;
+  state.pomTotal=mins*60;
+  state.pomTime=mins*60;
+  renderPomodoro();
+}
+
+function renderPostsale() {
+  document.getElementById('postsale-metrics').innerHTML=[
+    {icon:'👥',label:'Clientes Ativos',val:state.postsale.length,c:'#6366f1'},
+    {icon:'📅',label:'Reforços em 30d',val:1,c:'#f59e0b'},
+    {icon:'💰',label:'Indicações abertas',val:0,c:'#10b981'},
+    {icon:'📄',label:'Contratos',val:state.contracts.length,c:'#06b6d4'}
+  ].map(m=>`
+    <div class="card" style="text-align:center;box-shadow:0 0 16px ${m.c}11">
+      <div style="font-size:30px;margin-bottom:6px">${m.icon}</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:28px;font-weight:800;color:${m.c}">${m.val}</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:3px">${m.label}</div>
+    </div>`).join('');
+
+  document.getElementById('postsale-clients').innerHTML=state.postsale.map(c=>`
+    <div style="padding:14px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-weight:700">${c.client}</div>
+          <div style="font-size:11px;color:var(--text3)">${c.sale} · ${c.date}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px">${c.notes}</div>
+        </div>
+        ${tagHTML('#10b981',c.status)}
+      </div>
+      <div style="margin-top:10px;padding:10px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:10px;color:var(--text3)">🔔 Próximo reforço</div>
+            <div style="font-weight:700;margin-top:2px">${c.reinforcementDate}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text3);margin-bottom:3px">Periodicidade</div>
+            <select onchange="setReinforcementType(${c.id}, this.value)" style="font-size:11px;padding:6px 9px;background:rgba(255,255,255,0.07);border:1px solid var(--border2);border-radius:7px;width:auto">
+              <option value="trimestral" ${c.reinforcementType==='trimestral'?'selected':''}>Trimestral (3 meses)</option>
+              <option value="semestral" ${c.reinforcementType==='semestral'?'selected':''}>Semestral (6 meses)</option>
+              <option value="anual" ${c.reinforcementType==='anual'?'selected':''}>Anual (12 meses)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button onclick="openWhatsApp('','${c.client}')" style="padding:7px 13px;background:rgba(16,185,129,0.12);color:#10b981;border:1px solid rgba(16,185,129,0.25);border-radius:7px;font-size:11px;font-weight:600">📱 WhatsApp</button>
+        <button onclick="markReinforcementDone(${c.id})" style="padding:7px 13px;background:rgba(255,255,255,0.06);color:var(--text2);border:1px solid var(--border);border-radius:7px;font-size:11px">✓ Reforço feito (recalcular)</button>
+        <button onclick="syncReinforcementToGoogle(${c.id})" style="padding:7px 13px;background:${c.googleEventId?'rgba(99,102,241,0.18)':'rgba(99,102,241,0.08)'};color:#a5b4fc;border:1px solid rgba(99,102,241,0.25);border-radius:7px;font-size:11px;font-weight:600">📅 ${c.googleEventId?'Atualizar na Agenda':'Adicionar à Agenda'}</button>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('contracts-list').innerHTML = state.contracts.length ? state.contracts.map(c=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer" onclick="viewContract(${c.id})">
+      <div style="font-size:24px">${c.fileType&&c.fileType.includes('image')?'🖼️':'📄'}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.name}</div>
+        <div style="font-size:10px;color:var(--text3)">${c.client} · ${c.date}</div>
+      </div>
+      ${tagHTML(c.status==='assinado'?'#10b981':'#f59e0b',c.status)}
+      <button onclick="event.stopPropagation();deleteContract(${c.id})" style="padding:5px 9px;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.25);border-radius:6px;font-size:11px">✕</button>
+    </div>`).join('') : '<div style="color:var(--text3);padding:14px;text-align:center;font-size:12px">Nenhum contrato enviado ainda</div>';
+}
+
+async function handleAvatarUpload(file) {
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { alert('Selecione um arquivo de imagem.'); return; }
+  if (file.size > 5*1024*1024) { alert('A imagem deve ter até 5MB.'); return; }
+  if (!currentUser) return;
+
+  const ext = file.name.split('.').pop();
+  const path = `${currentUser.id}/avatar.${ext}`;
+
+  try {
+    const { error: upErr } = await sb.storage.from('snexus-files').upload(path, file, { upsert: true });
+    if (upErr) throw upErr;
+    const { data: urlData } = await sb.storage.from('snexus-files').createSignedUrl(path, 60*60*24*365);
+    state.userPhoto = urlData.signedUrl;
+    state.userPhotoPath = path;
+    applyAvatar();
+    markDirty();
+  } catch (e) {
+    alert('Não foi possível enviar a foto. Tente novamente.');
+  }
+}
+
+function applyAvatar() {
+  const sidebarAv = document.getElementById('sidebar-avatar');
+  const letterEl = document.getElementById('sidebar-avatar-letter');
+  if (state.userPhoto) {
+    sidebarAv.style.backgroundImage = `url(${state.userPhoto})`;
+    if (letterEl) letterEl.style.display = 'none';
+  } else {
+    sidebarAv.style.backgroundImage = '';
+    if (letterEl) { letterEl.style.display = ''; letterEl.textContent = (state.userName||'S')[0].toUpperCase(); }
+  }
+  const heroAv = document.getElementById('hero-avatar');
+  if (heroAv) {
+    if (state.userPhoto) {
+      heroAv.style.backgroundImage = `url(${state.userPhoto})`;
+      heroAv.textContent = '';
+    } else {
+      heroAv.style.backgroundImage = '';
+      heroAv.textContent = (state.userName||'S')[0].toUpperCase();
+    }
+  }
+}
+
+function setUserName(name) {
+  markDirty();
+  name = (name||'').trim();
+  if (!name) return;
+  state.userName = name;
+  document.getElementById('sidebar-user-name').textContent = name;
+  applyAvatar();
+  renderGreeting();
+  renderDashboard();
+}
+
+function promptUserName() {
+  const name = prompt('Como você gostaria de ser chamada(o)?', state.userName);
+  if (name !== null) setUserName(name);
+}
+
+function handleContractFiles(fileList) {
+  const files = Array.from(fileList || []);
+  if (!files.length) return;
+  if (!currentUser) return;
+
+  const pendingEl = document.getElementById('upload-pending');
+  pendingEl.style.display = '';
+  pendingEl.innerHTML = files.map((f,i)=>`
+    <div id="upload-row-${i}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.18);border-radius:9px;margin-bottom:6px">
+      <div style="font-size:18px">⏳</div>
+      <div style="flex:1;font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.name}</div>
+      <div style="font-size:10px;color:var(--text3)">${(f.size/1024).toFixed(0)} KB</div>
+    </div>`).join('');
+
+  files.forEach(async (file, i) => {
+    if (file.size > 10*1024*1024) {
+      document.getElementById(`upload-row-${i}`).innerHTML = `<div style="font-size:12px;color:#ef4444">⚠ ${file.name} excede 10MB e não foi enviado.</div>`;
+      return;
+    }
+    try {
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const path = `${currentUser.id}/contracts/${Date.now()}-${safeName}`;
+      const { error: upErr } = await sb.storage.from('snexus-files').upload(path, file);
+      if (upErr) throw upErr;
+      const { data: urlData } = await sb.storage.from('snexus-files').createSignedUrl(path, 60*60*24*365);
+      addContract(file.name, urlData.signedUrl, file.type, path);
+      const row = document.getElementById(`upload-row-${i}`);
+      if (row) row.innerHTML = `<div style="font-size:12px;color:#10b981">✓ ${file.name} enviado com sucesso</div>`;
+      setTimeout(() => { if(row) row.remove(); if(!document.getElementById('upload-pending').children.length) document.getElementById('upload-pending').style.display='none'; }, 1800);
+    } catch (e) {
+      const row = document.getElementById(`upload-row-${i}`);
+      if (row) row.innerHTML = `<div style="font-size:12px;color:#ef4444">⚠ Erro ao enviar ${file.name}</div>`;
+    }
+  });
+
+  document.getElementById('contract-file-input').value = '';
+}
+
+function addContract(fileName, fileUrl, fileType, storagePath) {
+  markDirty();
+  const clientName = guessClientFromFileName(fileName);
+  state.contracts.push({
+    id: Date.now() + Math.random(),
+    name: fileName,
+    client: clientName,
+    date: new Date().toISOString().split('T')[0],
+    status: 'assinado',
+    type: 'compra',
+    dataUrl: fileUrl,
+    fileType,
+    storagePath
+  });
+  renderPostsale();
+}
+
+function guessClientFromFileName(fileName) {
+  const base = fileName.replace(/\.[^/.]+$/, '').replace(/[_-]/g,' ');
+  const known = state.leads.map(l=>l.name).concat(state.sales.map(s=>s.buyer));
+  const match = known.find(n => base.toLowerCase().includes(n.split(' ')[0].toLowerCase()));
+  return match || base;
+}
+
+function viewContract(id) {
+  const c = state.contracts.find(c => c.id === id);
+  if (!c) return;
+  document.getElementById('modal-title').textContent = c.name;
+  const body = document.getElementById('modal-body');
+  const downloadBtn = document.getElementById('modal-download');
+
+  if (!c.dataUrl) {
+    body.innerHTML = `<div style="color:var(--text3);padding:40px;text-align:center;font-size:13px">Documento de exemplo — sem arquivo anexado.<br>Faça upload de um contrato real para visualizá-lo aqui.</div>`;
+    downloadBtn.style.display = 'none';
+  } else {
+    downloadBtn.style.display = '';
+    downloadBtn.href = c.dataUrl;
+    downloadBtn.setAttribute('download', c.name);
+    if (c.fileType && c.fileType.includes('pdf')) {
+      body.innerHTML = `<iframe src="${c.dataUrl}" style="width:100%;height:70vh;border:none;border-radius:8px;background:#fff"></iframe>`;
+    } else if (c.fileType && c.fileType.includes('image')) {
+      body.innerHTML = `<img src="${c.dataUrl}" style="max-width:100%;max-height:70vh;border-radius:8px">`;
+    } else {
+      body.innerHTML = `<div style="color:var(--text3);padding:40px">Formato não suportado para pré-visualização.</div>`;
+    }
+  }
+  document.getElementById('contract-modal').style.display = 'flex';
+}
+
+function closeContractModal() {
+  document.getElementById('contract-modal').style.display = 'none';
+  document.getElementById('modal-body').innerHTML = '';
+}
+
+async function deleteContract(id) {
+  if (!confirm('Remover este contrato?')) return;
+  const contract = state.contracts.find(c => c.id === id);
+  if (contract && contract.storagePath) {
+    try { await sb.storage.from('snexus-files').remove([contract.storagePath]); }
+    catch (e) { console.error('Erro ao remover arquivo do storage:', e); }
+  }
+  state.contracts = state.contracts.filter(c => c.id !== id);
+  markDirty();
+  renderPostsale();
+}
+
+const REINFORCEMENT_MONTHS = { trimestral: 3, semestral: 6, anual: 12 };
+
+function setReinforcementType(clientId, type) {
+  markDirty();
+  const c = state.postsale.find(c => c.id === clientId);
+  if (!c) return;
+  c.reinforcementType = type;
+  // Recalcula a próxima data de reforço a partir da data da venda, usando o novo intervalo
+  const months = REINFORCEMENT_MONTHS[type] || 12;
+  const base = new Date(c.date);
+  let next = new Date(base);
+  const today = new Date();
+  // Avança em incrementos do intervalo até passar de hoje, achando o próximo reforço futuro
+  while (next <= today) {
+    next.setMonth(next.getMonth() + months);
+  }
+  c.reinforcementDate = next.toISOString().split('T')[0];
+  renderPostsale();
+}
+
+function markReinforcementDone(clientId) {
+  markDirty();
+  const c = state.postsale.find(c => c.id === clientId);
+  if (!c) return;
+  const months = REINFORCEMENT_MONTHS[c.reinforcementType] || 12;
+  const next = new Date(c.reinforcementDate);
+  next.setMonth(next.getMonth() + months);
+  c.reinforcementDate = next.toISOString().split('T')[0];
+  renderPostsale();
+}
+
+function renderAlerts() {
+  const alerts=[
+    
+    
+    {type:'followup',lead:'Ana Lima',msg:'Sem contato há 2 dias — lead quente!',date:'Urgente',priority:'alta',color:'#ef4444',icon:'🔥'},
+    {type:'followup',lead:'Carlos Mendes',msg:'Reunião online amanhã às 15h',date:'Amanhã',priority:'alta',color:'#6366f1',icon:'💻'},
+    {type:'contrato',lead:'Patricia Souza',msg:'Proposta aberta há 3 dias sem resposta',date:'3 dias',priority:'media',color:'#f97316',icon:'📄'}
+  ];
+
+  const journeySteps = getUpcomingJourneySteps(14);
+  document.getElementById('journey-pending-list').innerHTML = journeySteps.length ? journeySteps.map(s=>{
+    const d = new Date(s.date);
+    const dateFmt = d.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'});
+    return `
+      <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)">
+        <div onclick="toggleJourneyStep(${s.journeyId},${s.id})" style="display:flex;align-items:center;gap:12px;flex:1;cursor:pointer;min-width:0">
+          <div style="width:36px;height:36px;border-radius:10px;background:${s.overdue?'rgba(239,68,68,0.12)':'rgba(99,102,241,0.12)'};border:1px solid ${s.overdue?'rgba(239,68,68,0.28)':'rgba(99,102,241,0.25)'};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${s.icon}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:600;font-size:13px">${s.leadName}</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:1px">${s.label} · dia ${s.day}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:11px;color:${s.overdue?'#ef4444':'var(--text3)'};margin-bottom:3px">${dateFmt}${s.overdue?' · atrasado':''}</div>
+            ${tagHTML(s.overdue?'#ef4444':'#6366f1', s.overdue?'atrasado':'pendente')}
+          </div>
+        </div>
+        <button onclick="syncJourneyStepToGoogle(${s.journeyId},${s.id})" title="Adicionar à Google Agenda" style="flex-shrink:0;width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,0.06);border:1px solid var(--border2);color:var(--text3);font-size:14px">📅</button>
+      </div>`;
+  }).join('') : '<div style="color:var(--text3);padding:14px 0;text-align:center;font-size:12px">Nenhuma etapa da jornada pendente nos próximos 14 dias 🎉</div>';
+
+  renderJourneyWidgets();
+
+  document.getElementById('alert-summary').innerHTML=[
+    {l:'Alertas críticos',v:2,c:'#ef4444',i:'🚨'},
+    {l:'Reforços próximos',v:1,c:'#f59e0b',i:'⚡'},
+    {l:'Follow-ups hoje',v:3,c:'#6366f1',i:'🔔'},
+    {l:'Parcelas julho',v:1,c:'#10b981',i:'💰'}
+  ].map(m=>`
+    <div class="card" style="text-align:center;box-shadow:0 0 16px ${m.c}11">
+      <div style="font-size:26px;margin-bottom:4px">${m.i}</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;font-weight:800;color:${m.c}">${m.v}</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:2px">${m.l}</div>
+    </div>`).join('');
+
+  document.getElementById('alerts-list').innerHTML=`
+    <div style="font-size:13px;font-weight:700;margin-bottom:16px">Central de Alertas</div>
+    ${alerts.map((a,i)=>`
+      <div class="alert-item">
+        <div class="alert-icon" style="background:${a.color}14;border:1px solid ${a.color}2a">${a.icon}</div>
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:13px">${a.lead}</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">${a.msg}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:4px">${a.date}</div>
+          ${tagHTML(a.color,a.priority)}
+        </div>
+      </div>`).join('')}`;
+}
+
+const QUICK_ACTIONS=[
+  "Gere follow-up para Ana Lima (lead quente, 2 dias sem contato)",
+  "Qual minha estratégia de vendas para essa semana?",
+  "Crie mensagem de follow-up para um lead quente",
+  "Analise meu pipeline e diga o que priorizar agora"
+];
+
+function initAI() {
+  if(state.chatHistory.length===0) {
+    state.chatHistory=[{role:'assistant',text:'Olá! 👋 Sou o assistente S Nexus.\n\nPosso te ajudar a gerar follow-ups, analisar seu pipeline, criar mensagens para WhatsApp, sugerir estratégias e muito mais.\n\nComo posso maximizar sua performance agora?'}];
+  }
+  renderChat();
+  document.getElementById('quick-actions').innerHTML=QUICK_ACTIONS.map(q=>`
+    <button onclick="setInput('${q.replace(/'/g,"\\'")}') " style="padding:5px 11px;border-radius:7px;font-size:10px;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.25);color:#c4b5fd;font-weight:500;cursor:pointer">
+      ${q.slice(0,40)}${q.length>40?'…':''}
+    </button>`).join('');
+}
+
+function setInput(txt) {
+  document.getElementById('ai-input').value=txt;
+  document.getElementById('ai-input').focus();
+}
+
+function renderChat() {
+  const el=document.getElementById('chat-messages');
+  if(!el) return;
+  el.innerHTML=state.chatHistory.map(m=>`
+    <div class="chat-msg ${m.role}" style="align-self:${m.role==='user'?'flex-end':'flex-start'}">${m.text}</div>`).join('');
+  el.scrollTop=el.scrollHeight;
+}
+
+async function sendAI() {
+  const input=document.getElementById('ai-input').value.trim();
+  if(!input) return;
+  document.getElementById('ai-input').value='';
+  state.chatHistory.push({role:'user',text:input});
+  renderChat();
+
+  // typing indicator
+  const chatEl=document.getElementById('chat-messages');
+  const typing=document.createElement('div');
+  typing.className='chat-msg assistant';
+  typing.style.alignSelf='flex-start';
+  typing.innerHTML='<div style="display:flex;gap:4px"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+  chatEl.appendChild(typing);
+  chatEl.scrollTop=chatEl.scrollHeight;
+
+  const btn=document.getElementById('ai-send');
+  btn.disabled=true; btn.textContent='...';
+
+  try {
+    const messages = state.chatHistory.slice(-10).map(m=>({role:m.role,content:m.text}));
+    // Remove último (o que acabamos de adicionar) e enviar
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:`Você é o assistente de IA do S Nexus, um CRM premium para corretores de imóveis de alto padrão.
+O usuário é um corretor com meta de R$1.000.000 em comissão líquida em 2025.
+Situação atual:
+- Comissão acumulada: R$22.125 (2.2% da meta)
+- Vendas realizadas: ${state.sales.length}
+- 5 leads ativos: Ana Lima (quente/WhatsApp), Carlos Mendes (quente/reunião), Patricia Souza (morno/proposta), Roberto Alves (frio/novo), Fernanda Costa (quente/negociação)
+- Meta mensal necessária: ${fmt(neededPerMonth)}
+- ${monthsLeft} meses restantes no ano
+Responda de forma direta, prática e motivadora. Use emojis com moderação.
+Quando gerar mensagens para WhatsApp, formate claramente.
+Seja conciso mas completo.`,
+        messages
+      })
+    });
+    const data=await resp.json();
+    const reply=data.content?.[0]?.text||'Desculpe, houve um erro. Tente novamente.';
+    typing.remove();
+    state.chatHistory.push({role:'assistant',text:reply});
+    renderChat();
+  } catch(e) {
+    typing.remove();
+    state.chatHistory.push({role:'assistant',text:'⚠️ Erro de conexão. Verifique sua internet e tente novamente.'});
+    renderChat();
+  }
+
+  btn.disabled=false; btn.textContent='→';
+}
+
+function init() {
+  try {
+    // Garante que a tela de boot/login estão escondidas, independentemente do resto
+    const boot = document.getElementById('boot-loading');
+    if (boot) boot.style.display = 'none';
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app-wrapper').style.display = '';
+
+    // Sincroniza meta anual do state
+    if (state.goal) GOAL = state.goal;
+
+    // Garante jornada de relacionamento para leads e vendas que já existiam antes desse recurso
+    ensureJourneysForExistingData();
+
+    // Date
+    const days=['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+    const months2=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const now=new Date();
+    document.getElementById('page-date').textContent=`${days[now.getDay()]}, ${now.getDate()} de ${months2[now.getMonth()]} de ${now.getFullYear()}`;
+    document.getElementById('streak-val').textContent=state.streak;
+
+    document.getElementById('sidebar-user-name').textContent = state.userName;
+    applyAvatar();
+    renderGreeting();
+    renderDashboard();
+    renderHabits();
+    calcSim();
+    renderJourneyWidgets();
+    initGoogleCalendar();
+    updateGoogleConnectButton();
+    checkAdminNav();
+    startAutoBackup();
+
+    updateSaveStatus('saved-auto');
+    document.getElementById('save-status').innerHTML = '<span style="color:var(--text3)">✓ Sincronizado com a nuvem</span>';
+  } catch (e) {
+    // Mesmo se algo no meio falhar, garante que o usuário não fique numa tela travada/preta
+    const boot = document.getElementById('boot-loading');
+    if (boot) boot.style.display = 'none';
+    const wrapper = document.getElementById('app-wrapper');
+    if (wrapper) wrapper.style.display = '';
+  }
+}
+
+function ensureJourneysForExistingData() {
+  if (!state.journeys) state.journeys = [];
+  let created = false;
+  state.leads.forEach(l => {
+    if (!state.journeys.find(j => j.leadId === l.id)) {
+      ensureJourneyForLead(l.id, l.name, l.lastContact || new Date().toISOString().split('T')[0]);
+      created = true;
+    }
+  });
+  state.sales.forEach(s => {
+    if (!state.journeys.find(j => j.leadId === s.id)) {
+      ensureJourneyForLead(s.id, s.buyer, s.date || new Date().toISOString().split('T')[0]);
+      created = true;
+    }
+  });
+  if (created) markDirty();
+}
+
+// Sale preview listener
+document.addEventListener('input', e => {
+  if(e.target.id==='s-value'||e.target.id==='s-pct'||e.target.id==='s-comm-manual') calcSalePreview();
+});
+
+checkExistingSession();
+</script>
+</body>
+</html>
