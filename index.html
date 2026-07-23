@@ -621,7 +621,7 @@ td:last-child{padding-right:0}
               stroke-dasharray="0 389" style="filter:drop-shadow(0 0 8px rgba(99,102,241,0.7));transition:stroke-dasharray 1.2s cubic-bezier(.4,0,.2,1)"/>
           </svg>
           <div class="ring-inner">
-            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:22px;color:#fff" id="hero-pct-txt">2.2%</div>
+            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:22px;color:var(--text)" id="hero-pct-txt">0.0%</div>
             <div style="font-size:9px;color:var(--text3)">da meta</div>
           </div>
         </div>
@@ -967,7 +967,7 @@ td:last-child{padding-right:0}
 </div><!-- /app-wrapper -->
 
 <script>
-let GOAL = 1000000;
+let GOAL = 0;
 
 let state = {
   commission: 0,
@@ -998,7 +998,7 @@ let state = {
   contracts: [],
   journeys: [],
   googleCalendarConnected: false,
-  goal: 1000000
+  goal: 0
 };
 
 const SUPABASE_URL = 'https://wgvefvhqogxujajcyuex.supabase.co';
@@ -1385,12 +1385,12 @@ async function resetAccountData() {
     contracts: [],
     journeys: [],
     googleCalendarConnected: false,
-    goal: 1000000
+    goal: 0
   };
 
   // Aplicar no state atual
   Object.assign(state, emptyState);
-  GOAL = 1000000;
+  GOAL = 0;
 
   try {
     // Apagar registro antigo do Supabase e recriar zerado
@@ -2348,35 +2348,37 @@ function closeMobile() {
 
 function renderDashboard() {
   // Recalcular valores dinâmicos com base no estado atual
-  neededPerMonth = getNeededPerMonth();
-  const remain = GOAL - state.commission;
+  if (state.goal) GOAL = state.goal;
+  neededPerMonth = GOAL > 0 ? getNeededPerMonth() : 0;
+  const remain = GOAL > 0 ? GOAL - state.commission : 0;
   const goalPct = pct(state.commission, GOAL);
 
   // Atualiza exibição da meta editável
   const goalDisplay = document.getElementById('hero-goal-display');
-  if (goalDisplay) goalDisplay.textContent = fmt(GOAL);
+  if (goalDisplay) goalDisplay.textContent = GOAL > 0 ? fmt(GOAL) : 'Definir meta';
   const sidebarLabel = document.getElementById('goal-mini-label-val');
-  if (sidebarLabel) sidebarLabel.textContent = fmt(GOAL);
+  if (sidebarLabel) sidebarLabel.textContent = GOAL > 0 ? fmt(GOAL) : '—';
 
   // sidebar
-  document.getElementById('sidebar-pct').textContent = goalPct.toFixed(1)+'%';
+  document.getElementById('sidebar-pct').textContent = GOAL > 0 ? goalPct.toFixed(1)+'%' : '0.0%';
   document.getElementById('sidebar-bar').style.width = goalPct+'%';
-  document.getElementById('sidebar-remain').textContent = 'Faltam '+fmt(remain);
+  document.getElementById('sidebar-remain').textContent = GOAL > 0 ? 'Faltam '+fmt(remain) : 'Meta não definida';
 
   // hero ring
-  setTimeout(()=>{ ring('hero-ring', state.commission, GOAL, 2*Math.PI*62); }, 100);
+  setTimeout(()=>{ ring('hero-ring', state.commission, GOAL || 1, 2*Math.PI*62); }, 100);
   document.getElementById('hero-pct-txt').textContent = goalPct.toFixed(1)+'%';
   document.getElementById('hero-acc').textContent = fmt(state.commission);
-  document.getElementById('hero-remain').textContent = fmt(remain);
+  document.getElementById('hero-remain').textContent = GOAL > 0 ? fmt(remain) : '—';
   setTimeout(()=>{ document.getElementById('hero-bar').style.width = goalPct+'%'; }, 100);
 
-  // goal stats
-  document.getElementById('goal-stats').innerHTML = [
+  // goal stats — mostrar traço quando meta não definida
+  document.getElementById('goal-stats').innerHTML = GOAL > 0 ? [
     {l:'Necessário/Mês', v:fmt(neededPerMonth), c:'#06b6d4'},
     {l:'Por Semana', v:fmt(neededPerMonth/4.3), c:'#10b981'},
     {l:'Por Dia útil', v:fmt(neededPerMonth/22), c:'#f59e0b'},
     {l:'Imóveis ~', v:`${Math.ceil(remain/(885000*0.025))} vendas`, c:'#ec4899'}
-  ].map(s=>`<div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em">${s.l}</div><div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:${s.c};margin-top:3px">${s.v}</div></div>`).join('');
+  ].map(s=>`<div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em">${s.l}</div><div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:${s.c};margin-top:3px">${s.v}</div></div>`).join('')
+  : `<div style="font-size:12px;color:var(--text3);padding:4px 0">👆 Clique em <strong style="color:var(--indigo)">Editar</strong> para definir sua meta anual</div>`;
 
   // metrics
   const totalVGV = state.sales.reduce((a,s)=>a+s.value,0);
@@ -2388,9 +2390,9 @@ function renderDashboard() {
     ? `${hotLeads} quente${hotLeads!==1?'s':''} · ${propostas} proposta${propostas!==1?'s':''}`
     : 'Nenhum lead cadastrado';
   document.getElementById('dash-metrics').innerHTML = [
-    {icon:'💰',label:'Comissão Líquida',val:fmt(state.commission),sub:`${state.sales.length} venda(s) realizadas`,c:'#6366f1',p:state.commission,pm:GOAL},
-    {icon:'🏢',label:'VGV Total Vendido',val:fmt(totalVGV),sub:`${state.sales.length} venda(s)`,c:'#06b6d4'},
-    {icon:'📈',label:'Necessário/Mês',val:fmt(neededPerMonth),sub:`${monthsLeft} meses restantes`,c:'#10b981'},
+    {icon:'💰',label:'Comissão Líquida',val:state.commission>0?fmt(state.commission):'—',sub:`${state.sales.length} venda(s) realizadas`,c:'#6366f1',p:state.commission,pm:GOAL||1},
+    {icon:'🏢',label:'VGV Total Vendido',val:totalVGV>0?fmt(totalVGV):'—',sub:`${state.sales.length} venda(s)`,c:'#06b6d4'},
+    {icon:'📈',label:'Necessário/Mês',val:GOAL>0?fmt(neededPerMonth):'Defina sua meta',sub:GOAL>0?`${monthsLeft} meses restantes`:'clique em Editar',c:'#10b981'},
     {icon:'🔥',label:'Pipeline Ativo',val:`${state.leads.length} lead${state.leads.length!==1?'s':''}`,sub:pipelineSub,c:'#f97316'},
     {icon:'⚡',label:'Ticket Médio VGV',val:avgVGV>0?fmt(avgVGV):'—',sub:avgComm>0?`comissão média: ${fmt(avgComm)}`:'cadastre vendas',c:'#f59e0b'},
     {icon:'🎯',label:'Conversão',val:state.leads.length>0?`${Math.round((state.sales.length/state.leads.length)*100)}%`:'—',sub:'vendas / leads ativos',c:'#ec4899'}
@@ -2412,13 +2414,13 @@ function renderDashboard() {
   const curM = today.getMonth();
   const projPerM = neededPerMonth;
   document.getElementById('chart-bars').innerHTML = months.map((m,i)=>{
-    const h = ((projPerM*(i+1))/(projPerM*12))*100;
-    const isActual = i===2;
+    const h = GOAL > 0 ? ((projPerM*(i+1))/(projPerM*12))*100 : 0;
+    const isActual = i===curM;
     const isPast = i<curM && !isActual;
     const bg = isActual?'linear-gradient(180deg,#6366f1,#4f46e5)':isPast?'rgba(99,102,241,0.25)':'rgba(255,255,255,0.06)';
     return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
       <div style="width:100%;height:100%;display:flex;align-items:flex-end">
-        <div style="width:100%;height:${h}%;background:${bg};border-radius:4px 4px 0 0;position:relative;${isActual?'box-shadow:0 0 10px rgba(99,102,241,0.5)':''}">
+        <div style="width:100%;height:${Math.max(h,2)}%;background:${bg};border-radius:4px 4px 0 0;position:relative;${isActual?'box-shadow:0 0 10px rgba(99,102,241,0.5)':''}">
           ${isActual?`<div style="position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:7px;color:#6366f1;font-weight:800;white-space:nowrap">atual</div>`:''}
         </div>
       </div>
