@@ -474,6 +474,11 @@ td:last-child{padding-right:0}
   </div>
 </div>
 
+<!-- MODAL DETALHE DO PLANO -->
+<div id="plan-detail-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:700;align-items:center;justify-content:center;padding:20px;overflow:auto" onclick="if(event.target===this)closePlanDetail()">
+  <div id="plan-detail-content" style="width:100%;max-width:560px;background:#0d1020;border-radius:20px;padding:32px;box-shadow:0 32px 80px rgba(0,0,0,0.6)"></div>
+</div>
+
 <div id="app-wrapper" style="display:none">
 
 <div class="overlay" id="overlay" onclick="toggleMobile()"></div>
@@ -528,6 +533,9 @@ td:last-child{padding-right:0}
     <button class="nav-item" onclick="goTo('ai',this)">
       <span class="nav-icon">✦</span> IA Nexus
       <span class="nav-badge ai">AI</span>
+    </button>
+    <button class="nav-item" onclick="goTo('properties',this)">
+      <span class="nav-icon">🏠</span> Imóveis
     </button>
     <button class="nav-item" onclick="goTo('studio',this)">
       <span class="nav-icon">🎨</span> Presentation Studio
@@ -1042,6 +1050,73 @@ td:last-child{padding-right:0}
       </div>
     </div>
 
+  </div>
+
+  <!-- ══ IMÓVEIS ══ -->
+  <div id="sec-properties" class="section">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:13px;font-weight:700">🏠 Imóveis Cadastrados</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">Cadastre imóveis para usar no Presentation Studio e nas apresentações</div>
+      </div>
+      <button onclick="openPropertyForm()" style="padding:10px 18px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer">+ Novo Imóvel</button>
+    </div>
+
+    <!-- Formulário de cadastro (oculto por padrão) -->
+    <div id="property-form-card" class="card" style="display:none;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:700" id="property-form-title">Novo Imóvel</div>
+        <button onclick="closePropertyForm()" style="background:rgba(255,255,255,0.07);border:none;color:var(--text3);border-radius:7px;padding:5px 10px;cursor:pointer">✕</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+        <div class="form-group"><label>Nome do Empreendimento *</label><input id="prop-name" type="text" placeholder="Ex: Residencial Parque Verde"></div>
+        <div class="form-group"><label>Construtora</label><input id="prop-builder" type="text" placeholder="Ex: MRV, Cyrela..."></div>
+        <div class="form-group"><label>Tipo</label>
+          <select id="prop-type">
+            <option value="apartamento">Apartamento</option>
+            <option value="casa">Casa</option>
+            <option value="cobertura">Cobertura</option>
+            <option value="terreno">Terreno</option>
+            <option value="comercial">Comercial</option>
+            <option value="galpao">Galpão</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Valor (R$)</label><input id="prop-value" type="number" placeholder="850000"></div>
+        <div class="form-group"><label>Área (m²)</label><input id="prop-area" type="number" placeholder="85"></div>
+        <div class="form-group"><label>Dormitórios</label><input id="prop-dorms" type="number" placeholder="3" min="0"></div>
+        <div class="form-group"><label>Suítes</label><input id="prop-suites" type="number" placeholder="1" min="0"></div>
+        <div class="form-group"><label>Vagas</label><input id="prop-vagas" type="number" placeholder="2" min="0"></div>
+        <div class="form-group"><label>Bairro</label><input id="prop-bairro" type="text" placeholder="Ex: Centro"></div>
+        <div class="form-group"><label>Cidade</label><input id="prop-city" type="text" placeholder="Ex: Balneário Camboriú"></div>
+        <div class="form-group"><label>Previsão de Entrega</label><input id="prop-delivery" type="text" placeholder="Ex: Dez/2026"></div>
+        <div class="form-group"><label>Status</label>
+          <select id="prop-status">
+            <option value="disponivel">Disponível</option>
+            <option value="lancamento">Lançamento</option>
+            <option value="construcao">Em construção</option>
+            <option value="pronto">Pronto para morar</option>
+            <option value="vendido">Vendido</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column:1/-1"><label>Diferenciais</label><textarea id="prop-features" rows="2" placeholder="Piscina, academia, área gourmet, vista para o mar..."></textarea></div>
+        <div class="form-group" style="grid-column:1/-1"><label>Descrição completa</label><textarea id="prop-desc" rows="3" placeholder="Descrição detalhada do imóvel para apresentações..."></textarea></div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Fotos (URLs separadas por vírgula)</label>
+          <textarea id="prop-photos" rows="2" placeholder="https://exemplo.com/foto1.jpg, https://exemplo.com/foto2.jpg"></textarea>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px">Cole os links das fotos. Dica: use Google Drive, Dropbox ou ImgBB para hospedar.</div>
+        </div>
+        <div class="form-group"><label>Valorização estimada (%/ano)</label><input id="prop-appreciation" type="number" placeholder="8" step="0.1"></div>
+        <div class="form-group"><label>Rentabilidade aluguel (%/ano)</label><input id="prop-rental-yield" type="number" placeholder="5" step="0.1"></div>
+      </div>
+      <input type="hidden" id="prop-editing-id">
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button onclick="saveProperty()" style="flex:1;padding:12px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer">💾 Salvar Imóvel</button>
+        <button onclick="closePropertyForm()" style="padding:12px 16px;background:rgba(255,255,255,0.06);color:var(--text2);border:1px solid var(--border);border-radius:10px;font-size:13px;cursor:pointer">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- Lista de imóveis -->
+    <div id="properties-list"></div>
   </div>
 
   <!-- ══ PRESENTATION STUDIO ══ -->
@@ -1710,6 +1785,7 @@ async function loadState() {
       if (Array.isArray(loaded.sales)) state.sales = loaded.sales;
       if (Array.isArray(loaded.leads)) state.leads = loaded.leads;
       if (Array.isArray(loaded.postsale)) state.postsale = loaded.postsale;
+      if (Array.isArray(loaded.properties)) state.properties = loaded.properties;
       if (Array.isArray(loaded.contracts)) state.contracts = loaded.contracts;
       if (Array.isArray(loaded.journeys)) state.journeys = loaded.journeys;
       if (Array.isArray(loaded.chatHistory)) state.chatHistory = loaded.chatHistory;
@@ -2037,8 +2113,32 @@ const PLANS_CONFIG = [
     color: '#06b6d4',
     description: 'Para quem está começando',
     checkoutUrl: 'https://pay.kiwify.com.br/5tnhhBN',
-    features: ['CRM e Pipeline completo', 'Dashboard básico', 'Financeiro básico', 'Backup manual', 'WhatsApp manual', 'Suporte padrão'],
-    locked: ['IA Nexus', 'Jornada automática', 'Google Agenda', 'Upload contratos', 'Backup automático', 'Pós-venda', 'Score e Streak', 'Pomodoro'],
+    features: [
+      '✅ CRM de Leads completo',
+      '✅ Pipeline Kanban e Lista',
+      '✅ Cadastro de Imóveis',
+      '✅ Dashboard básico',
+      '✅ Financeiro básico',
+      '✅ Histórico de observações',
+      '✅ Backup manual',
+      '✅ WhatsApp manual',
+      '✅ 1 usuário',
+      '✅ Suporte padrão',
+    ],
+    locked: [
+      '🔒 IA Nexus',
+      '🔒 Presentation Studio',
+      '🔒 Análise de Investimento',
+      '🔒 Jornada automática',
+      '🔒 Alertas inteligentes',
+      '🔒 Google Agenda',
+      '🔒 Upload inteligente de contratos',
+      '🔒 Backup automático',
+      '🔒 Pós-venda automatizado',
+      '🔒 Score e Streak',
+      '🔒 Pomodoro Timer',
+      '🔒 Reforços automáticos',
+    ],
     cta: 'Assinar Starter'
   },
   {
@@ -2046,19 +2146,51 @@ const PLANS_CONFIG = [
     price: 99.90, priceYearly: 999.00,
     color: '#6366f1',
     popular: true,
-    description: 'Para corretores ativos',
+    description: 'Para corretores ativos que querem vender mais',
     checkoutUrl: 'https://pay.kiwify.com.br/UsAK7Vv',
-    features: ['Tudo do Starter', 'IA Nexus', 'Jornada automática', 'Google Agenda', 'Upload contratos', 'Backup automático', 'Pós-venda completo', 'Score, Streak e Pomodoro', 'Financeiro completo', 'Suporte prioritário'],
-    locked: ['Múltiplos usuários', 'Gestão de equipe', 'Dashboard Executivo'],
+    features: [
+      '✅ Tudo do Starter',
+      '✅ IA Nexus Comercial',
+      '✅ Presentation Studio',
+      '✅ Análise de Investimento',
+      '✅ Jornada automática de relacionamento',
+      '✅ Alertas inteligentes',
+      '✅ Google Agenda integrado',
+      '✅ Upload inteligente de contratos (IA)',
+      '✅ Reforços automáticos (30/15/7/0 dias)',
+      '✅ Backup automático',
+      '✅ Pós-venda completo',
+      '✅ Score, Streak e Pomodoro',
+      '✅ Financeiro completo',
+      '✅ Suporte prioritário',
+    ],
+    locked: [
+      '🔒 Múltiplos usuários',
+      '🔒 Gestão de equipe',
+      '🔒 Dashboard Executivo',
+      '🔒 Relatórios avançados',
+      '🔒 IA Premium',
+    ],
     cta: 'Assinar Pro'
   },
   {
     id: 'premium', name: 'Premium', emoji: '👑',
     price: 149.90, priceYearly: 1499.00,
     color: '#f59e0b',
-    description: 'Alta performance',
+    description: 'Para corretores de alta performance e equipes',
     checkoutUrl: 'https://pay.kiwify.com.br/ikZ80K1',
-    features: ['Tudo do Pro', 'Múltiplos usuários', 'Gestão de equipe', 'Dashboard Executivo', 'IA Premium', 'Relatórios avançados', 'Suporte VIP'],
+    features: [
+      '✅ Tudo do Pro',
+      '✅ Múltiplos usuários',
+      '✅ Gestão de equipe',
+      '✅ Dashboard Executivo',
+      '✅ Relatórios financeiros avançados',
+      '✅ IA Premium com análise de estratégias',
+      '✅ Ranking de equipe',
+      '✅ Permissões por usuário',
+      '✅ Suporte VIP',
+      '✅ Recursos Beta antecipados',
+    ],
     locked: [],
     cta: 'Assinar Premium'
   }
@@ -2200,7 +2332,7 @@ function renderPlansGrid(containerId, compact) {
   const container = document.getElementById(containerId);
   if (!container) return;
   container.innerHTML = PLANS_CONFIG.map(p => `
-    <div style="background:${p.popular?'linear-gradient(135deg,rgba(99,102,241,0.15),rgba(99,102,241,0.08))':'rgba(255,255,255,0.03)'};border:${p.popular?'2px solid rgba(99,102,241,0.5)':'1px solid rgba(255,255,255,0.08)'};border-radius:16px;padding:${compact?'16px':'24px'};position:relative;text-align:left">
+    <div style="background:${p.popular?'linear-gradient(135deg,rgba(99,102,241,0.15),rgba(99,102,241,0.08))':'rgba(255,255,255,0.03)'};border:${p.popular?'2px solid rgba(99,102,241,0.5)':'1px solid rgba(255,255,255,0.08)'};border-radius:16px;padding:${compact?'16px':'24px'};position:relative;text-align:left;transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px ${p.color}22'" onmouseout="this.style.transform='';this.style.boxShadow=''">
       ${p.popular?`<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-size:9px;font-weight:800;padding:3px 12px;border-radius:20px;letter-spacing:.05em;white-space:nowrap">MAIS POPULAR</div>`:''}
       <div style="font-size:${compact?'22px':'28px'}">${p.emoji}</div>
       <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:${compact?'14px':'18px'};color:var(--text);margin:6px 0 2px">${p.name}</div>
@@ -2210,15 +2342,25 @@ function renderPlansGrid(containerId, compact) {
         <span style="font-size:10px;color:var(--text3)">/mês</span>
       </div>
       ${!compact?`<div style="margin-bottom:16px">
-        ${p.features.map(f=>`<div style="font-size:11px;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;gap:6px"><span style="color:${p.color}">✓</span>${f}</div>`).join('')}
-        ${(p.locked||[]).slice(0,2).map(f=>`<div style="font-size:11px;color:var(--text3);margin-bottom:4px;display:flex;align-items:center;gap:6px"><span>🔒</span>${f}</div>`).join('')}
+        ${p.features.slice(0,4).map(f=>`<div style="font-size:11px;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;gap:6px"><span style="color:${p.color}">✓</span>${f}</div>`).join('')}
+        ${p.features.length > 4 ? `<div style="font-size:10px;color:var(--text3);margin-top:4px">+${p.features.length-4} recursos incluídos</div>` : ''}
       </div>`:''}
-      <button onclick="window.open('${p.checkoutUrl}','_blank');writeLog('plan_change','Checkout: ${p.name}',{plan:'${p.id}'})"
-        style="width:100%;padding:${compact?'8px':'11px'};background:${p.popular?`linear-gradient(135deg,#6366f1,#4f46e5)`:`${p.color}22`};color:${p.popular?'#fff':p.color};border:${p.popular?'none':`1px solid ${p.color}44`};border-radius:9px;font-weight:700;font-size:${compact?'11px':'12px'};cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s">
-        ${compact?'Assinar':'💳 '+p.cta}
-      </button>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button onclick="openPlanDetail('${p.id}')"
+          style="width:100%;padding:${compact?'7px':'10px'};background:transparent;color:${p.color};border:1px solid ${p.color}44;border-radius:9px;font-weight:600;font-size:${compact?'10px':'11px'};cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s">
+          🔍 Ver todos os recursos
+        </button>
+        <button onclick="window.open('${p.checkoutUrl}','_blank');writeLog('plan_change','Checkout: ${p.name}',{plan:'${p.id}'})"
+          style="width:100%;padding:${compact?'8px':'11px'};background:${p.popular?`linear-gradient(135deg,#6366f1,#4f46e5)`:`${p.color}22`};color:${p.popular?'#fff':p.color};border:${p.popular?'none':`1px solid ${p.color}44`};border-radius:9px;font-weight:700;font-size:${compact?'11px':'12px'};cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s">
+          ${compact?'Assinar':'💳 '+p.cta}
+        </button>
+      </div>
     </div>`).join('');
 }
+
+// Abre modal com detalhes completos do plano individual
+
+
 
 // Selecionar plano (abre link de pagamento — será integrado depois)
 function selectPlan(planId) {
@@ -2942,6 +3084,210 @@ ${state.sales.map(s => `- ${s.buyer}: R$${s.value}, comissão R$${s.commission}`
 Responda de forma direta, prática e acionável. Use os dados reais acima.`;
 }
 
+// ═══════════════════════════════════════════════════════════════
+//  TELA DE PLANOS — visível para TODOS
+// ═══════════════════════════════════════════════════════════════
+
+function openPlanDetail(planId) {
+  const p = PLANS_CONFIG.find(x => x.id === planId);
+  if (!p) return;
+  const modal = document.getElementById('plan-detail-modal');
+  const content = document.getElementById('plan-detail-content');
+  if (!modal || !content) return;
+  const currentPlan = currentBilling?.plan || 'trial';
+  const isCurrentPlan = currentPlan === planId;
+  const planOrder = {trial:0, starter:1, pro:2, premium:3};
+  const isUpgrade = planOrder[planId] > planOrder[currentPlan];
+
+  content.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <button onclick="closePlanDetail();openPlansModal()" style="background:rgba(255,255,255,0.07);border:none;color:rgba(255,255,255,0.5);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px">← Ver todos os planos</button>
+      <button onclick="closePlanDetail()" style="background:transparent;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:18px">✕</button>
+    </div>
+    <div style="text-align:center;padding:24px;background:linear-gradient(135deg,${p.color}22,${p.color}08);border:1px solid ${p.color}33;border-radius:16px;margin-bottom:20px;position:relative">
+      ${isCurrentPlan ? `<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;font-size:9px;font-weight:800;padding:3px 12px;border-radius:20px">SEU PLANO ATUAL</div>` : ''}
+      ${p.popular && !isCurrentPlan ? `<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-size:9px;font-weight:800;padding:3px 12px;border-radius:20px">MAIS POPULAR</div>` : ''}
+      <div style="font-size:40px;margin-bottom:8px">${p.emoji}</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:24px;color:var(--text)">${p.name}</div>
+      <div style="font-size:13px;color:var(--text3);margin-top:4px;margin-bottom:12px">${p.description}</div>
+      <div style="font-size:36px;font-weight:800;color:${p.color}">R$${p.price.toFixed(2).replace('.',',')}<span style="font-size:14px;font-weight:400;color:var(--text3)">/mês</span></div>
+      ${p.priceYearly ? `<div style="font-size:11px;color:${p.color};margin-top:4px">ou R$${p.priceYearly.toFixed(0)}/ano — economize ${Math.round((1-(p.priceYearly/(p.price*12)))*100)}%</div>` : ''}
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:#10b981;margin-bottom:8px">✅ INCLUÍDO NESTE PLANO</div>
+      ${(p.features||[]).map(f=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.12);border-radius:8px;margin-bottom:5px">
+          <span style="color:#10b981;font-size:13px;flex-shrink:0">✅</span>
+          <span style="font-size:12px;color:var(--text2)">${f.replace('✅ ','')}</span>
+        </div>`).join('')}
+    </div>
+    ${(p.locked||[]).length > 0 ? `
+    <div style="margin-bottom:20px">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:8px">🔒 NÃO INCLUÍDO — disponível em planos superiores</div>
+      ${(p.locked||[]).map(f=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:8px;margin-bottom:5px">
+          <span style="font-size:13px;flex-shrink:0">🔒</span>
+          <span style="font-size:12px;color:var(--text3)">${f.replace('🔒 ','')}</span>
+        </div>`).join('')}
+    </div>` : `<div style="margin-bottom:20px;padding:14px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:10px;text-align:center;font-size:12px;color:#10b981;font-weight:600">🏆 Plano completo — todos os recursos incluídos!</div>`}
+    ${isCurrentPlan
+      ? `<div style="width:100%;padding:14px;background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.3);border-radius:12px;font-weight:700;font-size:14px;text-align:center">✅ Você já está neste plano</div>`
+      : `<button onclick="window.open('${p.checkoutUrl}','_blank')" style="width:100%;padding:14px;background:${p.popular?'linear-gradient(135deg,#6366f1,#4f46e5)':p.color};color:#fff;border:none;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 6px 20px ${p.color}44;margin-bottom:10px">
+          💳 ${isUpgrade?'Fazer upgrade para':'Assinar'} ${p.name} — R$${p.price.toFixed(2).replace('.',',')}/mês
+        </button>`}
+    <div style="text-align:center;font-size:11px;color:var(--text3);margin-top:8px">🔒 Pagamento seguro · Cancele quando quiser · Sem fidelidade</div>`;
+
+  modal.style.display = 'flex';
+}
+
+function closePlanDetail() {
+  const modal = document.getElementById('plan-detail-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MÓDULO IMÓVEIS
+// ═══════════════════════════════════════════════════════════════
+
+function renderProperties() {
+  if (!state.properties) state.properties = [];
+  const list = document.getElementById('properties-list');
+  if (!list) return;
+  if (state.properties.length === 0) {
+    list.innerHTML = `<div style="text-align:center;padding:60px 20px;color:var(--text3)">
+      <div style="font-size:48px;margin-bottom:16px">🏠</div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:8px">Nenhum imóvel cadastrado ainda</div>
+      <div style="font-size:12px;margin-bottom:20px">Cadastre imóveis para usar no Presentation Studio</div>
+      <button onclick="openPropertyForm()" style="padding:10px 20px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer">+ Cadastrar primeiro imóvel</button>
+    </div>`;
+    return;
+  }
+  const statusColors = {disponivel:'#10b981',lancamento:'#6366f1',construcao:'#f59e0b',pronto:'#06b6d4',vendido:'#6b7280'};
+  const statusLabels = {disponivel:'Disponível',lancamento:'Lançamento',construcao:'Em construção',pronto:'Pronto',vendido:'Vendido'};
+  list.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">
+    ${state.properties.map(p => {
+      const color = statusColors[p.status] || '#6366f1';
+      const photos = (p.photos||'').split(',').map(u=>u.trim()).filter(Boolean);
+      return `<div class="card hover-lift" style="padding:0;overflow:hidden;border:1px solid ${color}22">
+        <div style="height:140px;background:${color}11;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">
+          ${photos[0]?`<img src="${photos[0]}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`:
+          `<div style="font-size:40px;opacity:0.3">🏠</div>`}
+          <span style="position:absolute;top:10px;right:10px;background:${color};color:#fff;font-size:9px;font-weight:800;padding:3px 8px;border-radius:20px">${statusLabels[p.status]||p.status}</span>
+        </div>
+        <div style="padding:14px">
+          <div style="font-weight:800;font-size:14px;color:var(--text);margin-bottom:4px">${p.name}</div>
+          ${p.builder?`<div style="font-size:10px;color:var(--text3);margin-bottom:6px">${p.builder}</div>`:''}
+          ${p.value?`<div style="font-size:18px;font-weight:800;color:${color};margin-bottom:8px">R$ ${Number(p.value).toLocaleString('pt-BR')}</div>`:''}
+          <div style="display:flex;gap:10px;font-size:11px;color:var(--text3);margin-bottom:8px;flex-wrap:wrap">
+            ${p.area?`<span>📐 ${p.area}m²</span>`:''}
+            ${p.dorms?`<span>🛏 ${p.dorms} dorm</span>`:''}
+            ${p.suites?`<span>🛁 ${p.suites} suíte${p.suites>1?'s':''}</span>`:''}
+            ${p.vagas?`<span>🚗 ${p.vagas} vaga${p.vagas>1?'s':''}</span>`:''}
+          </div>
+          ${p.bairro||p.city?`<div style="font-size:11px;color:var(--text3);margin-bottom:10px">📍 ${[p.bairro,p.city].filter(Boolean).join(', ')}</div>`:''}
+          <div style="display:flex;gap:6px">
+            <button onclick="editProperty('${p.id}')" style="flex:1;padding:7px;background:rgba(99,102,241,0.1);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25);border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">✏️ Editar</button>
+            <button onclick="usePropertyInStudio('${p.id}')" style="flex:1;padding:7px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">🎨 Apresentar</button>
+            <button onclick="deleteProperty('${p.id}')" style="padding:7px 10px;background:rgba(239,68,68,0.08);color:#ef4444;border:1px solid rgba(239,68,68,0.2);border-radius:8px;font-size:11px;cursor:pointer">🗑</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function openPropertyForm(propId) {
+  document.getElementById('property-form-card').style.display = '';
+  document.getElementById('property-form-title').textContent = propId ? 'Editar Imóvel' : 'Novo Imóvel';
+  document.getElementById('prop-editing-id').value = propId || '';
+  if (!propId) {
+    ['prop-name','prop-builder','prop-area','prop-dorms','prop-suites','prop-vagas',
+     'prop-bairro','prop-city','prop-delivery','prop-features','prop-desc',
+     'prop-photos','prop-appreciation','prop-rental-yield','prop-value'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    document.getElementById('prop-type').value = 'apartamento';
+    document.getElementById('prop-status').value = 'disponivel';
+  }
+  document.getElementById('property-form-card').scrollIntoView({behavior:'smooth'});
+}
+
+function closePropertyForm() {
+  document.getElementById('property-form-card').style.display = 'none';
+}
+
+function saveProperty() {
+  const id = document.getElementById('prop-editing-id').value;
+  const name = document.getElementById('prop-name').value.trim();
+  if (!name) { showAuthInfoToast('⚠️ Informe o nome do empreendimento'); return; }
+  const prop = {
+    id: id || (Date.now() + Math.random()),
+    name, builder: document.getElementById('prop-builder').value.trim(),
+    type: document.getElementById('prop-type').value,
+    value: document.getElementById('prop-value').value,
+    area: document.getElementById('prop-area').value,
+    dorms: document.getElementById('prop-dorms').value,
+    suites: document.getElementById('prop-suites').value,
+    vagas: document.getElementById('prop-vagas').value,
+    bairro: document.getElementById('prop-bairro').value.trim(),
+    city: document.getElementById('prop-city').value.trim(),
+    delivery: document.getElementById('prop-delivery').value.trim(),
+    status: document.getElementById('prop-status').value,
+    features: document.getElementById('prop-features').value.trim(),
+    desc: document.getElementById('prop-desc').value.trim(),
+    photos: document.getElementById('prop-photos').value.trim(),
+    appreciation: document.getElementById('prop-appreciation').value,
+    rentalYield: document.getElementById('prop-rental-yield').value,
+  };
+  if (!state.properties) state.properties = [];
+  const idx = state.properties.findIndex(p => p.id == id);
+  if (idx >= 0) state.properties[idx] = prop; else state.properties.push(prop);
+  markDirty(); closePropertyForm(); renderProperties();
+  showAuthInfoToast(`✅ Imóvel "${name}" salvo!`);
+}
+
+function editProperty(id) {
+  const p = state.properties.find(x => x.id == id);
+  if (!p) return;
+  openPropertyForm(id);
+  setTimeout(() => {
+    ['name','builder','value','area','dorms','suites','vagas','bairro','city','delivery','features','desc','photos','appreciation'].forEach(k => {
+      const el = document.getElementById(`prop-${k}`); if (el) el.value = p[k] || '';
+    });
+    document.getElementById('prop-type').value = p.type || 'apartamento';
+    document.getElementById('prop-status').value = p.status || 'disponivel';
+    document.getElementById('prop-rental-yield').value = p.rentalYield || '';
+  }, 100);
+}
+
+function deleteProperty(id) {
+  if (!confirm('Remover este imóvel?')) return;
+  state.properties = (state.properties||[]).filter(p => p.id != id);
+  markDirty(); renderProperties();
+}
+
+function usePropertyInStudio(id) {
+  const p = state.properties.find(x => x.id == id);
+  if (!p) return;
+  goTo('studio', Array.from(document.querySelectorAll('.nav-item')).find(b => b.textContent.includes('Studio')));
+  setTimeout(() => {
+    const emp = document.getElementById('studio-empreendimento');
+    const loc = document.getElementById('studio-location');
+    const val = document.getElementById('studio-value');
+    const desc = document.getElementById('studio-desc');
+    if (emp) emp.value = p.name || '';
+    if (loc) loc.value = [p.bairro, p.city].filter(Boolean).join(', ');
+    if (val) val.value = p.value || '';
+    if (desc) desc.value = [
+      p.area ? `${p.area}m²` : '', p.dorms ? `${p.dorms} dorms` : '',
+      p.suites ? `${p.suites} suíte${p.suites>1?'s':''}` : '',
+      p.vagas ? `${p.vagas} vaga${p.vagas>1?'s':''}` : '',
+      p.delivery ? `Entrega: ${p.delivery}` : '', p.features || ''
+    ].filter(Boolean).join(' · ');
+    showAuthInfoToast('✅ Dados carregados no Studio!');
+  }, 400);
+}
+
 function checkAdminNav() {
   const navAdmin = document.getElementById('nav-admin');
   if (navAdmin) navAdmin.style.display = isAdmin() ? 'flex' : 'none';
@@ -3632,7 +3978,7 @@ function tagHTML(color, text) {
 const PAGE_NAMES = {
   dashboard:'Dashboard', crm:'CRM / Leads', financial:'Financeiro',
   performance:'Performance', postsale:'Pós-venda', alerts:'Alertas',
-  ai:'IA Nexus', studio:'🎨 Presentation Studio',
+  ai:'IA Nexus', properties:'🏠 Imóveis', studio:'🎨 Presentation Studio',
   investment:'📈 Análise de Investimento',
   subscription:'Minha Assinatura', admin:'🛡 Painel Admin'
 };
@@ -3646,6 +3992,7 @@ const _renderFns = {
   postsale: () => renderPostsale(),
   alerts: () => renderAlerts(),
   ai: () => initAI(),
+  properties: () => renderProperties(),
   studio: () => initStudio(),
   investment: () => initInvestment(),
   subscription: () => renderSubscription(),
@@ -4649,19 +4996,36 @@ function handleContractFiles(fileList) {
 
   files.forEach(async (file, i) => {
     if (file.size > 10*1024*1024) {
-      document.getElementById(`upload-row-${i}`).innerHTML = `<div style="font-size:12px;color:#ef4444">⚠ ${file.name} excede 10MB e não foi enviado.</div>`;
+      document.getElementById(`upload-row-${i}`).innerHTML = `<div style="font-size:12px;color:#ef4444">⚠ ${file.name} excede 10MB.</div>`;
       return;
     }
     try {
+      const row = document.getElementById(`upload-row-${i}`);
+
+      // Upload do arquivo
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
       const path = `${currentUser.id}/contracts/${Date.now()}-${safeName}`;
       const { error: upErr } = await sb.storage.from('snexus-files').upload(path, file);
       if (upErr) throw upErr;
       const { data: urlData } = await sb.storage.from('snexus-files').createSignedUrl(path, 60*60*24*365);
-      addContract(file.name, urlData.signedUrl, file.type, path);
-      const row = document.getElementById(`upload-row-${i}`);
-      if (row) row.innerHTML = `<div style="font-size:12px;color:#10b981">✓ ${file.name} enviado com sucesso</div>`;
-      setTimeout(() => { if(row) row.remove(); if(!document.getElementById('upload-pending').children.length) document.getElementById('upload-pending').style.display='none'; }, 1800);
+
+      if (row) row.innerHTML = `<div style="font-size:12px;color:#f59e0b">🤖 Analisando contrato com IA...</div>`;
+
+      // Tentar extrair dados com IA se for PDF
+      let extractedData = null;
+      if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+        extractedData = await extractContractDataWithAI(file);
+      }
+
+      addContract(file.name, urlData?.signedUrl, file.type, path, extractedData);
+
+      if (row) row.innerHTML = `<div style="font-size:12px;color:#10b981">✓ ${file.name} enviado${extractedData ? ' — dados extraídos!' : ''}</div>`;
+      setTimeout(() => {
+        if(row) row.remove();
+        const pending = document.getElementById('upload-pending');
+        if(pending && !pending.children.length) pending.style.display='none';
+      }, 2500);
+
     } catch (e) {
       const row = document.getElementById(`upload-row-${i}`);
       if (row) row.innerHTML = `<div style="font-size:12px;color:#ef4444">⚠ Erro ao enviar ${file.name}</div>`;
@@ -4671,10 +5035,69 @@ function handleContractFiles(fileList) {
   document.getElementById('contract-file-input').value = '';
 }
 
-function addContract(fileName, fileUrl, fileType, storagePath) {
+// Extrai dados do contrato com IA (Claude)
+async function extractContractDataWithAI(file) {
+  try {
+    const base64 = await fileToBase64(file);
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1500,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: 'document',
+              source: { type: 'base64', media_type: 'application/pdf', data: base64 }
+            },
+            {
+              type: 'text',
+              text: `Analise este contrato imobiliário e extraia TODOS os dados financeiros. Responda APENAS em JSON válido, sem explicações:
+{
+  "comprador": "",
+  "empreendimento": "",
+  "unidade": "",
+  "valor_total": 0,
+  "entrada": 0,
+  "parcelas_mensais": { "quantidade": 0, "valor": 0, "data_inicio": "" },
+  "reforcos": [
+    { "tipo": "semestral|anual|intermediaria", "valor": 0, "data": "YYYY-MM-DD", "descricao": "" }
+  ],
+  "indice_correcao": "",
+  "entrega_chaves": "",
+  "comissao": 0,
+  "observacoes": ""
+}`
+            }
+          ]
+        }]
+      })
+    });
+    const data = await response.json();
+    const text = data.content?.[0]?.text || '{}';
+    const clean = text.replace(/```json|```/g, '').trim();
+    return JSON.parse(clean);
+  } catch(e) {
+    return null;
+  }
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function addContract(fileName, fileUrl, fileType, storagePath, extracted) {
   markDirty();
-  const clientName = guessClientFromFileName(fileName);
-  state.contracts.push({
+  const clientName = extracted?.comprador || guessClientFromFileName(fileName);
+
+  const contract = {
     id: Date.now() + Math.random(),
     name: fileName,
     client: clientName,
@@ -4683,9 +5106,172 @@ function addContract(fileName, fileUrl, fileType, storagePath) {
     type: 'compra',
     dataUrl: fileUrl,
     fileType,
-    storagePath
-  });
+    storagePath,
+    extracted: extracted || null,
+    reforcos: extracted?.reforcos || []
+  };
+
+  state.contracts.push(contract);
+
+  // Se extraiu dados, mostrar modal de revisão
+  if (extracted && (extracted.comprador || extracted.reforcos?.length > 0)) {
+    showContractReviewModal(contract, extracted);
+  }
+
   renderPostsale();
+}
+
+// Modal de revisão dos dados extraídos do contrato
+function showContractReviewModal(contract, data) {
+  const existing = document.getElementById('contract-review-modal');
+  if (existing) existing.remove();
+
+  const reforcos = data.reforcos || [];
+  const modal = document.createElement('div');
+  modal.id = 'contract-review-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:800;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto';
+  modal.innerHTML = `
+    <div style="background:#0d1020;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:28px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:16px;color:#fff">🤖 Dados extraídos do contrato</div>
+        <button onclick="document.getElementById('contract-review-modal').remove()" style="background:rgba(255,255,255,0.07);border:none;color:rgba(255,255,255,0.5);border-radius:8px;padding:6px 10px;cursor:pointer">✕</button>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:16px">Revise os dados identificados pela IA. Confirme para criar automaticamente o cadastro financeiro e os reforços.</div>
+
+      <!-- Dados gerais -->
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-size:12px;font-weight:700;margin-bottom:12px;color:var(--text)">📋 Dados Gerais</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px">
+          ${data.comprador ? `<div><span style="color:var(--text3)">Comprador</span><div style="font-weight:600;color:var(--text)">${data.comprador}</div></div>` : ''}
+          ${data.empreendimento ? `<div><span style="color:var(--text3)">Empreendimento</span><div style="font-weight:600;color:var(--text)">${data.empreendimento}</div></div>` : ''}
+          ${data.unidade ? `<div><span style="color:var(--text3)">Unidade</span><div style="font-weight:600;color:var(--text)">${data.unidade}</div></div>` : ''}
+          ${data.valor_total ? `<div><span style="color:var(--text3)">Valor Total</span><div style="font-weight:600;color:#10b981">R$ ${Number(data.valor_total).toLocaleString('pt-BR')}</div></div>` : ''}
+          ${data.entrada ? `<div><span style="color:var(--text3)">Entrada</span><div style="font-weight:600;color:var(--text)">R$ ${Number(data.entrada).toLocaleString('pt-BR')}</div></div>` : ''}
+          ${data.comissao ? `<div><span style="color:var(--text3)">Comissão</span><div style="font-weight:600;color:#6366f1">R$ ${Number(data.comissao).toLocaleString('pt-BR')}</div></div>` : ''}
+          ${data.entrega_chaves ? `<div><span style="color:var(--text3)">Entrega das Chaves</span><div style="font-weight:600;color:var(--text)">${data.entrega_chaves}</div></div>` : ''}
+          ${data.indice_correcao ? `<div><span style="color:var(--text3)">Índice de Correção</span><div style="font-weight:600;color:var(--text)">${data.indice_correcao}</div></div>` : ''}
+        </div>
+      </div>
+
+      <!-- Parcelas mensais -->
+      ${data.parcelas_mensais?.quantidade > 0 ? `
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--text)">💳 Parcelas Mensais</div>
+        <div style="font-size:11px;color:var(--text2)">
+          ${data.parcelas_mensais.quantidade}x de R$ ${Number(data.parcelas_mensais.valor||0).toLocaleString('pt-BR')}
+          ${data.parcelas_mensais.data_inicio ? ` · A partir de ${data.parcelas_mensais.data_inicio}` : ''}
+        </div>
+      </div>` : ''}
+
+      <!-- Reforços -->
+      ${reforcos.length > 0 ? `
+      <div class="card" style="margin-bottom:20px">
+        <div style="font-size:12px;font-weight:700;margin-bottom:12px;color:var(--text)">🔔 Reforços Identificados (${reforcos.length})</div>
+        ${reforcos.map((r, i) => {
+          const typeLabels = { semestral:'Semestral', anual:'Anual', intermediaria:'Intermediária' };
+          const typeColors = { semestral:'#06b6d4', anual:'#f59e0b', intermediaria:'#8b5cf6' };
+          const color = typeColors[r.tipo] || '#6366f1';
+          return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <span style="background:${color}22;color:${color};border:1px solid ${color}44;border-radius:6px;font-size:9px;font-weight:800;padding:2px 8px;white-space:nowrap">${typeLabels[r.tipo]||r.tipo}</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600;color:var(--text)">R$ ${Number(r.valor||0).toLocaleString('pt-BR')}</div>
+              ${r.descricao ? `<div style="font-size:10px;color:var(--text3)">${r.descricao}</div>` : ''}
+            </div>
+            <div style="font-size:11px;color:var(--text3);text-align:right">${r.data ? new Date(r.data).toLocaleDateString('pt-BR') : '—'}</div>
+          </div>`;
+        }).join('')}
+      </div>` : '<div style="font-size:12px;color:var(--text3);margin-bottom:14px;padding:12px;background:rgba(255,255,255,0.02);border-radius:8px">ℹ️ Nenhum reforço identificado neste contrato</div>'}
+
+      <!-- Ações -->
+      <div style="display:flex;gap:10px">
+        <button onclick="confirmContractData('${contract.id}')" style="flex:1;padding:12px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer">✅ Confirmar e Criar Registros</button>
+        <button onclick="document.getElementById('contract-review-modal').remove()" style="padding:12px 16px;background:rgba(255,255,255,0.06);color:var(--text2);border:1px solid var(--border);border-radius:10px;font-size:13px;cursor:pointer">Fechar</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+// Confirmar dados e criar registros automáticos
+function confirmContractData(contractId) {
+  const contract = state.contracts.find(c => c.id == contractId);
+  if (!contract || !contract.extracted) return;
+  const data = contract.extracted;
+
+  // Criar venda no financeiro se tiver dados suficientes
+  if (data.comprador && data.valor_total) {
+    const newSale = {
+      id: Date.now(),
+      buyer: data.comprador,
+      seller: data.empreendimento || '',
+      value: Number(data.valor_total) || 0,
+      commission: Number(data.comissao) || 0,
+      commissionPct: data.valor_total > 0 ? ((Number(data.comissao)/Number(data.valor_total))*100) : 0,
+      date: new Date().toISOString().split('T')[0],
+      status: 'fechamento',
+      notes: `Importado do contrato: ${contract.name}`,
+      installments: []
+    };
+
+    // Adicionar parcelas mensais
+    if (data.parcelas_mensais?.quantidade > 0) {
+      const startDate = data.parcelas_mensais.data_inicio
+        ? new Date(data.parcelas_mensais.data_inicio)
+        : new Date();
+      for (let i = 0; i < data.parcelas_mensais.quantidade; i++) {
+        const d = new Date(startDate);
+        d.setMonth(d.getMonth() + i);
+        newSale.installments.push({
+          id: i+1,
+          date: d.toISOString().split('T')[0],
+          value: Number(data.parcelas_mensais.valor) || 0,
+          status: 'pendente'
+        });
+      }
+    }
+
+    // Adicionar reforços como parcelas especiais
+    if (data.reforcos?.length > 0) {
+      const startId = newSale.installments.length + 1;
+      data.reforcos.forEach((r, i) => {
+        newSale.installments.push({
+          id: startId + i,
+          date: r.data || new Date().toISOString().split('T')[0],
+          value: Number(r.valor) || 0,
+          status: 'pendente',
+          tipo: r.tipo,
+          descricao: `Reforço ${r.tipo}: ${r.descricao || ''}`
+        });
+      });
+    }
+
+    // Ordenar por data
+    newSale.installments.sort((a,b) => new Date(a.date) - new Date(b.date));
+    state.sales.push(newSale);
+
+    // Criar pós-venda com reforços
+    if (data.reforcos?.length > 0) {
+      const nearestReforco = data.reforcos.sort((a,b) => new Date(a.data) - new Date(b.data))[0];
+      state.postsale.push({
+        id: Date.now() + 1,
+        client: data.comprador,
+        sale: data.empreendimento || '',
+        date: new Date().toISOString().split('T')[0],
+        reinforcementDate: nearestReforco.data || '',
+        reinforcementType: nearestReforco.tipo || 'anual',
+        status: 'ativo',
+        notes: `${data.reforcos.length} reforço(s) identificado(s) — ${data.reforcos.map(r=>`${r.tipo} R$${Number(r.valor).toLocaleString('pt-BR')} em ${r.data?new Date(r.data).toLocaleDateString('pt-BR'):'sem data'}`).join(', ')}`
+      });
+    }
+
+    state.commission += newSale.commission;
+    markDirty();
+    renderDashboard();
+    renderFinancial();
+    renderPostsale();
+  }
+
+  document.getElementById('contract-review-modal')?.remove();
+  showAuthInfoToast(`✅ Contrato processado! ${data.reforcos?.length||0} reforço(s) criado(s).`);
 }
 
 function guessClientFromFileName(fileName) {
