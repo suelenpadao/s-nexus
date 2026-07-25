@@ -523,25 +523,28 @@ td:last-child{padding-right:0}
     <button class="nav-item" onclick="goTo('performance',this)">
       <span class="nav-icon">◉</span> Performance
     </button>
-    <button class="nav-item" onclick="goTo('postsale',this)">
+    <button class="nav-item" id="nav-postsale" onclick="goTo('postsale',this)">
       <span class="nav-icon">♥</span> Pós-venda
+      <span id="postsale-plan-badge" class="nav-badge" style="display:none;background:rgba(99,102,241,0.2);color:#a5b4fc;font-size:8px">PRO</span>
     </button>
     <button class="nav-item" onclick="goTo('alerts',this)">
       <span class="nav-icon">⚡</span> Alertas
       <span class="nav-badge" id="alert-badge" style="display:none">0</span>
     </button>
-    <button class="nav-item" onclick="goTo('ai',this)">
+    <button class="nav-item" id="nav-ai" onclick="goTo('ai',this)">
       <span class="nav-icon">✦</span> IA Nexus
-      <span class="nav-badge ai">AI</span>
+      <span class="nav-badge ai" id="ai-plan-badge">AI</span>
     </button>
     <button class="nav-item" onclick="goTo('properties',this)">
       <span class="nav-icon">🏠</span> Imóveis
     </button>
-    <button class="nav-item" onclick="goTo('studio',this)">
+    <button class="nav-item" id="nav-studio" onclick="goTo('studio',this)">
       <span class="nav-icon">🎨</span> Presentation Studio
+      <span id="studio-plan-badge" class="nav-badge" style="display:none;background:rgba(99,102,241,0.2);color:#a5b4fc;font-size:8px">PRO</span>
     </button>
-    <button class="nav-item" onclick="goTo('investment',this)">
+    <button class="nav-item" id="nav-investment" onclick="goTo('investment',this)">
       <span class="nav-icon">📈</span> Análise de Investimento
+      <span id="inv-plan-badge" class="nav-badge" style="display:none;background:rgba(99,102,241,0.2);color:#a5b4fc;font-size:8px">PRO</span>
     </button>
     <button class="nav-item" onclick="goTo('subscription',this)">
       <span class="nav-icon">💳</span> Minha Assinatura
@@ -2030,13 +2033,36 @@ function isPlatformAdmin() {
 
 function paywallHTML(featureName, minPlan) {
   const plan = PLANS_CONFIG.find(p => p.id === minPlan) || PLANS_CONFIG[1];
-  return `<div style="text-align:center;padding:40px 20px;background:rgba(99,102,241,0.04);border:1px dashed rgba(99,102,241,0.25);border-radius:16px;margin:8px 0">
-    <div style="font-size:36px;margin-bottom:12px">🔒</div>
-    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:15px;color:var(--text);margin-bottom:6px">${featureName}</div>
-    <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Disponível a partir do plano <strong style="color:${plan.color}">${plan.name}</strong></div>
-    <button onclick="openPlansModal()" style="padding:10px 22px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;box-shadow:0 4px 14px rgba(99,102,241,0.35)">
-      💎 Ver Planos
-    </button>
+  const allPlans = ['starter','pro','premium'];
+  const minIdx = allPlans.indexOf(minPlan);
+  // Planos que liberam essa função
+  const unlocksIn = PLANS_CONFIG.filter(p => allPlans.indexOf(p.id) >= minIdx);
+
+  return `<div style="text-align:center;padding:40px 24px;background:linear-gradient(135deg,rgba(99,102,241,0.06),rgba(99,102,241,0.02));border:1px dashed rgba(99,102,241,0.3);border-radius:20px;margin:8px 0">
+    <div style="width:60px;height:60px;border-radius:16px;background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.25);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:26px">🔒</div>
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:17px;color:var(--text);margin-bottom:8px">${featureName}</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:20px">
+      Disponível a partir do plano
+      <span style="background:${plan.color}22;color:${plan.color};border:1px solid ${plan.color}44;border-radius:20px;padding:2px 10px;font-weight:700;margin-left:4px">${plan.emoji} ${plan.name}</span>
+    </div>
+    <div style="display:flex;justify-content:center;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+      ${unlocksIn.map(p => `
+        <div style="background:${p.color}11;border:1px solid ${p.color}33;border-radius:12px;padding:10px 16px;text-align:center;min-width:110px">
+          <div style="font-size:18px;margin-bottom:4px">${p.emoji}</div>
+          <div style="font-size:12px;font-weight:700;color:${p.color}">${p.name}</div>
+          <div style="font-size:11px;color:var(--text3)">R$${p.price.toFixed(2).replace('.',',')}/mês</div>
+        </div>`).join('')}
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button onclick="openPlanDetail('${minPlan}')"
+        style="padding:11px 24px;background:linear-gradient(135deg,${plan.color},${plan.color}cc);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 4px 14px ${plan.color}44">
+        ${plan.emoji} Ver Plano ${plan.name} — R$${plan.price.toFixed(2).replace('.',',')}/mês
+      </button>
+      <button onclick="openPlansModal()"
+        style="padding:11px 20px;background:rgba(255,255,255,0.06);color:var(--text2);border:1px solid var(--border2);border-radius:10px;font-weight:600;font-size:13px;cursor:pointer">
+        Comparar todos os planos
+      </button>
+    </div>
   </div>`;
 }
 
@@ -2659,6 +2685,11 @@ function markReinforcement(id) {
 // ═══════════════════════════════════════════════════════════════
 
 function initStudio() {
+  if (!can('ai.nexus')) {
+    const sec = document.getElementById('sec-studio');
+    if (sec) sec.innerHTML = `<div style="padding:40px 20px">${paywallHTML('Presentation Studio', 'pro')}</div>`;
+    return;
+  }
   // Popular selects com clientes reais
   const clients = state.leads.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
   const clientOptions = `<option value="">Selecionar cliente...</option>${clients}`;
@@ -2934,6 +2965,11 @@ async function generateCatalog() {
 // ═══════════════════════════════════════════════════════════════
 
 function initInvestment() {
+  if (!can('ai.nexus')) {
+    const sec = document.getElementById('sec-investment');
+    if (sec) sec.innerHTML = `<div style="padding:40px 20px">${paywallHTML('Análise de Investimento', 'pro')}</div>`;
+    return;
+  }
   const clients = state.leads.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
   const el = document.getElementById('inv-client');
   if (el) el.innerHTML = `<option value="">Selecionar...</option>${clients}`;
@@ -3291,6 +3327,47 @@ function usePropertyInStudio(id) {
 function checkAdminNav() {
   const navAdmin = document.getElementById('nav-admin');
   if (navAdmin) navAdmin.style.display = isAdmin() ? 'flex' : 'none';
+  updateNavBadges();
+}
+
+// Atualiza badges de plano no menu lateral
+function updateNavBadges() {
+  const isStarter = !can('ai.nexus');
+  const isPro = can('ai.nexus') && !can('team.manage');
+
+  // Itens bloqueados no Starter — mostrar badge PRO
+  const proItems = ['studio-plan-badge','inv-plan-badge','postsale-plan-badge'];
+  proItems.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = isStarter ? '' : 'none';
+  });
+
+  // Nav items bloqueados ficam levemente apagados
+  const blockedNavs = isStarter
+    ? ['nav-studio','nav-investment','nav-postsale']
+    : [];
+
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.style.opacity = '';
+  });
+  blockedNavs.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.opacity = '0.55';
+  });
+
+  // Badge AI — mostrar PRO se bloqueado
+  const aiBadge = document.getElementById('ai-plan-badge');
+  if (aiBadge) {
+    if (isStarter) {
+      aiBadge.textContent = 'PRO';
+      aiBadge.style.background = 'rgba(99,102,241,0.2)';
+      aiBadge.style.color = '#a5b4fc';
+    } else {
+      aiBadge.textContent = 'AI';
+      aiBadge.style.background = '';
+      aiBadge.style.color = '';
+    }
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
