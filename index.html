@@ -572,10 +572,10 @@ td:last-child{padding-right:0}
   </div>
   <!-- Badge de trial -->
   <div id="trial-badge-sidebar" style="display:none;padding:10px 16px 0">
-    <div style="background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(139,92,246,0.1));border:1px solid rgba(99,102,241,0.3);border-radius:10px;padding:10px 12px;text-align:center">
-      <div style="font-size:10px;color:#a5b4fc;font-weight:700;letter-spacing:.05em">🎁 TRIAL ATIVO</div>
-      <div id="trial-days-label" style="font-size:18px;font-weight:800;color:#fff;margin:2px 0">7</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.4)">dias restantes</div>
+    <div style="background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(139,92,246,0.1));border:1px solid rgba(99,102,241,0.3);border-radius:10px;padding:10px 12px;text-align:center;transition:all .3s">
+      <div style="font-size:10px;color:#a5b4fc;font-weight:700;letter-spacing:.05em">🎁 TRIAL STARTER</div>
+      <div id="trial-days-label" style="font-size:28px;font-weight:800;color:#fff;margin:2px 0;line-height:1">7</div>
+      <div id="trial-days-sublabel" style="font-size:9px;color:rgba(255,255,255,0.4)">dias restantes</div>
       <button onclick="openPlansModal()" style="margin-top:8px;width:100%;padding:6px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer">Assinar agora</button>
     </div>
   </div>
@@ -1019,6 +1019,7 @@ td:last-child{padding-right:0}
         <button onclick="filterSubs('all')" class="sub-filter-btn active" style="padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;background:rgba(99,102,241,0.15);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3);cursor:pointer">Todos</button>
         <button onclick="filterSubs('trial')" class="sub-filter-btn" style="padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border);cursor:pointer">🎁 Trial ativo</button>
         <button onclick="filterSubs('trial_warning')" class="sub-filter-btn" style="padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border);cursor:pointer">⚠️ Vencendo em 3d</button>
+        <button onclick="filterSubs('trial_today')" class="sub-filter-btn" style="padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border);cursor:pointer">🔴 Vencendo hoje</button>
         <button onclick="filterSubs('trial_expired')" class="sub-filter-btn" style="padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border);cursor:pointer">⏰ Trial expirado</button>
         <button onclick="filterSubs('active')" class="sub-filter-btn" style="padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border);cursor:pointer">✅ Pagantes</button>
         <button onclick="filterSubs('blocked')" class="sub-filter-btn" style="padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border);cursor:pointer">🔒 Bloqueados</button>
@@ -1674,16 +1675,11 @@ async function onAuthSuccess(user, username) {
     const emailEl = document.getElementById('sidebar-user-email');
     if (emailEl) emailEl.textContent = username ? `@${username}` : 'S Nexus';
 
-    if (billing.plan === 'trial' && billing.daysLeft > 0) {
+    if (billing.plan === 'trial' && !billing.blocked) {
       showTrialBadge(billing.daysLeft);
-      // Aviso especial quando faltam 3 dias ou menos
-      if (billing.daysLeft <= 3) {
-        setTimeout(() => {
-          const msg = billing.daysLeft === 1
-            ? '⚠️ Último dia de trial! Assine agora para não perder acesso.'
-            : `⚠️ Seu trial expira em ${billing.daysLeft} dias! Garanta sua assinatura.`;
-          showAuthInfoToast(msg);
-        }, 2000);
+      showTrialWarning(billing.daysLeft, billing.hoursLeft || 0);
+      if (billing.isNewUser) {
+        setTimeout(() => showAuthInfoToast('🎁 Bem-vindo! Seu Trial Starter de 7 dias começou agora.'), 2000);
       }
     }
 
@@ -2227,89 +2223,114 @@ let currentBilling = null;
 // Verifica plano/trial do usuário no Supabase
 async function checkUserBilling(userId) {
   try {
-    const { data: sub } = await sb.from('subscriptions').select('*').eq('user_id', userId).maybeSingle();
+    // Buscar subscription com campos de trial
+    const { data: sub } = await sb
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle();
 
-    if (sub) {
-      // Platform admin — acesso permanente
-      if (sub.status === 'internal_admin' || sub.is_platform_admin) {
-        currentBilling = {
-          plan: 'premium', status: 'internal_admin',
-          isPlatformAdmin: true, daysLeft: 99999, blocked: false
-        };
-        return currentBilling;
-      }
-
+    // Usuário novo — criar trial automaticamente
+    if (!sub) {
       const now = new Date();
-      const expires = sub.expires_at ? new Date(sub.expires_at) : null;
-      const daysLeft = expires ? Math.ceil((expires - now) / (1000*60*60*24)) : 999;
-
-      if (['blocked','refunded','chargeback'].includes(sub.status)) {
-        currentBilling = { plan: sub.plan_id, blocked: true, reason: sub.status, daysLeft: 0 };
-        return currentBilling;
-      }
-      if (sub.status === 'trial_expired' || (sub.status === 'trial' && expires && expires < now)) {
-        currentBilling = { plan: 'trial', blocked: true, reason: 'trial_expired', daysLeft: 0, status: 'trial_expired' };
-        return currentBilling;
-      }
-      if (sub.status === 'active' && expires && expires < now) {
-        currentBilling = { plan: sub.plan_id, blocked: true, reason: 'plan_expired', daysLeft: 0 };
-        return currentBilling;
-      }
-
-      currentBilling = {
-        plan: sub.plan_id || 'trial',
-        status: sub.status,
-        daysLeft,
-        blocked: false,
-        aiCallsUsed: sub.ai_calls_used || 0,
-        aiCallsLimit: sub.ai_calls_limit || 100,
-        isPlatformAdmin: sub.is_platform_admin || false
+      const trialEnd = new Date(now.getTime() + 7*24*60*60*1000);
+      const newSub = {
+        user_id: userId,
+        plan_id: 'starter',
+        status: 'trial',
+        origin: 'system_trial',
+        trial_started_at: now.toISOString(),
+        trial_ends_at: trialEnd.toISOString(),
+        first_login_at: now.toISOString(),
       };
-      return currentBilling;
-    }
-
-    // Fallback: snexus_profiles (legado)
-    const { data, error } = await sb.from('snexus_profiles')
-      .select('plan, trial_ends_at, plan_expires_at, is_blocked, is_platform_admin')
-      .eq('user_id', userId).maybeSingle();
-
-    if (!data && !error) {
-      const trialEnd = new Date(Date.now() + 7*24*60*60*1000);
-      await sb.from('snexus_profiles').upsert({ user_id: userId, plan: 'trial', trial_ends_at: trialEnd.toISOString() }, { onConflict: 'user_id' });
-      await sb.from('subscriptions').upsert({ user_id: userId, plan_id: 'trial', status: 'trial', expires_at: trialEnd.toISOString() }, { onConflict: 'user_id' });
-      currentBilling = { plan: 'trial', status: 'trial', daysLeft: 7, blocked: false };
-      return currentBilling;
-    }
-
-    if (error || !data) {
-      currentBilling = { plan: 'trial', status: 'trial', daysLeft: 99, blocked: false };
-      return currentBilling;
-    }
-
-    if (data.is_platform_admin) {
-      currentBilling = { plan: 'premium', status: 'internal_admin', isPlatformAdmin: true, daysLeft: 99999, blocked: false };
+      await sb.from('subscriptions').upsert(newSub, { onConflict: 'user_id' });
+      currentBilling = {
+        plan: 'starter', status: 'trial', daysLeft: 7,
+        hoursLeft: 168, trialEnd: trialEnd, blocked: false,
+        trialStarted: now, isNewUser: true
+      };
+      await writeLog('trial_start', 'Trial Starter iniciado automaticamente no primeiro acesso', {
+        trial_ends_at: trialEnd.toISOString()
+      });
       return currentBilling;
     }
 
     const now = new Date();
-    if (data.is_blocked) { currentBilling = { plan: data.plan, blocked: true, reason: 'blocked', status: 'blocked' }; return currentBilling; }
 
-    if (data.plan === 'trial' && data.trial_ends_at) {
-      const trialEnd = new Date(data.trial_ends_at);
-      const daysLeft = Math.ceil((trialEnd - now)/(1000*60*60*24));
-      if (daysLeft <= 0) {
-        currentBilling = { plan:'trial', blocked:true, reason:'trial_expired', status:'trial_expired', daysLeft:0 };
-        return currentBilling;
-      }
-      currentBilling = { plan:'trial', status:'trial', daysLeft, blocked:false };
+    // Platform admin — acesso permanente
+    if (sub.status === 'internal_admin' || sub.is_platform_admin) {
+      currentBilling = {
+        plan: 'premium', status: 'internal_admin',
+        isPlatformAdmin: true, daysLeft: 99999, blocked: false
+      };
       return currentBilling;
     }
 
-    currentBilling = { plan: data.plan || 'trial', status: data.plan || 'trial', daysLeft: 999, blocked: false };
+    // Calcular dias restantes do trial (usa trial_ends_at se disponível, senão expires_at)
+    const trialEndDate = sub.trial_ends_at
+      ? new Date(sub.trial_ends_at)
+      : (sub.expires_at ? new Date(sub.expires_at) : null);
+
+    const daysLeft = trialEndDate
+      ? Math.ceil((trialEndDate - now) / (1000*60*60*24))
+      : 999;
+    const hoursLeft = trialEndDate
+      ? Math.ceil((trialEndDate - now) / (1000*60*60))
+      : 9999;
+
+    // Verificar expiração do trial em tempo real (não depender só do job)
+    if (sub.status === 'trial' && trialEndDate && trialEndDate < now) {
+      // Expirou — atualizar no banco
+      await sb.from('subscriptions')
+        .update({ status: 'trial_expired', updated_at: now.toISOString() })
+        .eq('user_id', userId);
+      await writeLog('trial_expired', 'Trial expirado — bloqueio automático', {
+        trial_ended_at: trialEndDate.toISOString()
+      });
+      currentBilling = {
+        plan: 'starter', status: 'trial_expired',
+        blocked: true, reason: 'trial_expired', daysLeft: 0, hoursLeft: 0
+      };
+      return currentBilling;
+    }
+
+    // Bloqueios diretos
+    if (['blocked','refunded','chargeback','trial_expired'].includes(sub.status)) {
+      currentBilling = {
+        plan: sub.plan_id || 'starter',
+        blocked: true, reason: sub.status, status: sub.status, daysLeft: 0
+      };
+      return currentBilling;
+    }
+
+    if (sub.status === 'active' && trialEndDate && trialEndDate < now) {
+      currentBilling = { plan: sub.plan_id, blocked: true, reason: 'plan_expired', daysLeft: 0 };
+      return currentBilling;
+    }
+
+    // Atualizar last_activity
+    sb.from('subscriptions')
+      .update({ last_activity_at: now.toISOString() })
+      .eq('user_id', userId)
+      .then(() => {});
+
+    currentBilling = {
+      plan: sub.plan_id || 'starter',
+      status: sub.status,
+      daysLeft: Math.max(0, daysLeft),
+      hoursLeft: Math.max(0, hoursLeft),
+      trialEnd: trialEndDate,
+      trialStarted: sub.trial_started_at ? new Date(sub.trial_started_at) : null,
+      blocked: false,
+      aiCallsUsed: sub.ai_calls_used || 0,
+      aiCallsLimit: sub.ai_calls_limit || 100,
+      isPlatformAdmin: sub.is_platform_admin || false
+    };
     return currentBilling;
 
   } catch (e) {
-    currentBilling = { plan: 'trial', status: 'trial', daysLeft: 99, blocked: false };
+    // Fail open — não bloqueia por erro de rede
+    currentBilling = { plan: 'starter', status: 'trial', daysLeft: 7, blocked: false };
     return currentBilling;
   }
 }
@@ -2345,12 +2366,52 @@ function showBillingWall(billing) {
 
 // Mostra badge de trial na sidebar
 function showTrialBadge(daysLeft) {
-  // Não mostrar badge se for o valor de fallback (99) — significa que não temos data real
   if (!daysLeft || daysLeft >= 99) return;
   const badge = document.getElementById('trial-badge-sidebar');
   const label = document.getElementById('trial-days-label');
-  if (badge) badge.style.display = 'block';
-  if (label) label.textContent = daysLeft;
+  if (badge) {
+    badge.style.display = 'block';
+    // Cor de urgência
+    const urgColor = daysLeft <= 1 ? '#ef4444' : daysLeft <= 3 ? '#f59e0b' : '#6366f1';
+    badge.style.borderColor = urgColor + '50';
+    badge.style.background = `linear-gradient(135deg,${urgColor}20,${urgColor}08)`;
+  }
+  if (label) {
+    label.textContent = daysLeft;
+    const urgColor = daysLeft <= 1 ? '#ef4444' : daysLeft <= 3 ? '#f59e0b' : '#fff';
+    label.style.color = urgColor;
+  }
+  // Atualizar texto do rodapé do badge
+  const sub = document.getElementById('trial-days-sublabel');
+  if (sub) sub.textContent = daysLeft === 1 ? 'dia restante ⚠️' : 'dias restantes';
+}
+
+// Exibir aviso de trial expirando
+function showTrialWarning(daysLeft, hoursLeft) {
+  if (daysLeft > 3) return;
+  let msg = '';
+  if (daysLeft <= 0 && hoursLeft > 0) {
+    msg = `⏰ Seu trial expira em ${hoursLeft}h! Assine agora para não perder acesso.`;
+  } else if (daysLeft === 1) {
+    msg = '⚠️ Último dia de trial! Assine hoje para continuar usando o S Nexus.';
+  } else if (daysLeft <= 3) {
+    msg = `⚠️ Seu trial expira em ${daysLeft} dias. Garanta sua assinatura!`;
+  }
+  if (msg) {
+    setTimeout(() => showAuthInfoToast(msg), 3000);
+  }
+}
+
+// Formatar data em horário de São Paulo
+function fmtSaoPaulo(dateStr) {
+  if (!dateStr) return '—';
+  try {
+    return new Date(dateStr).toLocaleString('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      day:'2-digit', month:'2-digit', year:'numeric',
+      hour:'2-digit', minute:'2-digit'
+    });
+  } catch(e) { return dateStr; }
 }
 
 // Renderiza os cards de planos
@@ -2455,12 +2516,17 @@ let _allSubsData = [];
 async function loadAdminSubscriptions() {
   const el = document.getElementById('admin-subs-list');
   if (!el) return;
+  el.innerHTML = skeletonHTML(4);
   try {
-    const { data: subs } = await sb.from('subscriptions').select('*').order('created_at', {ascending:false});
+    const { data: subs, error } = await sb
+      .from('subscriptions')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
     _allSubsData = subs || [];
     renderSubsTable(_allSubsData);
   } catch(e) {
-    if (el) el.innerHTML = '<div style="color:#ef4444;font-size:12px;padding:12px">Erro ao carregar assinaturas</div>';
+    el.innerHTML = '<div style="color:#ef4444;font-size:12px;padding:12px">Erro ao carregar. Execute o setup-trial-fix.sql no Supabase.</div>';
   }
 }
 
@@ -2470,21 +2536,29 @@ function filterSubs(filter) {
     b.style.color = 'var(--text3)';
     b.style.borderColor = 'var(--border)';
   });
-  const activeBtn = event?.target;
-  if (activeBtn) {
-    activeBtn.style.background = 'rgba(99,102,241,0.15)';
-    activeBtn.style.color = '#a5b4fc';
-    activeBtn.style.borderColor = 'rgba(99,102,241,0.3)';
+  if (event?.target) {
+    event.target.style.background = 'rgba(99,102,241,0.15)';
+    event.target.style.color = '#a5b4fc';
+    event.target.style.borderColor = 'rgba(99,102,241,0.3)';
   }
   const now = new Date();
   let filtered = _allSubsData;
-  if (filter === 'trial') filtered = filtered.filter(s => s.status === 'trial' && new Date(s.expires_at) > now);
+  if (filter === 'trial') filtered = filtered.filter(s => s.status === 'trial' && new Date(s.trial_ends_at||s.expires_at||0) > now);
   else if (filter === 'trial_warning') filtered = filtered.filter(s => {
     if (s.status !== 'trial') return false;
-    const days = Math.ceil((new Date(s.expires_at) - now)/(1000*60*60*24));
+    const end = new Date(s.trial_ends_at||s.expires_at||0);
+    const days = Math.ceil((end - now)/(1000*60*60*24));
     return days > 0 && days <= 3;
   });
-  else if (filter === 'trial_expired') filtered = filtered.filter(s => s.status === 'trial_expired' || (s.status === 'trial' && new Date(s.expires_at) <= now));
+  else if (filter === 'trial_today') filtered = filtered.filter(s => {
+    if (s.status !== 'trial') return false;
+    const end = new Date(s.trial_ends_at||s.expires_at||0);
+    const days = Math.ceil((end - now)/(1000*60*60*24));
+    return days === 1;
+  });
+  else if (filter === 'trial_expired') filtered = filtered.filter(s =>
+    s.status === 'trial_expired' || (s.status === 'trial' && new Date(s.trial_ends_at||0) <= now)
+  );
   else if (filter === 'active') filtered = filtered.filter(s => s.status === 'active');
   else if (filter === 'blocked') filtered = filtered.filter(s => s.status === 'blocked');
   renderSubsTable(filtered);
@@ -2494,1079 +2568,67 @@ function renderSubsTable(subs) {
   const el = document.getElementById('admin-subs-list');
   if (!el) return;
   const now = new Date();
-  el.innerHTML = subs.length ? subs.map(s => {
-    const expires = s.expires_at ? new Date(s.expires_at) : null;
-    const daysLeft = expires ? Math.ceil((expires - now)/(1000*60*60*24)) : null;
-    const planColors = {trial:'#f59e0b',starter:'#06b6d4',pro:'#6366f1',premium:'#f59e0b',internal_admin:'#10b981'};
-    const color = s.status === 'blocked' ? '#ef4444' : (planColors[s.plan_id || s.status] || '#666');
-    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);flex-wrap:wrap">
-      <div style="flex:1;min-width:120px">
-        <div style="font-size:11px;font-weight:600;color:var(--text)">${s.kiwify_customer_id || s.user_id?.slice(0,12)+'...'}</div>
-        <div style="font-size:10px;color:var(--text3)">${expires ? new Date(s.created_at).toLocaleDateString('pt-BR') : '—'}</div>
-      </div>
-      <span style="background:${color}22;color:${color};border:1px solid ${color}44;border-radius:6px;font-size:9px;font-weight:700;padding:2px 8px;white-space:nowrap">${s.plan_id || '—'}</span>
-      <span style="font-size:10px;color:${daysLeft !== null && daysLeft <= 3 ? '#ef4444' : 'var(--text3)'};white-space:nowrap">${daysLeft !== null ? (daysLeft <= 0 ? 'Expirado' : `${daysLeft}d restantes`) : '—'}</span>
-      <div style="display:flex;gap:4px;flex-shrink:0">
-        <button onclick="adminChangePlan('${s.user_id}')" style="padding:3px 7px;background:rgba(99,102,241,0.1);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25);border-radius:5px;font-size:9px;cursor:pointer">✏️</button>
-        <button onclick="adminGrantDays('${s.user_id}')" style="padding:3px 7px;background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.25);border-radius:5px;font-size:9px;cursor:pointer">🎁</button>
-      </div>
-    </div>`;
-  }).join('') : '<div style="color:var(--text3);text-align:center;padding:20px;font-size:12px">Nenhum resultado</div>';
-}
-
-async function loadDemoHistory() {
-  // Renderizar cards de plano dinamicamente
-  const grid = document.getElementById('demo-plans-grid');
-  if (grid) {
-    const demoPlansMeta = {
-      starter: {name:'Starter', color:'#06b6d4', emoji:'🚀', price:'R$59,90/mês'},
-      pro:     {name:'Pro',     color:'#6366f1', emoji:'⚡', price:'R$99,90/mês'},
-      premium: {name:'Premium', color:'#f59e0b', emoji:'👑', price:'R$149,90/mês'},
-    };
-    grid.innerHTML = Object.entries(demoPlansMeta).map(([id, p]) => `
-      <div style="background:${p.color}11;border:1px solid ${p.color}33;border-radius:12px;padding:16px;text-align:center">
-        <div style="font-size:28px;margin-bottom:8px">${p.emoji}</div>
-        <div style="font-weight:700;color:var(--text);margin-bottom:2px">${p.name}</div>
-        <div style="font-size:11px;color:var(--text3);margin-bottom:12px">${p.price}</div>
-        <button onclick="activateDemoMode('${id}')"
-          style="width:100%;padding:8px;background:${p.color}22;color:${p.color};border:1px solid ${p.color}44;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">
-          🎭 Simular ${p.name}
-        </button>
-      </div>`).join('');
-  }
-
-  const el = document.getElementById('demo-history-list');
-  if (!el) return;
-  try {
-    const { data } = await sb.from('snexus_logs')
-      .select('*')
-      .in('event', ['demo_mode_enter','demo_mode_exit'])
-      .order('created_at', {ascending:false})
-      .limit(20);
-    el.innerHTML = (data||[]).length > 0
-      ? (data||[]).map(l => `<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:11px">
-          <span style="font-weight:600">🎭 ${l.description}</span>
-          <span style="color:var(--text3);margin-left:8px">${new Date(l.created_at).toLocaleString('pt-BR')}</span>
-        </div>`).join('')
-      : '<div style="color:var(--text3);text-align:center;padding:16px;font-size:12px">Nenhuma demonstração realizada ainda</div>';
-  } catch(e) {
-    el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:12px">Ative o modo demo para ver o histórico aqui</div>';
-  }
-}
-
-async function loadAdminLogs() {
-  const el = document.getElementById('admin-logs-list');
-  if (!el) return;
-  try {
-    const { data: logs } = await sb.from('snexus_logs').select('*').order('created_at',{ascending:false}).limit(100);
-    const eventIcons = {login:'🔑',logout:'🚪',signup:'🎉',password_change:'🔐',plan_change:'💳',block:'🔒',unblock:'🔓',data_save:'💾',trial_start:'🎁',trial_expired:'⏰',backup_export:'📦',backup_import:'📥',demo_mode_enter:'🎭',demo_mode_exit:'🎭',manual_grant:'🎁'};
-    el.innerHTML = (logs||[]).map(l => `
-      <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
-        <div style="font-size:14px;flex-shrink:0">${eventIcons[l.event]||'📋'}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:11px;font-weight:600;color:var(--text)">${l.description||l.event}</div>
-          <div style="font-size:9px;color:var(--text3);margin-top:2px">${l.user_id?.slice(0,8)||'—'} · ${new Date(l.created_at).toLocaleString('pt-BR')}</div>
-        </div>
-      </div>`).join('') || '<div style="color:var(--text3);text-align:center;padding:20px;font-size:12px">Nenhum log</div>';
-  } catch(e) { el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:12px">Erro ao carregar logs</div>'; }
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  MÓDULO 10 — EXPERIÊNCIA PREMIUM (skeleton loading + animações)
-// ═══════════════════════════════════════════════════════════════
-
-function skeletonHTML(lines = 3) {
-  return Array(lines).fill(0).map((_, i) => `
-    <div style="height:14px;background:linear-gradient(90deg,rgba(255,255,255,0.05) 25%,rgba(255,255,255,0.1) 50%,rgba(255,255,255,0.05) 75%);border-radius:7px;margin-bottom:10px;width:${[100,75,90][i%3]}%;animation:shimmer 1.5s infinite"></div>
-  `).join('');
-}
-
-// Adicionar CSS de shimmer dinamicamente
-(function addShimmerCSS() {
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
-    @keyframes fadeInUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-    @keyframes scaleIn { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
-    .fade-in-up { animation: fadeInUp .3s ease forwards; }
-    .scale-in { animation: scaleIn .2s ease forwards; }
-    .hover-lift { transition: transform .2s ease, box-shadow .2s ease; }
-    .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(99,102,241,0.2); }
-  `;
-  document.head.appendChild(style);
-})();
-
-// ═══════════════════════════════════════════════════════════════
-//  MÓDULO 4 — REFORÇOS AUTOMÁTICOS
-// ═══════════════════════════════════════════════════════════════
-
-function getAutoReinforcements() {
-  const now = new Date();
-  const reminders = [];
-
-  // Reforços de pós-venda
-  state.postsale.forEach(c => {
-    if (!c.reinforcementDate) return;
-    const date = new Date(c.reinforcementDate);
-    const diff = Math.floor((date - now) / (1000*60*60*24));
-    if (diff >= 0 && diff <= 30) {
-      reminders.push({
-        id: `postsale-${c.id}`,
-        type: 'reforco',
-        client: c.client,
-        description: `Reforço ${c.reinforcementType} — ${c.client}`,
-        date: c.reinforcementDate,
-        daysLeft: diff,
-        icon: '🔔',
-        color: diff <= 7 ? '#ef4444' : diff <= 15 ? '#f59e0b' : '#6366f1',
-        urgency: diff === 0 ? 'hoje' : diff <= 7 ? 'urgente' : diff <= 15 ? 'próximo' : 'programado',
-        actions: ['whatsapp', 'ligar', 'agendar', 'concluir']
-      });
-    }
-  });
-
-  // Parcelas vencendo
-  state.sales.forEach(s => {
-    (s.installments || []).filter(i => i.status === 'pendente').forEach(i => {
-      const date = new Date(i.date);
-      const diff = Math.floor((date - now) / (1000*60*60*24));
-      if (diff >= 0 && diff <= 30) {
-        reminders.push({
-          id: `parcela-${s.id}-${i.id}`,
-          type: 'parcela',
-          client: s.buyer,
-          description: `Parcela ${fmt(i.value)} — ${s.buyer}`,
-          date: i.date,
-          daysLeft: diff,
-          icon: '💰',
-          color: diff <= 3 ? '#ef4444' : diff <= 7 ? '#f59e0b' : '#10b981',
-          urgency: diff === 0 ? 'hoje' : diff <= 3 ? 'urgente' : diff <= 7 ? 'próximo' : 'programado',
-          actions: ['whatsapp', 'concluir'],
-          saleId: s.id,
-          instId: i.id
-        });
-      }
-    });
-  });
-
-  return reminders.sort((a, b) => a.daysLeft - b.daysLeft);
-}
-
-function reinforcementReminderHTML(r) {
-  const urgencyColors = { hoje: '#ef4444', urgente: '#ef4444', próximo: '#f59e0b', programado: '#6366f1' };
-  const color = urgencyColors[r.urgency] || r.color;
-  return `
-    <div class="hover-lift" style="background:${color}0a;border:1px solid ${color}25;border-radius:12px;padding:14px 16px;margin-bottom:10px">
-      <div style="display:flex;align-items:flex-start;gap:12px">
-        <div style="font-size:22px;flex-shrink:0">${r.icon}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-weight:700;font-size:13px;color:var(--text)">${r.description}</div>
-          <div style="font-size:11px;color:var(--text3);margin-top:2px">
-            ${r.daysLeft === 0 ? '⚡ Hoje!' : `📅 Em ${r.daysLeft} dia${r.daysLeft !== 1 ? 's' : ''}`}
-            <span style="margin-left:8px;background:${color}22;color:${color};border-radius:5px;padding:1px 7px;font-size:9px;font-weight:800;text-transform:uppercase">${r.urgency}</span>
-          </div>
-          <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
-            ${r.actions.includes('whatsapp') ? `<button onclick="openWhatsApp('',\'${r.client}\')" style="padding:5px 10px;background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.25);border-radius:7px;font-size:10px;font-weight:700;cursor:pointer">📱 WhatsApp</button>` : ''}
-            ${r.actions.includes('ligar') ? `<button style="padding:5px 10px;background:rgba(99,102,241,0.1);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25);border-radius:7px;font-size:10px;font-weight:700;cursor:pointer">📞 Ligar</button>` : ''}
-            ${r.actions.includes('agendar') ? `<button onclick="syncReinforcementToGoogle(${r.id?.split('-')[1]})" style="padding:5px 10px;background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.25);border-radius:7px;font-size:10px;font-weight:700;cursor:pointer">📅 Agendar</button>` : ''}
-            ${r.actions.includes('concluir') ? `<button onclick="markReinforcement('${r.id}')" style="padding:5px 10px;background:rgba(255,255,255,0.06);color:var(--text3);border:1px solid var(--border2);border-radius:7px;font-size:10px;cursor:pointer">✓ Concluído</button>` : ''}
-          </div>
-        </div>
-      </div>
-    </div>`;
-}
-
-function markReinforcement(id) {
-  showAuthInfoToast('✓ Marcado como concluído!');
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  MÓDULO 1 — PRESENTATION STUDIO
-// ═══════════════════════════════════════════════════════════════
-
-function initStudio() {
-  if (!can('ai.nexus')) {
-    const sec = document.getElementById('sec-studio');
-    if (sec) sec.innerHTML = `<div style="padding:40px 20px">${paywallHTML('Presentation Studio', 'pro')}</div>`;
+  if (!subs.length) {
+    el.innerHTML = '<div style="color:var(--text3);text-align:center;padding:20px;font-size:12px">Nenhum resultado</div>';
     return;
   }
-  // Popular selects com clientes reais
-  const clients = state.leads.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
-  const clientOptions = `<option value="">Selecionar cliente...</option>${clients}`;
-  ['studio-client', 'inv-client'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = clientOptions;
-  });
-
-  // Renderizar biblioteca de modelos
-  renderTemplatesLibrary();
-  switchStudioTab('presentation');
-}
-
-function switchStudioTab(tab) {
-  ['presentation','comparator','dossier','catalog','templates'].forEach(t => {
-    const panel = document.getElementById(`studio-panel-${t}`);
-    const btn = document.getElementById(`studio-tab-${t}`);
-    if (panel) panel.style.display = t === tab ? '' : 'none';
-    if (btn) {
-      btn.style.background = t === tab ? 'linear-gradient(135deg,#6366f1,#4f46e5)' : 'rgba(255,255,255,0.05)';
-      btn.style.color = t === tab ? '#fff' : 'var(--text3)';
-      btn.style.border = t === tab ? 'none' : '1px solid var(--border)';
-    }
-  });
-}
-
-function renderTemplatesLibrary() {
-  const templates = [
-    { id:'investor', name:'Investidor', emoji:'💰', desc:'Foco em rentabilidade e valorização', color:'#10b981' },
-    { id:'first_home', name:'Primeiro Imóvel', emoji:'🏠', desc:'Sonho da casa própria, financiamento', color:'#6366f1' },
-    { id:'luxury', name:'Alto Padrão', emoji:'👑', desc:'Imóveis premium e exclusivos', color:'#f59e0b' },
-    { id:'beach', name:'Frente Mar', emoji:'🌊', desc:'Imóveis litorâneos e de veraneio', color:'#06b6d4' },
-    { id:'launch', name:'Lançamento', emoji:'🚀', desc:'Novos empreendimentos em pré-venda', color:'#8b5cf6' },
-    { id:'rental', name:'Locação', emoji:'🔑', desc:'Imóveis para renda passiva', color:'#f97316' },
-    { id:'commercial', name:'Comercial', emoji:'🏢', desc:'Salas, lojas e galpões', color:'#ec4899' },
-    { id:'standard', name:'Padrão Premium', emoji:'⭐', desc:'Modelo completo e versátil', color:'#6366f1' },
-  ];
-  const grid = document.getElementById('templates-grid');
-  if (!grid) return;
-  grid.innerHTML = templates.map(t => `
-    <div class="card hover-lift" style="cursor:pointer;border:1px solid ${t.color}25;background:${t.color}08" onclick="useTemplate('${t.id}')">
-      <div style="font-size:32px;margin-bottom:10px">${t.emoji}</div>
-      <div style="font-weight:700;font-size:13px;color:var(--text);margin-bottom:4px">${t.name}</div>
-      <div style="font-size:11px;color:var(--text3);margin-bottom:12px">${t.desc}</div>
-      <button style="width:100%;padding:7px;background:${t.color}18;color:${t.color};border:1px solid ${t.color}35;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">
-        Usar Modelo
-      </button>
-    </div>`).join('');
-}
-
-function useTemplate(templateId) {
-  document.getElementById('studio-template').value = templateId;
-  switchStudioTab('presentation');
-  showAuthInfoToast(`✓ Modelo "${templateId}" selecionado!`);
-}
-
-async function generatePresentation() {
-  const client = document.getElementById('studio-client').value;
-  const clientName = client
-    ? state.leads.find(l => l.id == client)?.name || 'Cliente'
-    : 'Cliente';
-  const emp = document.getElementById('studio-empreendimento').value || 'Empreendimento';
-  const desc = document.getElementById('studio-desc').value || '';
-  const value = document.getElementById('studio-value').value || '';
-  const location = document.getElementById('studio-location').value || '';
-  const template = document.getElementById('studio-template').value || 'standard';
-
-  const preview = document.getElementById('studio-preview');
-  preview.innerHTML = skeletonHTML(4);
-
-  // Usar IA para gerar texto da apresentação
-  const prompt = `Gere uma apresentação comercial PREMIUM e PERSUASIVA de imóvel para o cliente ${clientName}.
-Empreendimento: ${emp}
-Descrição: ${desc}
-Valor: R$ ${value}
-Localização: ${location}
-Modelo: ${template}
-
-Crie:
-1. Título impactante
-2. Frase de abertura personalizada para ${clientName}
-3. 3 diferenciais principais em bullet points
-4. Call to action final
-
-Seja objetivo, profissional e persuasivo. Máximo 200 palavras.`;
-
-  let content = '';
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 500,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    const data = await res.json();
-    content = data.content?.[0]?.text || 'Erro ao gerar conteúdo.';
-  } catch(e) {
-    content = `Apresentação para ${clientName} — ${emp}\n\n${desc}\n\nValor: R$ ${value}\nLocalização: ${location}`;
-  }
-
-  const templateColors = {
-    standard: '#6366f1', investor: '#10b981', first_home: '#06b6d4',
-    luxury: '#f59e0b', beach: '#06b6d4', launch: '#8b5cf6',
-    rental: '#f97316', commercial: '#ec4899'
-  };
-  const color = templateColors[template] || '#6366f1';
-  const brokerName = state.userName || 'Corretor';
-
-  preview.innerHTML = `
-    <div class="scale-in" style="background:linear-gradient(135deg,${color}22,${color}08);border:1px solid ${color}35;border-radius:16px;padding:24px">
-      <!-- Capa -->
-      <div style="text-align:center;margin-bottom:20px;padding:20px;background:linear-gradient(135deg,${color},${color}cc);border-radius:12px;color:#fff">
-        <div style="font-size:32px;margin-bottom:8px">🏠</div>
-        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:18px;margin-bottom:4px">${emp}</div>
-        <div style="font-size:12px;opacity:0.85">Apresentação exclusiva para ${clientName}</div>
-        ${value ? `<div style="font-size:20px;font-weight:800;margin-top:8px">R$ ${value}</div>` : ''}
-      </div>
-
-      <!-- Conteúdo gerado -->
-      <div style="font-size:12px;line-height:1.7;color:var(--text);margin-bottom:16px;white-space:pre-wrap">${content}</div>
-
-      <!-- Info -->
-      ${location ? `<div style="padding:10px 14px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:11px;color:var(--text3);margin-bottom:12px">📍 ${location}</div>` : ''}
-
-      <!-- Rodapé -->
-      <div style="border-top:1px solid ${color}25;padding-top:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-        <div style="font-size:11px;color:var(--text3)">
-          <div style="font-weight:700;color:var(--text)">${brokerName}</div>
-          <div>S Nexus CRM Premium</div>
-        </div>
-        <div style="display:flex;gap:8px">
-          <button onclick="generatePresentationPDF()" style="padding:8px 14px;background:${color};color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">📄 PDF</button>
-          <button onclick="sharePresentation()" style="padding:8px 14px;background:rgba(255,255,255,0.08);color:var(--text2);border:1px solid var(--border);border-radius:8px;font-size:11px;cursor:pointer">🔗 Link</button>
-        </div>
-      </div>
-    </div>`;
-}
-
-function generatePresentationPDF() {
-  const preview = document.getElementById('studio-preview');
-  const content = preview.innerHTML;
-  const win = window.open('', '_blank');
-  win.document.write(`<!DOCTYPE html><html><head><title>Apresentação S Nexus</title>
-    <style>body{font-family:'Plus Jakarta Sans',sans-serif;margin:0;padding:24px;background:#07090f;color:#f0f2ff}
-    @media print{body{background:#fff;color:#111}}</style></head>
-    <body>${content}<script>window.print();<\/script></body></html>`);
-  win.document.close();
-}
-
-function sharePresentation() {
-  const text = document.getElementById('studio-preview')?.innerText || '';
-  const encoded = encodeURIComponent(text.slice(0, 500));
-  showAuthInfoToast('🔗 Link copiado! (Função de link online em desenvolvimento)');
-}
-
-async function generateComparison() {
-  const c1 = {
-    name: document.getElementById('comp1-name').value || 'Imóvel 1',
-    value: document.getElementById('comp1-value').value,
-    area: document.getElementById('comp1-area').value,
-    dorms: document.getElementById('comp1-dorms').value,
-    suites: document.getElementById('comp1-suites').value,
-    vagas: document.getElementById('comp1-vagas').value,
-    loc: document.getElementById('comp1-loc').value,
-    diff: document.getElementById('comp1-diff').value,
-  };
-  const c2 = {
-    name: document.getElementById('comp2-name').value || 'Imóvel 2',
-    value: document.getElementById('comp2-value').value,
-    area: document.getElementById('comp2-area').value,
-    dorms: document.getElementById('comp2-dorms').value,
-    suites: document.getElementById('comp2-suites').value,
-    vagas: document.getElementById('comp2-vagas').value,
-    loc: document.getElementById('comp2-loc').value,
-    diff: document.getElementById('comp2-diff').value,
-  };
-
-  const result = document.getElementById('comp-result');
-  result.innerHTML = `
-    <div class="scale-in" style="overflow-x:auto;margin-top:8px">
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
-        <thead>
-          <tr>
-            <th style="padding:10px;text-align:left;color:var(--text3);border-bottom:1px solid var(--border)">Critério</th>
-            <th style="padding:10px;text-align:center;color:#6366f1;border-bottom:1px solid var(--border);background:rgba(99,102,241,0.06)">${c1.name}</th>
-            <th style="padding:10px;text-align:center;color:#06b6d4;border-bottom:1px solid var(--border);background:rgba(6,182,212,0.06)">${c2.name}</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${[
-            ['💰 Valor', `R$ ${c1.value}`, `R$ ${c2.value}`],
-            ['📐 Área', `${c1.area}m²`, `${c2.area}m²`],
-            ['🛏 Dormitórios', c1.dorms, c2.dorms],
-            ['🛁 Suítes', c1.suites, c2.suites],
-            ['🚗 Vagas', c1.vagas, c2.vagas],
-            ['📍 Localização', c1.loc, c2.loc],
-            ['⭐ Diferenciais', c1.diff, c2.diff],
-          ].map(([label, v1, v2]) => `
-            <tr>
-              <td style="padding:10px;color:var(--text3);border-bottom:1px solid var(--border)">${label}</td>
-              <td style="padding:10px;text-align:center;border-bottom:1px solid var(--border);background:rgba(99,102,241,0.04)">${v1 || '—'}</td>
-              <td style="padding:10px;text-align:center;border-bottom:1px solid var(--border);background:rgba(6,182,212,0.04)">${v2 || '—'}</td>
-            </tr>`).join('')}
-        </tbody>
-      </table>
-      <div style="display:flex;gap:8px;margin-top:14px">
-        <button onclick="printComparison()" style="padding:9px 16px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">📄 Exportar PDF</button>
-      </div>
-    </div>`;
-}
-
-function printComparison() {
-  const content = document.getElementById('comp-result').innerHTML;
-  const win = window.open('', '_blank');
-  win.document.write(`<!DOCTYPE html><html><head><title>Comparativo — S Nexus</title>
-    <style>body{font-family:sans-serif;padding:24px}table{width:100%;border-collapse:collapse}
-    th,td{padding:8px;border:1px solid #ddd}th{background:#f5f5f5}
-    @media print{}</style></head><body>${content}<script>window.print();<\/script></body></html>`);
-  win.document.close();
-}
-
-async function generateDossier() {
-  const name = document.getElementById('doss-name').value || 'Empreendimento';
-  const builder = document.getElementById('doss-builder').value;
-  const loc = document.getElementById('doss-loc').value;
-  const delivery = document.getElementById('doss-delivery').value;
-  const features = document.getElementById('doss-features').value;
-  const plants = document.getElementById('doss-plants').value;
-
-  document.getElementById('doss-result').innerHTML = `
-    <div class="scale-in" style="background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.2);border-radius:14px;padding:20px">
-      <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px">📁 ${name}</div>
-      ${builder ? `<div style="font-size:12px;color:var(--text3);margin-bottom:12px">Construtora: ${builder}</div>` : ''}
-      ${loc ? `<div style="font-size:12px;color:var(--text2);margin-bottom:8px">📍 ${loc}</div>` : ''}
-      ${delivery ? `<div style="font-size:12px;color:#10b981;margin-bottom:8px">🗓 Entrega: ${delivery}</div>` : ''}
-      ${features ? `<div style="font-size:12px;color:var(--text2);margin-bottom:8px;white-space:pre-wrap">${features}</div>` : ''}
-      ${plants ? `<div style="margin-top:10px;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Plantas</div><div style="font-size:12px;color:var(--text2)">${plants}</div></div>` : ''}
-      <div style="margin-top:14px;padding:12px;border-top:1px solid rgba(99,102,241,0.15)">
-        <div style="font-size:11px;color:var(--text3)">Corretor: ${state.userName || 'S Nexus'} · S Nexus CRM Premium</div>
-      </div>
-      <button onclick="window.print()" style="margin-top:12px;padding:9px 16px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">📄 Exportar PDF</button>
-    </div>`;
-}
-
-async function generateCatalog() {
-  const title = document.getElementById('cat-title').value || 'Portfólio de Imóveis';
-  const intro = document.getElementById('cat-intro').value || '';
-  const filter = document.getElementById('cat-filter').value;
-
-  let leads = state.leads;
-  if (filter !== 'all') leads = leads.filter(l => l.status === filter);
-
-  document.getElementById('cat-result').innerHTML = `
-    <div class="scale-in" style="background:rgba(99,102,241,0.05);border:1px solid rgba(99,102,241,0.15);border-radius:14px;padding:20px">
-      <div style="font-size:16px;font-weight:800;margin-bottom:8px">${title}</div>
-      ${intro ? `<div style="font-size:12px;color:var(--text2);margin-bottom:14px">${intro}</div>` : ''}
-      ${leads.length === 0
-        ? `<div style="color:var(--text3);font-size:12px;text-align:center;padding:20px">Nenhum cliente encontrado com esse filtro</div>`
-        : leads.map(l => `
-          <div style="padding:12px;background:rgba(255,255,255,0.03);border-radius:10px;margin-bottom:8px">
-            <div style="font-weight:700;font-size:13px">${l.name}</div>
-            <div style="font-size:11px;color:var(--text3)">${l.notes || 'Sem descrição'}</div>
-          </div>`).join('')}
-      <button onclick="window.print()" style="margin-top:12px;padding:9px 16px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">📄 Exportar PDF</button>
-    </div>`;
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  MÓDULO 2 — ANÁLISE DE INVESTIMENTO
-// ═══════════════════════════════════════════════════════════════
-
-function initInvestment() {
-  if (!can('ai.nexus')) {
-    const sec = document.getElementById('sec-investment');
-    if (sec) sec.innerHTML = `<div style="padding:40px 20px">${paywallHTML('Análise de Investimento', 'pro')}</div>`;
-    return;
-  }
-  const clients = state.leads.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
-  const el = document.getElementById('inv-client');
-  if (el) el.innerHTML = `<option value="">Selecionar...</option>${clients}`;
-}
-
-function generateInvestmentAnalysis() {
-  const client = document.getElementById('inv-client');
-  const clientName = client?.value
-    ? state.leads.find(l => l.id == client.value)?.name || 'Cliente'
-    : 'Cliente';
-  const emp = document.getElementById('inv-emp').value || 'Empreendimento';
-  const unit = document.getElementById('inv-unit').value || '';
-  const value = parseFloat(document.getElementById('inv-value').value) || 0;
-  const entrada = parseFloat(document.getElementById('inv-entrada').value) || 0;
-  const parcelas = parseInt(document.getElementById('inv-parcelas').value) || 36;
-  const pmt = parseFloat(document.getElementById('inv-pmt').value) || 0;
-  const prazo = parseInt(document.getElementById('inv-prazo').value) || 48;
-  const valorizacao = parseFloat(document.getElementById('inv-valorizacao').value) || 8;
-  const aluguel = parseFloat(document.getElementById('inv-aluguel').value) || 0;
-  const indice = document.getElementById('inv-indice').value || 'INCC';
-
-  if (!value) { showAuthInfoToast('⚠️ Informe o valor do imóvel'); return; }
-
-  // Cálculos
-  const totalPago = entrada + (pmt * parcelas);
-  const custoLiquido = totalPago;
-  const valorFuturo = value * Math.pow(1 + valorizacao/100, prazo/12);
-  const lucroEstimado = valorFuturo - totalPago;
-  const rentabilidadeTotal = ((lucroEstimado / totalPago) * 100);
-  const aluguelAnual = aluguel * 12;
-  const rentabilidadeAluguel = value > 0 ? ((aluguelAnual / value) * 100) : 0;
-
-  // Gráfico simples de evolução patrimonial
-  const anos = Math.ceil(prazo/12);
-  const evolucao = Array.from({length: anos+1}, (_, i) => ({
-    ano: i,
-    valor: value * Math.pow(1 + valorizacao/100, i),
-    pago: entrada + Math.min(pmt * parcelas, pmt * (i * 12))
-  }));
-  const maxVal = Math.max(...evolucao.map(e => e.valor));
-
-  document.getElementById('inv-result').innerHTML = `
-    <div class="scale-in">
-      <!-- Header -->
-      <div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:14px;padding:20px;color:#fff;margin-bottom:16px">
-        <div style="font-size:11px;opacity:0.8;text-transform:uppercase;letter-spacing:.08em">Análise de Investimento</div>
-        <div style="font-size:18px;font-weight:800;margin:4px 0">${emp} ${unit ? '— '+unit : ''}</div>
-        <div style="font-size:12px;opacity:0.85">Para: ${clientName} · ${new Date().toLocaleDateString('pt-BR')}</div>
-      </div>
-
-      <!-- KPIs -->
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px">
-        ${[
-          ['💰 Valor do Imóvel', `R$ ${value.toLocaleString('pt-BR')}`, '#6366f1'],
-          ['📥 Entrada', `R$ ${entrada.toLocaleString('pt-BR')}`, '#06b6d4'],
-          ['💳 Total Pago', `R$ ${totalPago.toLocaleString('pt-BR')}`, '#f59e0b'],
-          ['📈 Valor Futuro', `R$ ${Math.round(valorFuturo).toLocaleString('pt-BR')}`, '#10b981'],
-          ['💎 Lucro Estimado', `R$ ${Math.round(lucroEstimado).toLocaleString('pt-BR')}`, '#10b981'],
-          ['📊 Rentabilidade', `${rentabilidadeTotal.toFixed(1)}%`, '#8b5cf6'],
-        ].map(([label, val, color]) => `
-          <div style="background:${color}0f;border:1px solid ${color}25;border-radius:10px;padding:12px">
-            <div style="font-size:10px;color:var(--text3)">${label}</div>
-            <div style="font-size:16px;font-weight:800;color:${color};margin-top:3px">${val}</div>
-          </div>`).join('')}
-      </div>
-
-      <!-- Gráfico evolução -->
-      <div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:16px;margin-bottom:14px">
-        <div style="font-size:12px;font-weight:700;margin-bottom:12px">📈 Evolução Patrimonial</div>
-        <div style="display:flex;align-items:flex-end;gap:4px;height:80px">
-          ${evolucao.map(e => {
-            const h = Math.round((e.valor/maxVal)*100);
-            return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
-              <div style="width:100%;height:${h}%;background:linear-gradient(180deg,#10b981,#059669);border-radius:3px 3px 0 0;min-height:4px"></div>
-              <div style="font-size:8px;color:var(--text3)">${e.ano}a</div>
-            </div>`;
-          }).join('')}
-        </div>
-      </div>
-
-      <!-- Info adicional -->
-      ${aluguel > 0 ? `<div style="padding:12px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:10px;margin-bottom:12px;font-size:12px">
-        🏠 <strong>Renda de Aluguel:</strong> R$ ${aluguel.toLocaleString('pt-BR')}/mês · 
-        Rentabilidade: ${rentabilidadeAluguel.toFixed(2)}% a.a.
-      </div>` : ''}
-
-      <div style="padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:8px;font-size:11px;color:var(--text3);margin-bottom:14px">
-        Índice de correção: ${indice} · Prazo: ${prazo} meses · Valorização estimada: ${valorizacao}% a.a.
-      </div>
-
-      <!-- Rodapé -->
-      <div style="display:flex;gap:8px">
-        <button onclick="printInvestment()" style="flex:1;padding:10px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer">📄 Exportar PDF</button>
-        <button onclick="shareInvestment()" style="padding:10px 14px;background:rgba(255,255,255,0.06);color:var(--text2);border:1px solid var(--border);border-radius:9px;font-size:12px;cursor:pointer">🔗 Compartilhar</button>
-      </div>
-    </div>`;
-}
-
-function printInvestment() {
-  const content = document.getElementById('inv-result').innerHTML;
-  const win = window.open('', '_blank');
-  win.document.write(`<!DOCTYPE html><html><head><title>Análise de Investimento — S Nexus</title>
-    <style>body{font-family:'Plus Jakarta Sans',sans-serif;margin:0;padding:24px;background:#07090f;color:#f0f2ff}
-    @media print{body{background:#fff;color:#111;padding:12px}}</style></head>
-    <body>${content}<script>window.print();<\/script></body></html>`);
-  win.document.close();
-}
-
-function shareInvestment() {
-  showAuthInfoToast('🔗 Link compartilhável em desenvolvimento!');
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  MÓDULO 7 — IA NEXUS COMERCIAL (perguntas sobre dados reais)
-// ═══════════════════════════════════════════════════════════════
-
-function buildAIContext() {
-  const now = new Date();
-  const reminders = getAutoReinforcements();
-  const hotLeads = state.leads.filter(l => l.temp === 'quente');
-  const coldLeads = state.leads.filter(l => {
-    const last = l.lastContact ? new Date(l.lastContact) : null;
-    return last && Math.floor((now - last)/(1000*60*60*24)) > 7;
-  });
-
-  return `Você é o assistente comercial do S Nexus CRM.
-
-DADOS REAIS DO CORRETOR (${state.userName || 'Corretor'}):
-- Meta anual: ${fmt(GOAL)}
-- Acumulado: ${fmt(state.commission)} (${GOAL > 0 ? ((state.commission/GOAL)*100).toFixed(1) : 0}% da meta)
-- Falta: ${fmt(Math.max(0, GOAL - state.commission))}
-- Vendas realizadas: ${state.sales.length}
-- Total de leads: ${state.leads.length}
-- Leads quentes: ${hotLeads.length} (${hotLeads.map(l=>l.name).join(', ')})
-- Leads sem contato há +7 dias: ${coldLeads.length} (${coldLeads.map(l=>l.name).join(', ')})
-- Leads em proposta enviada: ${state.leads.filter(l=>l.status==='proposta_enviada').length}
-- Reforços nos próximos 30 dias: ${reminders.filter(r=>r.type==='reforco').length}
-- Parcelas vencendo em 7 dias: ${reminders.filter(r=>r.type==='parcela' && r.daysLeft<=7).length}
-- Streak atual: ${state.streak} dias
-- Score hoje: ${Math.round(state.habits.reduce((a,h)=>a+Math.min(100,(h.done/h.goal)*100),0)/state.habits.length)}
-
-LEADS DETALHADOS:
-${state.leads.map(l => `- ${l.name}: ${l.status}, ${l.temp}, último contato: ${l.lastContact||'nunca'}, follow-ups: ${l.followups}`).join('\n')}
-
-VENDAS:
-${state.sales.map(s => `- ${s.buyer}: R$${s.value}, comissão R$${s.commission}`).join('\n')}
-
-Responda de forma direta, prática e acionável. Use os dados reais acima.`;
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  TELA DE PLANOS — visível para TODOS
-// ═══════════════════════════════════════════════════════════════
-
-function openPlanDetail(planId) {
-  const p = PLANS_CONFIG.find(x => x.id === planId);
-  if (!p) return;
-  const modal = document.getElementById('plan-detail-modal');
-  const content = document.getElementById('plan-detail-content');
-  if (!modal || !content) return;
-  const currentPlan = currentBilling?.plan || 'trial';
-  const isCurrentPlan = currentPlan === planId;
-  const planOrder = {trial:0, starter:1, pro:2, premium:3};
-  const isUpgrade = planOrder[planId] > planOrder[currentPlan];
-
-  content.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <button onclick="closePlanDetail();openPlansModal()" style="background:rgba(255,255,255,0.07);border:none;color:rgba(255,255,255,0.5);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px">← Ver todos os planos</button>
-      <button onclick="closePlanDetail()" style="background:transparent;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:18px">✕</button>
-    </div>
-    <div style="text-align:center;padding:24px;background:linear-gradient(135deg,${p.color}22,${p.color}08);border:1px solid ${p.color}33;border-radius:16px;margin-bottom:20px;position:relative">
-      ${isCurrentPlan ? `<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;font-size:9px;font-weight:800;padding:3px 12px;border-radius:20px">SEU PLANO ATUAL</div>` : ''}
-      ${p.popular && !isCurrentPlan ? `<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-size:9px;font-weight:800;padding:3px 12px;border-radius:20px">MAIS POPULAR</div>` : ''}
-      <div style="font-size:40px;margin-bottom:8px">${p.emoji}</div>
-      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:24px;color:var(--text)">${p.name}</div>
-      <div style="font-size:13px;color:var(--text3);margin-top:4px;margin-bottom:12px">${p.description}</div>
-      <div style="font-size:36px;font-weight:800;color:${p.color}">R$${p.price.toFixed(2).replace('.',',')}<span style="font-size:14px;font-weight:400;color:var(--text3)">/mês</span></div>
-      ${p.priceYearly ? `<div style="font-size:11px;color:${p.color};margin-top:4px">ou R$${p.priceYearly.toFixed(0)}/ano — economize ${Math.round((1-(p.priceYearly/(p.price*12)))*100)}%</div>` : ''}
-    </div>
-    <div style="margin-bottom:16px">
-      <div style="font-size:11px;font-weight:700;color:#10b981;margin-bottom:8px">✅ INCLUÍDO NESTE PLANO</div>
-      ${(p.features||[]).map(f=>`
-        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.12);border-radius:8px;margin-bottom:5px">
-          <span style="color:#10b981;font-size:13px;flex-shrink:0">✅</span>
-          <span style="font-size:12px;color:var(--text2)">${f.replace('✅ ','')}</span>
-        </div>`).join('')}
-    </div>
-    ${(p.locked||[]).length > 0 ? `
-    <div style="margin-bottom:20px">
-      <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:8px">🔒 NÃO INCLUÍDO — disponível em planos superiores</div>
-      ${(p.locked||[]).map(f=>`
-        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:8px;margin-bottom:5px">
-          <span style="font-size:13px;flex-shrink:0">🔒</span>
-          <span style="font-size:12px;color:var(--text3)">${f.replace('🔒 ','')}</span>
-        </div>`).join('')}
-    </div>` : `<div style="margin-bottom:20px;padding:14px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:10px;text-align:center;font-size:12px;color:#10b981;font-weight:600">🏆 Plano completo — todos os recursos incluídos!</div>`}
-    ${isCurrentPlan
-      ? `<div style="width:100%;padding:14px;background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.3);border-radius:12px;font-weight:700;font-size:14px;text-align:center">✅ Você já está neste plano</div>`
-      : `<button onclick="window.open('${p.checkoutUrl}','_blank')" style="width:100%;padding:14px;background:${p.popular?'linear-gradient(135deg,#6366f1,#4f46e5)':p.color};color:#fff;border:none;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 6px 20px ${p.color}44;margin-bottom:10px">
-          💳 ${isUpgrade?'Fazer upgrade para':'Assinar'} ${p.name} — R$${p.price.toFixed(2).replace('.',',')}/mês
-        </button>`}
-    <div style="text-align:center;font-size:11px;color:var(--text3);margin-top:8px">🔒 Pagamento seguro · Cancele quando quiser · Sem fidelidade</div>`;
-
-  modal.style.display = 'flex';
-}
-
-function closePlanDetail() {
-  const modal = document.getElementById('plan-detail-modal');
-  if (modal) modal.style.display = 'none';
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  MÓDULO IMÓVEIS
-// ═══════════════════════════════════════════════════════════════
-
-function renderProperties() {
-  if (!state.properties) state.properties = [];
-  const list = document.getElementById('properties-list');
-  if (!list) return;
-  if (state.properties.length === 0) {
-    list.innerHTML = `<div style="text-align:center;padding:60px 20px;color:var(--text3)">
-      <div style="font-size:48px;margin-bottom:16px">🏠</div>
-      <div style="font-size:14px;font-weight:600;margin-bottom:8px">Nenhum imóvel cadastrado ainda</div>
-      <div style="font-size:12px;margin-bottom:20px">Cadastre imóveis para usar no Presentation Studio</div>
-      <button onclick="openPropertyForm()" style="padding:10px 20px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer">+ Cadastrar primeiro imóvel</button>
-    </div>`;
-    return;
-  }
-  const statusColors = {disponivel:'#10b981',lancamento:'#6366f1',construcao:'#f59e0b',pronto:'#06b6d4',vendido:'#6b7280'};
-  const statusLabels = {disponivel:'Disponível',lancamento:'Lançamento',construcao:'Em construção',pronto:'Pronto',vendido:'Vendido'};
-  list.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">
-    ${state.properties.map(p => {
-      const color = statusColors[p.status] || '#6366f1';
-      const photos = (p.photos||'').split(',').map(u=>u.trim()).filter(Boolean);
-      return `<div class="card hover-lift" style="padding:0;overflow:hidden;border:1px solid ${color}22">
-        <div style="height:140px;background:${color}11;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">
-          ${photos[0]?`<img src="${photos[0]}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`:
-          `<div style="font-size:40px;opacity:0.3">🏠</div>`}
-          <span style="position:absolute;top:10px;right:10px;background:${color};color:#fff;font-size:9px;font-weight:800;padding:3px 8px;border-radius:20px">${statusLabels[p.status]||p.status}</span>
-        </div>
-        <div style="padding:14px">
-          <div style="font-weight:800;font-size:14px;color:var(--text);margin-bottom:4px">${p.name}</div>
-          ${p.builder?`<div style="font-size:10px;color:var(--text3);margin-bottom:6px">${p.builder}</div>`:''}
-          ${p.value?`<div style="font-size:18px;font-weight:800;color:${color};margin-bottom:8px">R$ ${Number(p.value).toLocaleString('pt-BR')}</div>`:''}
-          <div style="display:flex;gap:10px;font-size:11px;color:var(--text3);margin-bottom:8px;flex-wrap:wrap">
-            ${p.area?`<span>📐 ${p.area}m²</span>`:''}
-            ${p.dorms?`<span>🛏 ${p.dorms} dorm</span>`:''}
-            ${p.suites?`<span>🛁 ${p.suites} suíte${p.suites>1?'s':''}</span>`:''}
-            ${p.vagas?`<span>🚗 ${p.vagas} vaga${p.vagas>1?'s':''}</span>`:''}
-          </div>
-          ${p.bairro||p.city?`<div style="font-size:11px;color:var(--text3);margin-bottom:10px">📍 ${[p.bairro,p.city].filter(Boolean).join(', ')}</div>`:''}
-          <div style="display:flex;gap:6px">
-            <button onclick="editProperty('${p.id}')" style="flex:1;padding:7px;background:rgba(99,102,241,0.1);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25);border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">✏️ Editar</button>
-            <button onclick="usePropertyInStudio('${p.id}')" style="flex:1;padding:7px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">🎨 Apresentar</button>
-            <button onclick="deleteProperty('${p.id}')" style="padding:7px 10px;background:rgba(239,68,68,0.08);color:#ef4444;border:1px solid rgba(239,68,68,0.2);border-radius:8px;font-size:11px;cursor:pointer">🗑</button>
-          </div>
-        </div>
-      </div>`;
-    }).join('')}
+  el.innerHTML = `<div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:600px">
+      <thead><tr style="border-bottom:1px solid var(--border)">
+        <th style="padding:8px 10px;text-align:left;color:var(--text3)">Usuário</th>
+        <th style="padding:8px 10px;text-align:left;color:var(--text3)">Plano</th>
+        <th style="padding:8px 10px;text-align:left;color:var(--text3)">Status</th>
+        <th style="padding:8px 10px;text-align:left;color:var(--text3)">Início Trial</th>
+        <th style="padding:8px 10px;text-align:left;color:var(--text3)">Fim Trial</th>
+        <th style="padding:8px 10px;text-align:left;color:var(--text3)">Restam</th>
+        <th style="padding:8px 10px;text-align:left;color:var(--text3)">Ações</th>
+      </tr></thead>
+      <tbody>${subs.map(s => {
+        const trialEnd = s.trial_ends_at ? new Date(s.trial_ends_at) : (s.expires_at ? new Date(s.expires_at) : null);
+        const daysLeft = trialEnd ? Math.ceil((trialEnd - now)/(1000*60*60*24)) : null;
+        const planColors = {trial:'#f59e0b',starter:'#06b6d4',pro:'#6366f1',premium:'#f59e0b',active:'#10b981',internal_admin:'#10b981'};
+        const statusColors = {trial:'#f59e0b',trial_expired:'#ef4444',active:'#10b981',blocked:'#ef4444',cancelled:'#6b7280'};
+        const planColor = planColors[s.plan_id]||'#666';
+        const statusColor = statusColors[s.status]||'#666';
+        const daysColor = daysLeft===null?'var(--text3)':daysLeft<=0?'#ef4444':daysLeft<=3?'#f59e0b':'#10b981';
+        return `<tr style="border-bottom:1px solid var(--border)" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background=''">
+          <td style="padding:10px"><div style="font-weight:600;color:var(--text);font-size:10px">${s.user_id?.slice(0,12)}...</div><div style="font-size:9px;color:var(--text3)">${s.origin||'—'}</div></td>
+          <td style="padding:10px"><span style="background:${planColor}22;color:${planColor};border:1px solid ${planColor}44;border-radius:6px;padding:2px 7px;font-weight:700">${s.plan_id||'—'}</span></td>
+          <td style="padding:10px"><span style="background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}44;border-radius:6px;padding:2px 7px;font-weight:700">${s.status||'—'}</span></td>
+          <td style="padding:10px;color:var(--text3);font-size:10px">${s.trial_started_at?fmtSaoPaulo(s.trial_started_at):'—'}</td>
+          <td style="padding:10px;color:var(--text3);font-size:10px">${trialEnd?fmtSaoPaulo(trialEnd):'—'}</td>
+          <td style="padding:10px;font-weight:800;color:${daysColor}">${daysLeft===null?'—':daysLeft<=0?'Expirado':`${daysLeft}d`}</td>
+          <td style="padding:10px"><div style="display:flex;gap:4px;flex-wrap:wrap">
+            <button onclick="adminExtendTrial('${s.user_id}')" style="padding:3px 7px;background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.25);border-radius:5px;font-size:9px;cursor:pointer" title="Estender trial">+dias</button>
+            <button onclick="adminChangePlan('${s.user_id}')" style="padding:3px 7px;background:rgba(99,102,241,0.1);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25);border-radius:5px;font-size:9px;cursor:pointer" title="Alterar plano">plano</button>
+            <button onclick="adminToggleBlock('${s.user_id}',${s.status==='blocked'})" style="padding:3px 7px;background:${s.status==='blocked'?'rgba(16,185,129,0.1)':'rgba(239,68,68,0.1)'};color:${s.status==='blocked'?'#10b981':'#ef4444'};border:1px solid ${s.status==='blocked'?'rgba(16,185,129,0.25)':'rgba(239,68,68,0.25)'};border-radius:5px;font-size:9px;cursor:pointer">${s.status==='blocked'?'🔓':'🔒'}</button>
+          </div></td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>
   </div>`;
 }
 
-function openPropertyForm(propId) {
-  document.getElementById('property-form-card').style.display = '';
-  document.getElementById('property-form-title').textContent = propId ? 'Editar Imóvel' : 'Novo Imóvel';
-  document.getElementById('prop-editing-id').value = propId || '';
-  if (!propId) {
-    ['prop-name','prop-builder','prop-area','prop-dorms','prop-suites','prop-vagas',
-     'prop-bairro','prop-city','prop-delivery','prop-features','prop-desc',
-     'prop-photos','prop-appreciation','prop-rental-yield','prop-value'].forEach(id => {
-      const el = document.getElementById(id); if (el) el.value = '';
+async function adminExtendTrial(userId) {
+  const days = parseInt(prompt('Quantos dias adicionar ao trial?'));
+  if (!days || days < 1 || days > 365) return;
+  try {
+    const { data: sub } = await sb.from('subscriptions').select('trial_ends_at').eq('user_id', userId).maybeSingle();
+    const currentEnd = sub?.trial_ends_at ? new Date(sub.trial_ends_at) : new Date();
+    const base = currentEnd > new Date() ? currentEnd : new Date();
+    const newEnd = new Date(base);
+    newEnd.setDate(newEnd.getDate() + days);
+    await sb.from('subscriptions').update({
+      trial_ends_at: newEnd.toISOString(),
+      status: 'trial',
+      updated_at: new Date().toISOString()
+    }).eq('user_id', userId);
+    await writeLog('trial_extended', `Admin estendeu trial em ${days} dias`, {
+      user_id: userId, days_added: days, new_end: newEnd.toISOString()
     });
-    document.getElementById('prop-type').value = 'apartamento';
-    document.getElementById('prop-status').value = 'disponivel';
-  }
-  document.getElementById('property-form-card').scrollIntoView({behavior:'smooth'});
-}
-
-function closePropertyForm() {
-  document.getElementById('property-form-card').style.display = 'none';
-}
-
-function saveProperty() {
-  const id = document.getElementById('prop-editing-id').value;
-  const name = document.getElementById('prop-name').value.trim();
-  if (!name) { showAuthInfoToast('⚠️ Informe o nome do empreendimento'); return; }
-  const prop = {
-    id: id || (Date.now() + Math.random()),
-    name, builder: document.getElementById('prop-builder').value.trim(),
-    type: document.getElementById('prop-type').value,
-    value: document.getElementById('prop-value').value,
-    area: document.getElementById('prop-area').value,
-    dorms: document.getElementById('prop-dorms').value,
-    suites: document.getElementById('prop-suites').value,
-    vagas: document.getElementById('prop-vagas').value,
-    bairro: document.getElementById('prop-bairro').value.trim(),
-    city: document.getElementById('prop-city').value.trim(),
-    delivery: document.getElementById('prop-delivery').value.trim(),
-    status: document.getElementById('prop-status').value,
-    features: document.getElementById('prop-features').value.trim(),
-    desc: document.getElementById('prop-desc').value.trim(),
-    photos: document.getElementById('prop-photos').value.trim(),
-    appreciation: document.getElementById('prop-appreciation').value,
-    rentalYield: document.getElementById('prop-rental-yield').value,
-  };
-  if (!state.properties) state.properties = [];
-  const idx = state.properties.findIndex(p => p.id == id);
-  if (idx >= 0) state.properties[idx] = prop; else state.properties.push(prop);
-  markDirty(); closePropertyForm(); renderProperties();
-  showAuthInfoToast(`✅ Imóvel "${name}" salvo!`);
-}
-
-function editProperty(id) {
-  const p = state.properties.find(x => x.id == id);
-  if (!p) return;
-  openPropertyForm(id);
-  setTimeout(() => {
-    ['name','builder','value','area','dorms','suites','vagas','bairro','city','delivery','features','desc','photos','appreciation'].forEach(k => {
-      const el = document.getElementById(`prop-${k}`); if (el) el.value = p[k] || '';
-    });
-    document.getElementById('prop-type').value = p.type || 'apartamento';
-    document.getElementById('prop-status').value = p.status || 'disponivel';
-    document.getElementById('prop-rental-yield').value = p.rentalYield || '';
-  }, 100);
-}
-
-function deleteProperty(id) {
-  if (!confirm('Remover este imóvel?')) return;
-  state.properties = (state.properties||[]).filter(p => p.id != id);
-  markDirty(); renderProperties();
-}
-
-function usePropertyInStudio(id) {
-  const p = state.properties.find(x => x.id == id);
-  if (!p) return;
-  goTo('studio', Array.from(document.querySelectorAll('.nav-item')).find(b => b.textContent.includes('Studio')));
-  setTimeout(() => {
-    const emp = document.getElementById('studio-empreendimento');
-    const loc = document.getElementById('studio-location');
-    const val = document.getElementById('studio-value');
-    const desc = document.getElementById('studio-desc');
-    if (emp) emp.value = p.name || '';
-    if (loc) loc.value = [p.bairro, p.city].filter(Boolean).join(', ');
-    if (val) val.value = p.value || '';
-    if (desc) desc.value = [
-      p.area ? `${p.area}m²` : '', p.dorms ? `${p.dorms} dorms` : '',
-      p.suites ? `${p.suites} suíte${p.suites>1?'s':''}` : '',
-      p.vagas ? `${p.vagas} vaga${p.vagas>1?'s':''}` : '',
-      p.delivery ? `Entrega: ${p.delivery}` : '', p.features || ''
-    ].filter(Boolean).join(' · ');
-    showAuthInfoToast('✅ Dados carregados no Studio!');
-  }, 400);
-}
-
-function checkAdminNav() {
-  const navAdmin = document.getElementById('nav-admin');
-  if (navAdmin) navAdmin.style.display = isAdmin() ? 'flex' : 'none';
-  updateNavBadges();
-}
-
-// Atualiza badges de plano no menu lateral
-function updateNavBadges() {
-  const isStarter = !can('ai.nexus');
-  const isPro = can('ai.nexus') && !can('team.manage');
-
-  // Itens bloqueados no Starter — mostrar badge PRO
-  const proItems = ['studio-plan-badge','inv-plan-badge','postsale-plan-badge'];
-  proItems.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = isStarter ? '' : 'none';
-  });
-
-  // Nav items bloqueados ficam levemente apagados
-  const blockedNavs = isStarter
-    ? ['nav-studio','nav-investment','nav-postsale']
-    : [];
-
-  document.querySelectorAll('.nav-item').forEach(btn => {
-    btn.style.opacity = '';
-  });
-  blockedNavs.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.opacity = '0.55';
-  });
-
-  // Badge AI — mostrar PRO se bloqueado
-  const aiBadge = document.getElementById('ai-plan-badge');
-  if (aiBadge) {
-    if (isStarter) {
-      aiBadge.textContent = 'PRO';
-      aiBadge.style.background = 'rgba(99,102,241,0.2)';
-      aiBadge.style.color = '#a5b4fc';
-    } else {
-      aiBadge.textContent = 'AI';
-      aiBadge.style.background = '';
-      aiBadge.style.color = '';
-    }
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  TELA MINHA ASSINATURA
-// ═══════════════════════════════════════════════════════════════
-
-async function renderSubscription() {
-  const billing = currentBilling;
-  if (!billing) return;
-
-  const plan = PLANS_CONFIG.find(p => p.id === billing.plan) || PLANS_CONFIG[0];
-  const statusLabels = {
-    trial: {label:'Trial Premium', color:'#6366f1', icon:'🎁'},
-    active: {label:'Ativa', color:'#10b981', icon:'✅'},
-    starter: {label:'Starter Ativo', color:'#06b6d4', icon:'🚀'},
-    pro: {label:'Pro Ativo', color:'#6366f1', icon:'⚡'},
-    premium: {label:'Premium Ativo', color:'#f59e0b', icon:'👑'},
-    expired: {label:'Expirada', color:'#ef4444', icon:'⏰'},
-    blocked: {label:'Bloqueada', color:'#ef4444', icon:'🔒'},
-    cancelled: {label:'Cancelada', color:'#6b7280', icon:'❌'},
-  };
-  const st = statusLabels[billing.reason || billing.plan] || statusLabels['active'];
-
-  // Buscar dados reais do Supabase
-  let subData = null;
-  try {
-    const { data } = await sb.from('subscriptions').select('*').eq('user_id', currentUser.id).maybeSingle();
-    subData = data;
-  } catch(e) {}
-
-  // Header
-  document.getElementById('sub-icon').textContent = st.icon;
-  document.getElementById('sub-title').textContent = `Plano ${plan?.name || billing.plan}`;
-  document.getElementById('sub-subtitle').textContent = st.label;
-
-  const daysLeft = billing.daysLeft || 0;
-  const isTrialWarning = billing.plan === 'trial' && daysLeft <= 3 && daysLeft > 0;
-
-  // Card principal
-  document.getElementById('sub-card').innerHTML = `
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px">
-      <div>
-        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Plano atual</div>
-        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;color:${plan?.color || '#6366f1'}">${plan?.name || billing.plan}</div>
-        <div style="font-size:12px;color:var(--text3);margin-top:2px">${plan?.price > 0 ? `R$${plan.price.toFixed(2)}/mês` : 'Grátis'}</div>
-      </div>
-      <div>
-        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Status</div>
-        <span style="background:${st.color}22;color:${st.color};border:1px solid ${st.color}44;border-radius:8px;padding:4px 12px;font-size:12px;font-weight:700">${st.label}</span>
-      </div>
-      ${daysLeft > 0 && daysLeft < 99 ? `<div>
-        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">
-          ${billing.plan === 'trial' ? 'Trial expira em' : 'Próxima cobrança'}
-        </div>
-        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:18px;color:${daysLeft <= 3 ? '#ef4444' : 'var(--text)'}">
-          ${daysLeft} dia${daysLeft !== 1 ? 's' : ''}
-        </div>
-      </div>` : ''}
-      ${subData?.last_payment_at ? `<div>
-        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Último pagamento</div>
-        <div style="font-size:14px;font-weight:600;color:var(--text)">${new Date(subData.last_payment_at).toLocaleDateString('pt-BR')}</div>
-      </div>` : ''}
-    </div>
-    ${isTrialWarning ? `<div style="margin-top:16px;padding:12px 16px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:10px;color:#f59e0b;font-size:12px;font-weight:600">
-      ⚠️ Seu trial expira em ${daysLeft} dia${daysLeft !== 1 ? 's' : ''}! Assine agora para não perder acesso.
-    </div>` : ''}
-    <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
-      ${billing.plan === 'trial' || billing.blocked ? `
-        <button onclick="openPlansModal()" style="padding:11px 22px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 4px 14px rgba(99,102,241,0.35)">💎 Assinar agora</button>
-      ` : `
-        <button onclick="openPlansModal()" style="padding:11px 22px;background:rgba(99,102,241,0.1);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25);border-radius:10px;font-weight:700;font-size:13px;cursor:pointer">🔄 Alterar Plano</button>
-      `}
-      <button onclick="openPlansModal()" style="padding:11px 22px;background:rgba(255,255,255,0.05);color:var(--text2);border:1px solid var(--border2);border-radius:10px;font-weight:600;font-size:13px;cursor:pointer">Ver todos os planos</button>
-    </div>`;
-
-  // Recursos liberados
-  const currentPlan = PLANS_CONFIG.find(p => p.id === billing.plan) || PLANS_CONFIG[1];
-  document.getElementById('sub-features-card').innerHTML = `
-    <div style="font-size:13px;font-weight:700;margin-bottom:14px">✅ Recursos do seu plano</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">
-      ${(currentPlan?.features || []).map(f => `
-        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2)">
-          <span style="color:#10b981;font-size:14px">✓</span>${f}
-        </div>`).join('')}
-    </div>
-    ${(currentPlan?.locked || []).length > 0 ? `
-      <div style="font-size:13px;font-weight:700;margin:16px 0 10px">🔒 Disponíveis em planos superiores</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">
-        ${(currentPlan.locked).map(f => `
-          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text3)">
-            <span style="font-size:14px">🔒</span>${f}
-          </div>`).join('')}
-      </div>` : ''}`;
-
-  // Histórico de eventos
-  let events = [];
-  try {
-    const { data } = await sb.from('subscription_events').select('*').eq('user_id', currentUser.id).order('created_at', {ascending:false}).limit(10);
-    events = data || [];
-  } catch(e) {}
-
-  document.getElementById('sub-history-card').innerHTML = `
-    <div style="font-size:13px;font-weight:700;margin-bottom:14px">📋 Histórico</div>
-    ${events.length > 0 ? events.map(e => `
-      <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="flex:1;font-size:12px;color:var(--text)">${e.event_type}</div>
-        <div style="font-size:11px;color:var(--text3)">${new Date(e.created_at).toLocaleDateString('pt-BR')}</div>
-      </div>`).join('')
-    : `<div style="font-size:12px;color:var(--text3);text-align:center;padding:16px">Nenhum evento ainda</div>`}`;
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  PAINEL ADMIN — EXPANDIDO
-// ═══════════════════════════════════════════════════════════════
-
-async function loadAdminData() {
-  if (!isAdmin()) return;
-
-  try {
-    const { data: profiles } = await sb.from('snexus_profiles').select('*').order('created_at', {ascending:false});
-    const { data: subs } = await sb.from('subscriptions').select('*');
-
-    const total = profiles?.length || 0;
-    const trials = profiles?.filter(p => p.plan === 'trial').length || 0;
-    const paying = profiles?.filter(p => ['starter','pro','premium'].includes(p.plan)).length || 0;
-    const blocked = profiles?.filter(p => p.is_blocked).length || 0;
-
-    // MRR calculado
-    const prices = {starter:59.90, pro:99.90, premium:149.90};
-    const mrr = profiles?.reduce((a,p) => a + (prices[p.plan] || 0), 0) || 0;
-
-    document.getElementById('admin-metrics').innerHTML = [
-      {icon:'👥', label:'Total usuários', val:total, c:'#6366f1'},
-      {icon:'🎁', label:'Em trial', val:trials, c:'#f59e0b'},
-      {icon:'💳', label:'Pagantes', val:paying, c:'#10b981'},
-      {icon:'🔒', label:'Bloqueados', val:blocked, c:'#ef4444'},
-      {icon:'💰', label:'MRR', val:`R$${mrr.toFixed(2)}`, c:'#10b981'},
-      {icon:'📈', label:'ARR', val:`R$${(mrr*12).toFixed(2)}`, c:'#06b6d4'},
-      {icon:'🔄', label:'Conversão trial→pago', val:total > 0 ? `${Math.round((paying/total)*100)}%` : '0%', c:'#8b5cf6'},
-    ].map(m => `
-      <div class="card" style="text-align:center;box-shadow:0 0 16px ${m.c}11">
-        <div style="font-size:22px;margin-bottom:4px">${m.icon}</div>
-        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:${typeof m.val === 'string' && m.val.includes('R$') ? '16px' : '26px'};font-weight:800;color:${m.c}">${m.val}</div>
-        <div style="font-size:10px;color:var(--text3);margin-top:2px">${m.label}</div>
-      </div>`).join('');
-
-    // Lista de usuários com controles
-    document.getElementById('admin-users-list').innerHTML = `
-      <div style="margin-bottom:12px">
-        <input id="admin-search" type="text" placeholder="🔍 Buscar usuário..." oninput="filterAdminUsers()" style="font-size:12px;height:36px">
-      </div>
-      <div id="admin-users-table">
-      ${(profiles || []).map(p => {
-        const planColors = {trial:'#f59e0b', starter:'#06b6d4', pro:'#6366f1', premium:'#f59e0b'};
-        const color = p.is_blocked ? '#ef4444' : (planColors[p.plan] || '#666');
-        const planLabel = p.is_blocked ? 'bloqueado' : p.plan;
-        return `<div class="admin-user-row" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);flex-wrap:wrap" data-email="${p.email||''}" data-plan="${p.plan}">
-          <div style="flex:1;min-width:120px">
-            <div style="font-size:11px;font-weight:600;color:var(--text)">${p.username || p.email || p.user_id?.slice(0,8)}</div>
-            <div style="font-size:10px;color:var(--text3)">${new Date(p.created_at).toLocaleDateString('pt-BR')}</div>
-          </div>
-          <span style="background:${color}22;color:${color};border:1px solid ${color}44;border-radius:6px;font-size:9px;font-weight:700;padding:2px 8px;white-space:nowrap">${planLabel}</span>
-          <div style="display:flex;gap:4px;flex-shrink:0">
-            <button onclick="adminChangePlan('${p.user_id}')" style="padding:4px 8px;background:rgba(99,102,241,0.1);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25);border-radius:6px;font-size:9px;cursor:pointer">✏️ Plano</button>
-            <button onclick="adminToggleBlock('${p.user_id}',${p.is_blocked})" style="padding:4px 8px;background:${p.is_blocked ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)'};color:${p.is_blocked ? '#10b981' : '#ef4444'};border:1px solid ${p.is_blocked ? 'rgba(16,185,129,0.25)' : 'rgba(239,68,68,0.25)'};border-radius:6px;font-size:9px;cursor:pointer">
-              ${p.is_blocked ? '🔓 Liberar' : '🔒 Bloquear'}
-            </button>
-            <button onclick="adminGrantDays('${p.user_id}')" style="padding:4px 8px;background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.25);border-radius:6px;font-size:9px;cursor:pointer">🎁 +Dias</button>
-          </div>
-        </div>`;
-      }).join('')}
-      </div>`;
-
-  } catch(e) {
-    document.getElementById('admin-users-list').innerHTML = `<div style="color:#ef4444;font-size:12px;padding:12px">Erro ao carregar. Verifique permissões no Supabase.</div>`;
-  }
-
-  // Logs
-  try {
-    const { data: logs } = await sb.from('snexus_logs').select('*').order('created_at',{ascending:false}).limit(50);
-    const eventIcons = {login:'🔑',logout:'🚪',signup:'🎉',password_change:'🔐',plan_change:'💳',block:'🔒',unblock:'🔓',data_save:'💾',trial_start:'🎁',trial_expired:'⏰',backup_export:'📦',backup_import:'📥'};
-    document.getElementById('admin-logs-list').innerHTML = (logs||[]).map(l => `
-      <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
-        <div style="font-size:15px;flex-shrink:0">${eventIcons[l.event]||'📋'}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:11px;font-weight:600;color:var(--text)">${l.description||l.event}</div>
-          <div style="font-size:10px;color:var(--text3)">${new Date(l.created_at).toLocaleString('pt-BR')}</div>
-        </div>
-      </div>`).join('') || '<div style="color:var(--text3);text-align:center;padding:20px;font-size:12px">Nenhum log ainda</div>';
-  } catch(e) {}
-}
-
-function filterAdminUsers() {
-  const q = (document.getElementById('admin-search')?.value || '').toLowerCase();
-  document.querySelectorAll('.admin-user-row').forEach(row => {
-    const email = row.dataset.email?.toLowerCase() || '';
-    const plan = row.dataset.plan?.toLowerCase() || '';
-    row.style.display = (!q || email.includes(q) || plan.includes(q)) ? '' : 'none';
-  });
+    showAuthInfoToast(`✅ Trial estendido ${days} dias! Novo fim: ${fmtSaoPaulo(newEnd)}`);
+    loadAdminSubscriptions();
+  } catch(e) { alert('Erro ao estender trial'); }
 }
 
 async function adminChangePlan(userId) {
