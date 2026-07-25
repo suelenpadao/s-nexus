@@ -323,7 +323,7 @@ td:last-child{padding-right:0}
 <!-- ═══════════════════ TELA DE CARREGAMENTO INICIAL ═══════════════════ -->
 <div id="boot-loading" style="position:fixed;inset:0;background:#07090f;display:flex;align-items:center;justify-content:center;z-index:1000">
   <div style="text-align:center">
-    <img src="https://raw.githubusercontent.com/suelenpadao/s-nexus/main/ChatGPT%20Image%2011%20de%20jul.%20de%202026%2C%2011_03_45.png" style="width:80px;height:80px;object-fit:contain;margin:0 auto 16px;display:block;animation:pulse 1.6s infinite" onerror="this.style.display='none'">
+    <img src="https://raw.githubusercontent.com/suelenpadao/s-nexus/main/logo-snexus.png" style="width:80px;height:80px;object-fit:contain;margin:0 auto 16px;display:block;animation:pulse 1.6s infinite" onerror="this.style.display='none'">
     <div style="color:rgba(240,242,255,0.4);font-size:13px">Carregando S Nexus...</div>
   </div>
 </div>
@@ -338,10 +338,13 @@ td:last-child{padding-right:0}
 
     <!-- Logo + nome -->
     <div style="text-align:center;margin-bottom:28px">
-      <img src="https://raw.githubusercontent.com/suelenpadao/s-nexus/main/ChatGPT%20Image%2011%20de%20jul.%20de%202026%2C%2011_03_45.png"
-        style="width:200px;height:auto;object-fit:contain;margin:0 auto 8px;display:block;filter:drop-shadow(0 8px 32px rgba(99,102,241,0.35))"
-        onerror="this.style.display='none'">
-      <div style="font-size:11px;color:rgba(240,242,255,0.3);text-transform:uppercase;letter-spacing:.15em;margin-top:4px">CRM Premium para Corretores</div>
+      <img src="https://raw.githubusercontent.com/suelenpadao/s-nexus/main/logo-snexus.png"
+        id="login-logo"
+        style="width:120px;height:120px;object-fit:contain;margin:0 auto 8px;display:block;filter:drop-shadow(0 8px 32px rgba(99,102,241,0.4))"
+        onerror="this.style.display='none';document.getElementById('login-logo-fallback').style.display='flex'">
+      <div id="login-logo-fallback" style="display:none;width:80px;height:80px;border-radius:20px;background:linear-gradient(135deg,#6366f1,#4f46e5);align-items:center;justify-content:center;margin:0 auto 8px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:28px;color:#fff;box-shadow:0 8px 32px rgba(99,102,241,0.4)">S</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:22px;color:#fff;letter-spacing:-.01em">S Nexus</div>
+      <div style="font-size:11px;color:rgba(240,242,255,0.3);text-transform:uppercase;letter-spacing:.15em;margin-top:2px">CRM Premium para Corretores</div>
     </div>
 
     <!-- Card principal -->
@@ -359,10 +362,10 @@ td:last-child{padding-right:0}
       </div>
 
       <!-- Mensagens -->
-      <div id="auth-error" style="display:none;margin-bottom:16px;padding:12px 14px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:10px;color:#ef4444;font-size:13px;display:flex;align-items:flex-start;gap:8px">
+      <div id="auth-error" style="display:none;margin-bottom:16px;padding:12px 14px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:10px;color:#ef4444;font-size:13px;align-items:flex-start;gap:8px">
         <span style="flex-shrink:0;margin-top:1px">⚠</span><span id="auth-error-text"></span>
       </div>
-      <div id="auth-info" style="display:none;margin-bottom:16px;padding:12px 14px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);border-radius:10px;color:#10b981;font-size:13px;display:flex;align-items:flex-start;gap:8px">
+      <div id="auth-info" style="display:none;margin-bottom:16px;padding:12px 14px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);border-radius:10px;color:#10b981;font-size:13px;align-items:flex-start;gap:8px">
         <span style="flex-shrink:0;margin-top:1px">✓</span><span id="auth-info-text"></span>
       </div>
 
@@ -496,7 +499,7 @@ td:last-child{padding-right:0}
 <!-- ───────────────── SIDEBAR ───────────────── -->
 <aside class="sidebar" id="sidebar">
   <div class="logo">
-    <img src="https://raw.githubusercontent.com/suelenpadao/s-nexus/main/ChatGPT%20Image%2011%20de%20jul.%20de%202026%2C%2011_03_45.png" style="width:40px;height:40px;border-radius:10px;object-fit:contain" onerror="this.outerHTML='<div class=logo-icon>S</div>'">
+    <img src="https://raw.githubusercontent.com/suelenpadao/s-nexus/main/logo-snexus.png" style="width:40px;height:40px;border-radius:10px;object-fit:contain" onerror="this.outerHTML='<div class=logo-icon>S</div>'">
     <div>
       <div class="logo-text">S Nexus</div>
       <div class="logo-sub">CRM Premium</div>
@@ -2968,26 +2971,6 @@ async function loadAdminData() {
     document.getElementById('admin-users-list').innerHTML = '';
   }
 }
-    if (profiles) {
-      const total = profiles.length;
-      const trials = profiles.filter(p => p.plan === 'trial').length;
-      const paying = profiles.filter(p => ['starter','pro','premium'].includes(p.plan)).length;
-      const blocked = profiles.filter(p => p.is_blocked).length;
-
-      document.getElementById('admin-metrics').innerHTML = [
-        {icon:'👥', label:'Total usuários', val:total, c:'#6366f1'},
-        {icon:'🎁', label:'Em trial', val:trials, c:'#f59e0b'},
-        {icon:'💳', label:'Pagantes', val:paying, c:'#10b981'},
-        {icon:'🔒', label:'Bloqueados', val:blocked, c:'#ef4444'},
-      ].map(m => `
-        <div class="card" style="text-align:center;box-shadow:0 0 16px ${m.c}11">
-          <div style="font-size:26px;margin-bottom:4px">${m.icon}</div>
-          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:28px;font-weight:800;color:${m.c}">${m.val}</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:2px">${m.label}</div>
-        </div>`).join('');
-    }
-
-    // Lista de usuários
 
 // ═══════════════════════════════════════════════════════════════
 //  GOOGLE AGENDA — Integração via link direto (sem OAuth)
@@ -5027,6 +5010,33 @@ function ensureJourneysForExistingData() {
 // Sale preview listener
 document.addEventListener('input', e => {
   if(e.target.id==='s-value'||e.target.id==='s-pct'||e.target.id==='s-comm-manual') calcSalePreview();
+});
+
+// ── Verificação de sessão ao carregar ────────────────────────
+async function checkExistingSession() {
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session?.user) {
+      const username = session.user.email?.replace('@snexus.local','') || '';
+      await onAuthSuccess(session.user, username);
+    } else {
+      document.getElementById('boot-loading').style.display = 'none';
+      document.getElementById('auth-screen').style.display = 'flex';
+    }
+  } catch(e) {
+    document.getElementById('boot-loading').style.display = 'none';
+    document.getElementById('auth-screen').style.display = 'flex';
+  }
+}
+
+// Ouvir mudanças de sessão (ex: após reset de senha)
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'PASSWORD_RECOVERY') {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app-wrapper').style.display = 'none';
+    document.getElementById('boot-loading').style.display = 'none';
+    openChangePassword();
+  }
 });
 
 checkExistingSession();
