@@ -1688,8 +1688,8 @@ async function onAuthSuccess(user, username) {
     const emailEl = document.getElementById('sidebar-user-email');
     if (emailEl) emailEl.textContent = username ? `@${username}` : 'S Nexus';
 
-    // 3. Badge de trial — só mostra se tiver data real (daysLeft < 99)
-    if (billing.status === 'trial' && !billing.blocked && billing.daysLeft < 99) {
+    // 3. Badge de trial — não mostrar para admin, só para corretores comuns
+    if (billing.status === 'trial' && !billing.blocked && billing.daysLeft < 99 && !isPlatformAdmin()) {
       showTrialBadge(billing.daysLeft);
       showTrialWarning(billing.daysLeft, billing.hoursLeft || 0);
       if (billing.isNewUser) {
