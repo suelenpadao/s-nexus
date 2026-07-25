@@ -21,6 +21,12 @@
 
 <!-- Supabase SDK via CDN (148KB → ~45KB gzip, cacheável) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+// Fallback CDN se jsdelivr falhar
+if (typeof supabase === 'undefined') {
+  document.write('<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"><\/script>');
+}
+</script>
 
 <!-- Fallback: se CDN falhar, avisa o usuário -->
 <script>
@@ -5024,22 +5030,30 @@ async function checkExistingSession() {
       document.getElementById('auth-screen').style.display = 'flex';
     }
   } catch(e) {
+    console.error('checkExistingSession error:', e);
     document.getElementById('boot-loading').style.display = 'none';
     document.getElementById('auth-screen').style.display = 'flex';
   }
 }
 
-// Ouvir mudanças de sessão (ex: após reset de senha)
-sb.auth.onAuthStateChange(async (event, session) => {
-  if (event === 'PASSWORD_RECOVERY') {
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('app-wrapper').style.display = 'none';
-    document.getElementById('boot-loading').style.display = 'none';
-    openChangePassword();
-  }
-});
+// Ouvir mudanças de sessão
+try {
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      document.getElementById('auth-screen').style.display = 'none';
+      document.getElementById('app-wrapper').style.display = 'none';
+      document.getElementById('boot-loading').style.display = 'none';
+      openChangePassword();
+    }
+  });
+} catch(e) { console.warn('onAuthStateChange error:', e); }
 
-checkExistingSession();
+// Aguardar DOM pronto antes de iniciar
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', checkExistingSession);
+} else {
+  checkExistingSession();
+}
 </script>
 </body>
 </html>
