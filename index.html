@@ -2884,9 +2884,90 @@ async function adminGrantDays(userId) {
 async function loadAdminData() {
   if (!isAdmin()) return;
 
-  // Métricas resumidas
   try {
-    const { data: profiles } = await sb.from('snexus_profiles').select('plan, created_at, is_blocked');
+    // Usar função RPC que bypassa RLS — só admin consegue chamar
+    const { data: users, error } = await sb.rpc('admin_get_all_users');
+
+    if (error) throw error;
+
+    const profiles = users || [];
+    const now = new Date();
+
+    const total   = profiles.length;
+    const trials  = profiles.filter(p => p.status === 'trial').length;
+    const paying  = profiles.filter(p => ['starter','pro','premium','active'].includes(p.status)).length;
+    const blocked = profiles.filter(p => p.is_blocked || p.status === 'blocked').length;
+    const expired = profiles.filter(p => p.status === 'trial_expired').length;
+
+    const prices = {starter:59.90, pro:99.90, premium:149.90};
+    const mrr = profiles.reduce((a,p) => a + (prices[p.plan_id] || 0), 0);
+
+    document.getElementById('admin-metrics').innerHTML = [
+      {icon:'👥', label:'Total usuários', val:total,   c:'#6366f1'},
+      {icon:'🎁', label:'Em trial',       val:trials,  c:'#f59e0b'},
+      {icon:'💳', label:'Pagantes',       val:paying,  c:'#10b981'},
+      {icon:'⏰', label:'Trial expirado', val:expired, c:'#ef4444'},
+      {icon:'🔒', label:'Bloqueados',     val:blocked, c:'#6b7280'},
+      {icon:'💰', label:'MRR',   val:`R$${mrr.toFixed(0)}`, c:'#10b981'},
+    ].map(m => `
+      <div class="card" style="text-align:center;box-shadow:0 0 16px ${m.c}11">
+        <div style="font-size:22px;margin-bottom:4px">${m.icon}</div>
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:${m.val.toString().length > 5 ? '16px':'24px'};font-weight:800;color:${m.c}">${m.val}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">${m.label}</div>
+      </div>`).join('');
+
+    // Lista de usuários
+    const search = document.getElementById('admin-search')?.value?.toLowerCase() || '';
+    const planFilter = document.getElementById('admin-filter-plan')?.value || '';
+    const filtered = profiles.filter(p => {
+      const matchSearch = !search || (p.email||'').toLowerCase().includes(search);
+      const matchPlan = !planFilter || p.plan_id === planFilter ||
+        (planFilter === 'blocked' && (p.is_blocked || p.status === 'blocked'));
+      return matchSearch && matchPlan;
+    });
+
+    document.getElementById('admin-users-list').innerHTML = `
+      <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <input id="admin-search" type="text" placeholder="🔍 Buscar por email..." oninput="loadAdminData()" style="font-size:12px;height:36px;flex:1;min-width:150px">
+        <select id="admin-filter-plan" onchange="loadAdminData()" style="font-size:12px;height:36px;padding:0 8px">
+          <option value="">Todos os planos</option>
+          <option value="trial">Trial</option>
+          <option value="starter">Starter</option>
+          <option value="pro">Pro</option>
+          <option value="premium">Premium</option>
+          <option value="blocked">Bloqueados</option>
+        </select>
+        <button onclick="loadAdminData()" style="padding:0 12px;height:36px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);border-radius:8px;color:#a5b4fc;font-size:12px;cursor:pointer">↻</button>
+      </div>
+      ${filtered.length === 0 ? '<div style="color:var(--text3);text-align:center;padding:20px;font-size:12px">Nenhum usuário encontrado</div>' :
+      filtered.map(p => {
+        const trialEnd = p.trial_ends_at ? new Date(p.trial_ends_at) : null;
+        const daysLeft = trialEnd ? Math.ceil((trialEnd - now)/(1000*60*60*24)) : null;
+        const statusColors = {trial:'#f59e0b',trial_expired:'#ef4444',active:'#10b981',blocked:'#ef4444',internal_admin:'#10b981',starter:'#06b6d4',pro:'#6366f1',premium:'#f59e0b'};
+        const sColor = statusColors[p.status] || '#666';
+        const dColor = daysLeft === null ? 'var(--text3)' : daysLeft <= 0 ? '#ef4444' : daysLeft <= 3 ? '#f59e0b' : '#10b981';
+        return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);flex-wrap:wrap">
+          <div style="flex:1;min-width:150px">
+            <div style="font-size:12px;font-weight:600;color:var(--text)">${p.email || p.user_id?.slice(0,16)+'...'}</div>
+            <div style="font-size:10px;color:var(--text3)">Cadastro: ${p.created_at ? new Date(p.created_at).toLocaleDateString('pt-BR') : '—'}</div>
+          </div>
+          <span style="background:${sColor}22;color:${sColor};border:1px solid ${sColor}44;border-radius:6px;font-size:9px;font-weight:700;padding:2px 8px">${p.plan_id||'—'} · ${p.status||'—'}</span>
+          <span style="font-size:10px;font-weight:700;color:${dColor}">
+            ${daysLeft === null ? '—' : daysLeft <= 0 ? '⏰ Expirado' : `${daysLeft}d restantes`}
+          </span>
+          <div style="display:flex;gap:4px">
+            <button onclick="adminChangePlan('${p.user_id}')" style="padding:4px 8px;background:rgba(99,102,241,0.1);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25);border-radius:6px;font-size:9px;cursor:pointer">✏️ Plano</button>
+            <button onclick="adminExtendTrial('${p.user_id}')" style="padding:4px 8px;background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.25);border-radius:6px;font-size:9px;cursor:pointer">➕ Trial</button>
+            <button onclick="adminToggleBlock('${p.user_id}',${!!(p.is_blocked||p.status==='blocked')})" style="padding:4px 8px;background:${p.is_blocked?'rgba(16,185,129,0.1)':'rgba(239,68,68,0.1)'};color:${p.is_blocked?'#10b981':'#ef4444'};border:1px solid ${p.is_blocked?'rgba(16,185,129,0.25)':'rgba(239,68,68,0.25)'};border-radius:6px;font-size:9px;cursor:pointer">${p.is_blocked?'🔓':'🔒'}</button>
+          </div>
+        </div>`;
+      }).join('')}`;
+
+  } catch(e) {
+    document.getElementById('admin-metrics').innerHTML = `<div style="color:#ef4444;font-size:12px;grid-column:1/-1">Erro: ${e.message}. Rode o SETUP-COMPLETO-FINAL.sql no Supabase.</div>`;
+    document.getElementById('admin-users-list').innerHTML = '';
+  }
+}
     if (profiles) {
       const total = profiles.length;
       const trials = profiles.filter(p => p.plan === 'trial').length;
@@ -2907,82 +2988,6 @@ async function loadAdminData() {
     }
 
     // Lista de usuários
-    document.getElementById('admin-users-list').innerHTML = (profiles || [])
-      .sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
-      .slice(0, 20)
-      .map(p => {
-        const planColors = {trial:'#f59e0b', starter:'#06b6d4', pro:'#6366f1', premium:'#f59e0b', blocked:'#ef4444'};
-        const plan = p.is_blocked ? 'blocked' : p.plan;
-        const color = planColors[plan] || '#666';
-        return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
-          <div style="flex:1;min-width:0">
-            <div style="font-size:11px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-              ${new Date(p.created_at).toLocaleDateString('pt-BR')}
-            </div>
-          </div>
-          <span style="background:${color}22;color:${color};border:1px solid ${color}44;border-radius:6px;font-size:9px;font-weight:700;padding:2px 8px;text-transform:uppercase;white-space:nowrap">${plan}</span>
-        </div>`;
-      }).join('') || '<div style="color:var(--text3);text-align:center;padding:20px;font-size:12px">Nenhum usuário</div>';
-
-  } catch(e) {
-    document.getElementById('admin-users-list').innerHTML = '<div style="color:#ef4444;font-size:12px;padding:12px">Erro ao carregar usuários. Verifique as permissões de admin no Supabase.</div>';
-  }
-
-  // Logs recentes
-  try {
-    const { data: logs } = await sb.from('snexus_logs')
-      .select('event, description, created_at, metadata')
-      .order('created_at', { ascending: false })
-      .limit(30);
-
-    const eventIcons = {
-      login:'🔑', logout:'🚪', signup:'🎉', password_change:'🔐',
-      plan_change:'💳', block:'🔒', unblock:'🔓', data_save:'💾',
-      trial_start:'🎁', trial_expired:'⏰'
-    };
-
-    document.getElementById('admin-logs-list').innerHTML = (logs || [])
-      .map(l => `
-        <div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
-          <div style="font-size:16px;flex-shrink:0">${eventIcons[l.event] || '📋'}</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:11px;font-weight:600;color:var(--text)">${l.description || l.event}</div>
-            <div style="font-size:10px;color:var(--text3);margin-top:1px">${new Date(l.created_at).toLocaleString('pt-BR')}</div>
-          </div>
-        </div>`).join('') || '<div style="color:var(--text3);text-align:center;padding:20px;font-size:12px">Nenhum log ainda</div>';
-  } catch(e) {
-    document.getElementById('admin-logs-list').innerHTML = '<div style="color:var(--text3);font-size:12px;padding:12px">Logs disponíveis após rodar o setup-logs.sql</div>';
-  }
-}
-
-async function checkExistingSession() {
-  // Timeout de segurança absoluto: se em 10s nada resolveu, força a tela de login a aparecer
-  // (evita ficar travado para sempre em "Carregando..." por instabilidade de rede)
-  let safetyTimeout = setTimeout(() => {
-    const boot = document.getElementById('boot-loading');
-    const authScreen = document.getElementById('auth-screen');
-    if (boot && boot.style.display !== 'none') {
-      boot.style.display = 'none';
-      authScreen.style.display = 'flex';
-      setAuthTab('login');
-    }
-  }, 10000);
-
-  try {
-    const { data, error } = await sb.auth.getSession();
-    clearTimeout(safetyTimeout);
-    if (error) throw error;
-    if (data && data.session && data.session.user) {
-      await onAuthSuccess(data.session.user);
-      return;
-    }
-  } catch (e) {
-    clearTimeout(safetyTimeout);
-  }
-  document.getElementById('boot-loading').style.display = 'none';
-  document.getElementById('auth-screen').style.display = 'flex';
-  setAuthTab('login');
-}
 
 // ═══════════════════════════════════════════════════════════════
 //  GOOGLE AGENDA — Integração via link direto (sem OAuth)
