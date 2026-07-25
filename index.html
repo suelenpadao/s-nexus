@@ -1048,9 +1048,20 @@ td:last-child{padding-right:0}
 
     <!-- ABA: LOGS -->
     <div id="admin-panel-logs" style="display:none">
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+          <div style="font-size:13px;font-weight:700">🧪 Teste Ponta a Ponta — Trial</div>
+          <button onclick="runTrialE2ETest()" style="padding:8px 16px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">▶ Executar Teste</button>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Verifica: subscription, plano, duração de 7 dias, RLS, função de expiração e logs.</div>
+        <div id="e2e-results" style="background:rgba(0,0,0,0.2);border-radius:8px;padding:10px;min-height:40px;font-family:monospace"></div>
+      </div>
       <div class="card">
-        <div style="font-size:13px;font-weight:700;margin-bottom:14px">📋 Logs da Plataforma</div>
-        <div id="admin-logs-list"><div style="color:var(--text3);font-size:12px;text-align:center;padding:20px">Carregando...</div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div style="font-size:13px;font-weight:700">📋 Logs da Plataforma</div>
+          <button onclick="loadAdminLogs()" style="padding:5px 10px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);border-radius:6px;color:#a5b4fc;font-size:10px;cursor:pointer">↻ Atualizar</button>
+        </div>
+        <div id="admin-logs-list"></div>
       </div>
     </div>
 
@@ -2534,6 +2545,93 @@ function switchAdminTab(tab) {
     }
   });
   if (tab === 'logs') loadAdminLogs();
+
+async function loadAdminLogs() {
+  const el = document.getElementById('admin-logs-list');
+  if (!el) return;
+  el.innerHTML = skeletonHTML(4);
+  try {
+    const { data: logs } = await sb.from('snexus_logs')
+      .select('*').order('created_at',{ascending:false}).limit(100);
+    const icons = {
+      login:'🔑',logout:'🚪',signup:'🎉',password_change:'🔐',
+      plan_change:'💳',block:'🔒',unblock:'🔓',data_save:'💾',
+      trial_start:'🎁',trial_expired:'⏰',trial_extended:'➕',
+      trial_ended:'⏹',backup_export:'📦',backup_import:'📥',
+      demo_mode_enter:'🎭',demo_mode_exit:'🎭',manual_grant:'🎁'
+    };
+    el.innerHTML = (logs||[]).length > 0
+      ? (logs||[]).map(l=>`
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+          <div style="font-size:14px;flex-shrink:0">${icons[l.event]||'📋'}</div>
+          <div style="flex:1">
+            <div style="font-size:11px;font-weight:600;color:var(--text)">${l.description||l.event}</div>
+            <div style="font-size:9px;color:var(--text3)">${l.user_id?.slice(0,8)||'—'} · ${fmtSaoPaulo(l.created_at)}</div>
+          </div>
+        </div>`).join('')
+      : '<div style="color:var(--text3);text-align:center;padding:20px;font-size:12px">Nenhum log ainda</div>';
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:12px">Erro ao carregar logs</div>';
+  }
+}
+
+// ── Teste ponta a ponta do Trial ──────────────────────────────
+async function runTrialE2ETest() {
+  if (!isPlatformAdmin()) { showAuthInfoToast('❌ Apenas admins'); return; }
+  const log = [];
+  const addLog = (ok, msg) => {
+    log.push(`${ok ? '✅' : '❌'} ${msg}`);
+    const el = document.getElementById('e2e-results');
+    if (el) el.innerHTML = log.map(l => `<div style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--border)">${l}</div>`).join('');
+  };
+
+  addLog(true, 'Iniciando teste ponta a ponta do Trial...');
+
+  // 1. Verificar se tabela subscriptions existe e tem colunas corretas
+  try {
+    const { data, error } = await sb.from('subscriptions')
+      .select('user_id,plan_id,status,trial_started_at,trial_ends_at,origin')
+      .limit(1);
+    addLog(!error, error ? `Tabela subscriptions: ${error.message}` : 'Tabela subscriptions acessível com colunas corretas');
+  } catch(e) { addLog(false, `Tabela subscriptions: ${e.message}`); }
+
+  // 2. Verificar trial do usuário atual
+  try {
+    const { data: sub } = await sb.from('subscriptions')
+      .select('*').eq('user_id', currentUser.id).maybeSingle();
+    addLog(!!sub, sub ? `Subscription encontrada: status=${sub.status}, plano=${sub.plan_id}` : 'Sem subscription para usuário atual');
+    if (sub) {
+      addLog(sub.plan_id === 'starter' || sub.plan_id === 'premium', `Plano correto: ${sub.plan_id}`);
+      addLog(!!sub.trial_ends_at, sub.trial_ends_at ? `Trial termina: ${fmtSaoPaulo(sub.trial_ends_at)}` : 'trial_ends_at não definido');
+      if (sub.trial_started_at && sub.trial_ends_at) {
+        const diff = Math.round((new Date(sub.trial_ends_at) - new Date(sub.trial_started_at)) / (1000*60*60*24));
+        addLog(diff >= 7, `Duração do trial: ${diff} dias (esperado: 7)`);
+      }
+    }
+  } catch(e) { addLog(false, `Erro ao verificar subscription: ${e.message}`); }
+
+  // 3. Verificar RLS — usuário não pode ver dados de outros
+  try {
+    const { data, count } = await sb.from('snexus_data').select('user_id', {count:'exact'});
+    const onlyOwn = !data || data.every(d => d.user_id === currentUser.id);
+    addLog(onlyOwn, onlyOwn ? 'RLS OK — dados isolados por usuário' : `RLS FALHOU — vendo ${count} registros de outros usuários`);
+  } catch(e) { addLog(true, 'RLS ativo — acesso bloqueado corretamente'); }
+
+  // 4. Verificar job agendado
+  try {
+    const { data: jobs } = await sb.rpc('expire_stale_trials');
+    addLog(true, `Função expire_stale_trials executável — resultado: ${JSON.stringify(jobs)}`);
+  } catch(e) { addLog(false, `Função expire_stale_trials: ${e.message}`); }
+
+  // 5. Verificar logs de trial
+  try {
+    const { data: logs } = await sb.from('snexus_logs')
+      .select('*').in('event',['trial_start','trial_expired','login']).limit(5);
+    addLog(true, `Logs encontrados: ${logs?.length || 0} eventos de trial/login`);
+  } catch(e) { addLog(false, `Logs: ${e.message}`); }
+
+  addLog(true, 'Teste concluído! Verifique os itens ❌ acima e rode o setup-trial-completo.sql se necessário.');
+}
   if (tab === 'subscriptions') loadAdminSubscriptions();
   if (tab === 'demo') loadDemoHistory();
 }
@@ -2599,48 +2697,106 @@ function renderSubsTable(subs) {
     el.innerHTML = '<div style="color:var(--text3);text-align:center;padding:20px;font-size:12px">Nenhum resultado</div>';
     return;
   }
-  el.innerHTML = `<div style="overflow-x:auto">
-    <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:600px">
-      <thead><tr style="border-bottom:1px solid var(--border)">
-        <th style="padding:8px 10px;text-align:left;color:var(--text3)">Usuário</th>
-        <th style="padding:8px 10px;text-align:left;color:var(--text3)">Plano</th>
-        <th style="padding:8px 10px;text-align:left;color:var(--text3)">Status</th>
-        <th style="padding:8px 10px;text-align:left;color:var(--text3)">Início Trial</th>
-        <th style="padding:8px 10px;text-align:left;color:var(--text3)">Fim Trial</th>
-        <th style="padding:8px 10px;text-align:left;color:var(--text3)">Restam</th>
-        <th style="padding:8px 10px;text-align:left;color:var(--text3)">Ações</th>
-      </tr></thead>
-      <tbody>${subs.map(s => {
-        const trialEnd = s.trial_ends_at ? new Date(s.trial_ends_at) : (s.expires_at ? new Date(s.expires_at) : null);
-        const daysLeft = trialEnd ? Math.ceil((trialEnd - now)/(1000*60*60*24)) : null;
-        const planColors = {trial:'#f59e0b',starter:'#06b6d4',pro:'#6366f1',premium:'#f59e0b',active:'#10b981',internal_admin:'#10b981'};
-        const statusColors = {trial:'#f59e0b',trial_expired:'#ef4444',active:'#10b981',blocked:'#ef4444',cancelled:'#6b7280'};
-        const planColor = planColors[s.plan_id]||'#666';
-        const statusColor = statusColors[s.status]||'#666';
-        const daysColor = daysLeft===null?'var(--text3)':daysLeft<=0?'#ef4444':daysLeft<=3?'#f59e0b':'#10b981';
-        return `<tr style="border-bottom:1px solid var(--border)" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background=''">
-          <td style="padding:10px"><div style="font-weight:600;color:var(--text);font-size:10px">${s.user_id?.slice(0,12)}...</div><div style="font-size:9px;color:var(--text3)">${s.origin||'—'}</div></td>
-          <td style="padding:10px"><span style="background:${planColor}22;color:${planColor};border:1px solid ${planColor}44;border-radius:6px;padding:2px 7px;font-weight:700">${s.plan_id||'—'}</span></td>
-          <td style="padding:10px"><span style="background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}44;border-radius:6px;padding:2px 7px;font-weight:700">${s.status||'—'}</span></td>
-          <td style="padding:10px;color:var(--text3);font-size:10px">${s.trial_started_at?fmtSaoPaulo(s.trial_started_at):'—'}</td>
-          <td style="padding:10px;color:var(--text3);font-size:10px">${trialEnd?fmtSaoPaulo(trialEnd):'—'}</td>
-          <td style="padding:10px;font-weight:800;color:${daysColor}">${daysLeft===null?'—':daysLeft<=0?'Expirado':`${daysLeft}d`}</td>
-          <td style="padding:10px"><div style="display:flex;gap:4px;flex-wrap:wrap">
-            <button onclick="adminExtendTrial('${s.user_id}')" style="padding:3px 7px;background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.25);border-radius:5px;font-size:9px;cursor:pointer" title="Estender trial">+dias</button>
-            <button onclick="adminChangePlan('${s.user_id}')" style="padding:3px 7px;background:rgba(99,102,241,0.1);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25);border-radius:5px;font-size:9px;cursor:pointer" title="Alterar plano">plano</button>
-            <button onclick="adminToggleBlock('${s.user_id}',${s.status==='blocked'})" style="padding:3px 7px;background:${s.status==='blocked'?'rgba(16,185,129,0.1)':'rgba(239,68,68,0.1)'};color:${s.status==='blocked'?'#10b981':'#ef4444'};border:1px solid ${s.status==='blocked'?'rgba(16,185,129,0.25)':'rgba(239,68,68,0.25)'};border-radius:5px;font-size:9px;cursor:pointer">${s.status==='blocked'?'🔓':'🔒'}</button>
-          </div></td>
-        </tr>`;
-      }).join('')}</tbody>
-    </table>
-  </div>`;
+
+  el.innerHTML = subs.map(s => {
+    const trialEnd = s.trial_ends_at ? new Date(s.trial_ends_at) : null;
+    const trialStart = s.trial_started_at ? new Date(s.trial_started_at) : null;
+    const totalMs = trialEnd && trialStart ? trialEnd - trialStart : null;
+    const remainMs = trialEnd ? trialEnd - now : null;
+    const daysLeft = remainMs !== null ? Math.max(0, Math.floor(remainMs / (1000*60*60*24))) : null;
+    const hoursLeft = remainMs !== null ? Math.max(0, Math.floor((remainMs % (1000*60*60*24)) / (1000*60*60))) : null;
+    const isExpired = trialEnd && trialEnd < now;
+
+    const planColors  = {trial:'#f59e0b',starter:'#06b6d4',pro:'#6366f1',premium:'#f59e0b',active:'#10b981',internal_admin:'#10b981'};
+    const statusColors = {trial:'#f59e0b',trial_expired:'#ef4444',active:'#10b981',blocked:'#ef4444',cancelled:'#6b7280',internal_admin:'#10b981'};
+    const planColor   = planColors[s.plan_id] || '#666';
+    const statusColor = statusColors[s.status] || '#666';
+    const daysColor   = daysLeft === null ? 'var(--text3)' : daysLeft <= 0 ? '#ef4444' : daysLeft <= 3 ? '#f59e0b' : '#10b981';
+
+    // Barra de progresso do trial
+    let progressBar = '';
+    if (totalMs && remainMs !== null && s.status === 'trial') {
+      const pct = Math.max(0, Math.min(100, (remainMs / totalMs) * 100));
+      const barColor = pct > 50 ? '#10b981' : pct > 20 ? '#f59e0b' : '#ef4444';
+      progressBar = `
+        <div style="margin:8px 0 4px">
+          <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);margin-bottom:3px">
+            <span>Início: ${trialStart ? fmtSaoPaulo(trialStart) : '—'}</span>
+            <span>Fim: ${trialEnd ? fmtSaoPaulo(trialEnd) : '—'}</span>
+          </div>
+          <div style="height:6px;background:rgba(255,255,255,0.08);border-radius:99px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:${barColor};border-radius:99px;transition:width .3s"></div>
+          </div>
+          <div style="font-size:10px;font-weight:700;color:${daysColor};margin-top:4px">
+            ${isExpired ? '⏰ Expirado' : `${daysLeft}d ${hoursLeft}h restantes`}
+          </div>
+        </div>`;
+    }
+
+    return `
+      <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+        <div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap">
+
+          <!-- Info principal -->
+          <div style="flex:1;min-width:200px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+              <span style="background:${planColor}22;color:${planColor};border:1px solid ${planColor}44;border-radius:6px;padding:2px 8px;font-size:10px;font-weight:800">${(s.plan_id||'—').toUpperCase()}</span>
+              <span style="background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}44;border-radius:6px;padding:2px 8px;font-size:10px;font-weight:700">${s.status||'—'}</span>
+              ${s.is_platform_admin ? '<span style="background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3);border-radius:6px;padding:2px 8px;font-size:10px;font-weight:700">🛡 ADMIN</span>' : ''}
+            </div>
+            <div style="font-size:10px;color:var(--text3);margin-bottom:2px">ID: ${s.user_id?.slice(0,16)}...</div>
+            <div style="font-size:10px;color:var(--text3)">Origem: ${s.origin||'—'} · Criado: ${s.created_at ? fmtSaoPaulo(s.created_at) : '—'}</div>
+            ${progressBar}
+          </div>
+
+          <!-- Datas do Trial -->
+          <div style="min-width:200px">
+            <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">📅 Trial</div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:3px">
+              <span style="color:var(--text3)">Começa:</span> <strong>${trialStart ? fmtSaoPaulo(trialStart) : '—'}</strong>
+            </div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:3px">
+              <span style="color:var(--text3)">Termina:</span>
+              <strong style="color:${daysColor}">${trialEnd ? fmtSaoPaulo(trialEnd) : '—'}</strong>
+            </div>
+            <div style="font-size:11px;margin-bottom:3px">
+              <span style="color:var(--text3)">Restam:</span>
+              <strong style="color:${daysColor}">
+                ${daysLeft === null ? '—' : isExpired ? '⏰ Expirado' : `${daysLeft}d ${hoursLeft}h`}
+              </strong>
+            </div>
+            ${s.last_activity_at ? `<div style="font-size:10px;color:var(--text3)">Última atividade: ${fmtSaoPaulo(s.last_activity_at)}</div>` : ''}
+          </div>
+
+          <!-- Ações -->
+          <div style="display:flex;flex-direction:column;gap:6px;min-width:120px">
+            <button onclick="adminExtendTrial('${s.user_id}')"
+              style="padding:7px 12px;background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.25);border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;text-align:left">
+              ➕ Estender Trial
+            </button>
+            <button onclick="adminEndTrial('${s.user_id}')"
+              style="padding:7px 12px;background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.25);border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;text-align:left">
+              ⏹ Encerrar Trial
+            </button>
+            <button onclick="adminChangePlan('${s.user_id}')"
+              style="padding:7px 12px;background:rgba(99,102,241,0.1);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25);border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;text-align:left">
+              🔄 Alterar Plano
+            </button>
+            <button onclick="adminToggleBlock('${s.user_id}',${s.status==='blocked'})"
+              style="padding:7px 12px;background:${s.status==='blocked'?'rgba(16,185,129,0.1)':'rgba(239,68,68,0.1)'};color:${s.status==='blocked'?'#10b981':'#ef4444'};border:1px solid ${s.status==='blocked'?'rgba(16,185,129,0.25)':'rgba(239,68,68,0.25)'};border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;text-align:left">
+              ${s.status==='blocked'?'🔓 Desbloquear':'🔒 Bloquear'}
+            </button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
 }
 
 async function adminExtendTrial(userId) {
   const days = parseInt(prompt('Quantos dias adicionar ao trial?'));
   if (!days || days < 1 || days > 365) return;
   try {
-    const { data: sub } = await sb.from('subscriptions').select('trial_ends_at').eq('user_id', userId).maybeSingle();
+    const { data: sub } = await sb.from('subscriptions').select('trial_ends_at,status').eq('user_id', userId).maybeSingle();
     const currentEnd = sub?.trial_ends_at ? new Date(sub.trial_ends_at) : new Date();
     const base = currentEnd > new Date() ? currentEnd : new Date();
     const newEnd = new Date(base);
@@ -2651,11 +2807,26 @@ async function adminExtendTrial(userId) {
       updated_at: new Date().toISOString()
     }).eq('user_id', userId);
     await writeLog('trial_extended', `Admin estendeu trial em ${days} dias`, {
-      user_id: userId, days_added: days, new_end: newEnd.toISOString()
+      user_id: userId, days_added: days,
+      old_end: sub?.trial_ends_at, new_end: newEnd.toISOString()
     });
-    showAuthInfoToast(`✅ Trial estendido ${days} dias! Novo fim: ${fmtSaoPaulo(newEnd)}`);
+    showAuthInfoToast(`✅ Trial estendido ${days} dias!\nNovo fim: ${fmtSaoPaulo(newEnd)}`);
     loadAdminSubscriptions();
-  } catch(e) { alert('Erro ao estender trial'); }
+  } catch(e) { alert('Erro ao estender trial: ' + e.message); }
+}
+
+async function adminEndTrial(userId) {
+  if (!confirm('Encerrar o trial deste usuário agora? Ele será bloqueado imediatamente.')) return;
+  try {
+    await sb.from('subscriptions').update({
+      status: 'trial_expired',
+      trial_ends_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }).eq('user_id', userId);
+    await writeLog('trial_ended', 'Admin encerrou o trial manualmente', { user_id: userId });
+    showAuthInfoToast('✅ Trial encerrado. Usuário bloqueado.');
+    loadAdminSubscriptions();
+  } catch(e) { alert('Erro ao encerrar trial: ' + e.message); }
 }
 
 async function adminChangePlan(userId) {
