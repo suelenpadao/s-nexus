@@ -1657,7 +1657,7 @@ async function onAuthSuccess(user, username) {
     document.getElementById('boot-loading').style.display = 'none';
     document.getElementById('auth-screen').style.display = 'none';
 
-    // Verificar plano/trial antes de mostrar o app
+    // 1. Verificar billing PRIMEIRO — populaCa currentBilling
     const billing = await checkUserBilling(user.id);
 
     // Log de login
@@ -1672,23 +1672,37 @@ async function onAuthSuccess(user, username) {
     }
 
     document.getElementById('app-wrapper').style.display = '';
+
+    // 2. Atualizar username na sidebar
     const emailEl = document.getElementById('sidebar-user-email');
     if (emailEl) emailEl.textContent = username ? `@${username}` : 'S Nexus';
 
-    if (billing.plan === 'trial' && !billing.blocked) {
+    // 3. Badge de trial — só mostra se tiver data real (daysLeft < 99)
+    if (billing.status === 'trial' && !billing.blocked && billing.daysLeft < 99) {
       showTrialBadge(billing.daysLeft);
       showTrialWarning(billing.daysLeft, billing.hoursLeft || 0);
       if (billing.isNewUser) {
-        setTimeout(() => showAuthInfoToast('🎁 Bem-vindo! Seu Trial Starter de 7 dias começou agora.'), 2000);
+        setTimeout(() => showAuthInfoToast(`🎁 Bem-vindo! Seu Trial Starter de 7 dias começou. Expira em ${billing.trialEnd ? fmtSaoPaulo(billing.trialEnd) : '7 dias'}.`), 2000);
       }
     }
 
+    // 4. Carregar dados e inicializar app
     await loadState();
     init();
+
+    // 5. checkAdminNav APÓS billing estar populado — garante que admin aparece
+    checkAdminNav();
+
+    // 6. Se for admin, mostrar nav sem delay
+    if (isPlatformAdmin()) {
+      const navAdmin = document.getElementById('nav-admin');
+      if (navAdmin) navAdmin.style.display = 'flex';
+    }
+
   } catch (e) {
     document.getElementById('boot-loading').style.display = 'none';
     document.getElementById('app-wrapper').style.display = '';
-    try { init(); } catch (e2) {}
+    try { init(); checkAdminNav(); } catch (e2) {}
   }
 }
 
@@ -2266,10 +2280,23 @@ async function checkUserBilling(userId) {
       return currentBilling;
     }
 
-    // Calcular dias restantes do trial (usa trial_ends_at se disponível, senão expires_at)
-    const trialEndDate = sub.trial_ends_at
+    // Calcular dias restantes do trial
+    // Se trial_ends_at for null (usuários antigos), calcular baseado em created_at + 7 dias
+    let trialEndDate = sub.trial_ends_at
       ? new Date(sub.trial_ends_at)
       : (sub.expires_at ? new Date(sub.expires_at) : null);
+
+    // Correção automática para usuários sem trial_ends_at
+    if (!trialEndDate && sub.status === 'trial') {
+      const base = new Date(sub.created_at || now);
+      trialEndDate = new Date(base.getTime() + 7*24*60*60*1000);
+      // Salvar no banco para não recalcular sempre
+      sb.from('subscriptions').update({
+        trial_starts_at: sub.created_at || now.toISOString(),
+        trial_ends_at: trialEndDate.toISOString(),
+        trial_started_at: sub.created_at || now.toISOString(),
+      }).eq('user_id', userId).then(() => {});
+    }
 
     const daysLeft = trialEndDate
       ? Math.ceil((trialEndDate - now) / (1000*60*60*24))
